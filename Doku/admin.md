@@ -163,7 +163,7 @@ then the default values are the effective policy delivered to the mail add-on.
 | `Send password separately` | Sends the password in a separate follow-up mail | Built-in default is **enabled** |
 | `Expiration (days)` | Default share lifetime | Interpreted in days |
 | `Always share attachments via NC Connector` | Forces attachment handling into the NC Connector flow | If active, the size-threshold setting becomes operationally irrelevant |
-| `Offer upload for files larger than (MB)` | Threshold that prompts the add-on to offer NC Connector sharing | Used only when “Always share attachments...” is not active |
+| `Offer upload for files larger than (MB)` | Threshold that prompts the add-on to offer NC Connector sharing | Comes with its own enable/disable checkbox; when disabled, the field is greyed out and the API value becomes `null` |
 | `Language in share HTML block` | Selects the built-in language for generated share text | Built-in default is **English** |
 | `Email share template` | Custom HTML template for the main share mail | Only active when the language is set to `custom` |
 | `Email password template` | Custom HTML template for the separate password mail | Only active when the language is set to `custom` |

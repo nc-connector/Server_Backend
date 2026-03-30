@@ -1494,23 +1494,29 @@
 	function syncAttachmentMinSizeDependency(container, prefix) {
 		const alwaysViaConnector = container.querySelector(`.nccv-setting-control[data-prefix="${prefix}"][data-setting-key="attachments_always_via_ncconnector"]`)
 		const minSizeControl = container.querySelector(`.nccv-setting-control[data-prefix="${prefix}"][data-setting-key="attachments_min_size_mb"]`)
-		if (!alwaysViaConnector || !minSizeControl) {
+		const minSizeToggle = container.querySelector(`.nccv-threshold-enabled[data-prefix="${prefix}"][data-setting-key="attachments_min_size_mb"]`)
+		const minSizeWrapper = minSizeControl?.closest('.nccv-threshold-control')
+		if (!alwaysViaConnector || !minSizeControl || !minSizeToggle) {
 			return
 		}
+		const disabledByMode = minSizeControl.dataset.disabledByMode === '1' || minSizeToggle.dataset.disabledByMode === '1'
 		if (alwaysViaConnector.checked) {
-			if (!Object.prototype.hasOwnProperty.call(minSizeControl.dataset, 'lockedPreviousValue')) {
-				minSizeControl.dataset.lockedPreviousValue = String(minSizeControl.value ?? '')
+			if (!Object.prototype.hasOwnProperty.call(minSizeToggle.dataset, 'lockedChecked')) {
+				minSizeToggle.dataset.lockedChecked = minSizeToggle.checked ? '1' : '0'
 			}
-			minSizeControl.value = ''
+			minSizeToggle.checked = false
+			minSizeToggle.disabled = true
 			minSizeControl.disabled = true
+			minSizeWrapper?.classList.add('nccv-threshold-control--disabled')
 			return
 		}
-		if (Object.prototype.hasOwnProperty.call(minSizeControl.dataset, 'lockedPreviousValue')) {
-			if (String(minSizeControl.value ?? '') === '') {
-				minSizeControl.value = minSizeControl.dataset.lockedPreviousValue || ''
-			}
-			delete minSizeControl.dataset.lockedPreviousValue
+		if (Object.prototype.hasOwnProperty.call(minSizeToggle.dataset, 'lockedChecked')) {
+			minSizeToggle.checked = minSizeToggle.dataset.lockedChecked === '1'
+			delete minSizeToggle.dataset.lockedChecked
 		}
+		minSizeToggle.disabled = disabledByMode
+		minSizeControl.disabled = disabledByMode || !minSizeToggle.checked
+		minSizeWrapper?.classList.toggle('nccv-threshold-control--disabled', minSizeControl.disabled)
 	}
 
 	function applyTemplateLanguageDependency(container, prefix) {
@@ -1586,7 +1592,7 @@
 	}
 
 	function attachAttachmentDependencyHandlers(root) {
-		root.querySelectorAll('.nccv-setting-control[data-setting-key="attachments_always_via_ncconnector"]').forEach((control) => {
+		root.querySelectorAll('.nccv-setting-control[data-setting-key="attachments_always_via_ncconnector"], .nccv-threshold-enabled[data-setting-key="attachments_min_size_mb"]').forEach((control) => {
 			if (control.dataset.nccvDependencyBound === '1') {
 				return
 			}
@@ -1705,6 +1711,18 @@
 			const min = Number.isInteger(definition?.min) ? `min="${definition.min}"` : ''
 			const max = Number.isInteger(definition?.max) ? `max="${definition.max}"` : ''
 			const numeric = Number.isInteger(value) ? value : Number.parseInt(String(value ?? 0), 10) || 0
+			if (key === 'attachments_min_size_mb') {
+				const enabled = value !== null && typeof value !== 'undefined'
+				return `
+					<div class="nccv-threshold-control">
+						<label class="nccv-inline-option nccv-threshold-toggle">
+							<input type="checkbox" class="nccv-threshold-enabled" data-prefix="${escapeHtml(prefix)}" data-setting-key="${escapeHtml(key)}" ${enabled ? 'checked' : ''} ${disabledAttr}>
+							${escapeHtml(tr('Enabled'))}
+						</label>
+						<input id="${escapeHtml(id)}" type="number" ${common} value="${numeric}" ${min} ${max}>
+					</div>
+				`
+			}
 			return `<input id="${escapeHtml(id)}" type="number" ${common} value="${numeric}" ${min} ${max}>`
 		}
 
@@ -1832,6 +1850,10 @@
 				control.disabled = false
 			}
 		}
+		root.querySelectorAll('.nccv-threshold-enabled[data-prefix="default"][data-setting-key="attachments_min_size_mb"]').forEach((toggle) => {
+			toggle.dataset.disabledByMode = '0'
+			toggle.disabled = false
+		})
 		syncAttachmentMinSizeDependency(root, 'default')
 		applyTemplateLanguageDependency(root, 'default')
 		syncTemplateEditorState(root, 'default')
@@ -1935,10 +1957,14 @@
 		for (const select of selects) {
 			const key = select.getAttribute('data-setting-key')
 			const control = tbody.querySelector(`.nccv-setting-control[data-prefix="override"][data-setting-key="${key}"]`)
+			const attachmentToggle = tbody.querySelector(`.nccv-threshold-enabled[data-prefix="override"][data-setting-key="${key}"]`)
 			if (control) {
 				const disabledByMode = select.value !== 'forced'
 				control.dataset.disabledByMode = disabledByMode ? '1' : '0'
 				control.disabled = disabledByMode
+				if (attachmentToggle) {
+					attachmentToggle.dataset.disabledByMode = disabledByMode ? '1' : '0'
+				}
 			}
 		}
 		syncAttachmentMinSizeDependency(tbody, 'override')
@@ -2036,10 +2062,14 @@
 		for (const select of selects) {
 			const key = select.getAttribute('data-setting-key')
 			const control = tbody.querySelector(`.nccv-setting-control[data-prefix="group-override"][data-setting-key="${key}"]`)
+			const attachmentToggle = tbody.querySelector(`.nccv-threshold-enabled[data-prefix="group-override"][data-setting-key="${key}"]`)
 			if (control) {
 				const disabledByMode = select.value !== 'forced'
 				control.dataset.disabledByMode = disabledByMode ? '1' : '0'
 				control.disabled = disabledByMode
+				if (attachmentToggle) {
+					attachmentToggle.dataset.disabledByMode = disabledByMode ? '1' : '0'
+				}
 			}
 		}
 		syncAttachmentMinSizeDependency(tbody, 'group-override')
@@ -3035,13 +3065,22 @@
 			renderGroupOverrideTables(root, refs, state, groupId)
 		}
 
+		const isAttachmentThresholdEnabled = (prefix) => {
+			const alwaysViaConnector = root.querySelector(`.nccv-setting-control[data-prefix="${prefix}"][data-setting-key="attachments_always_via_ncconnector"]`)
+			if (alwaysViaConnector?.checked) {
+				return false
+			}
+			const toggle = root.querySelector(`.nccv-threshold-enabled[data-prefix="${prefix}"][data-setting-key="attachments_min_size_mb"]`)
+			return toggle ? Boolean(toggle.checked) : true
+		}
+
 		const collectDefaultPayload = () => {
 			const payload = {}
 			sortedSettingKeys(state.schema).forEach((key) => {
 				const addonToggle = root.querySelector(`.nccv-addon-changeable[data-setting-key="${key}"]`)
 				const isAddonChangeable = !isTemplateEditorSettingKey(key) && Boolean(addonToggle?.checked)
 				const value = key === 'attachments_min_size_mb'
-					&& Boolean(root.querySelector('.nccv-setting-control[data-prefix="default"][data-setting-key="attachments_always_via_ncconnector"]')?.checked)
+					&& !isAttachmentThresholdEnabled('default')
 					? null
 					: readSettingControl(root, 'default', key, state.schema[key])
 				payload[key] = {
@@ -3063,7 +3102,7 @@
 				payload[key] = {
 					mode: 'forced',
 					value: key === 'attachments_min_size_mb'
-						&& Boolean(root.querySelector('.nccv-setting-control[data-prefix="override"][data-setting-key="attachments_always_via_ncconnector"]')?.checked)
+						&& !isAttachmentThresholdEnabled('override')
 						? null
 						: readSettingControl(root, 'override', key, state.schema[key]),
 				}
@@ -3082,7 +3121,7 @@
 				payload[key] = {
 					mode: 'forced',
 					value: key === 'attachments_min_size_mb'
-						&& Boolean(root.querySelector('.nccv-setting-control[data-prefix="group-override"][data-setting-key="attachments_always_via_ncconnector"]')?.checked)
+						&& !isAttachmentThresholdEnabled('group-override')
 						? null
 						: readSettingControl(root, 'group-override', key, state.schema[key]),
 				}

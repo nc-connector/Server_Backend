@@ -295,6 +295,10 @@ Current rule set:
 - all non-template Share/Talk defaults start as **editable in add-on**
 - templates remain backend-controlled
 - any **forced** override disables local add-on editing for that specific setting
+- `attachments_min_size_mb` is nullable by design:
+  - `null` means the threshold feature is disabled
+  - a numeric value means the threshold feature is enabled
+  - `attachments_always_via_ncconnector = true` also forces the runtime value to `null`
 
 Important current API behavior:
 - `/api/v1/status` no longer exposes a `default` block
