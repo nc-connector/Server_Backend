@@ -1,19 +1,25 @@
-# NC Connector – Mail Client API (authoritative)
+# NC Connector – Mail Client Runtime API
 
-This specification applies to external mail clients such as the Thunderbird add-on and Outlook Classic.
-For mail clients, **only one read-only endpoint** is exposed: `GET /api/v1/status`.
+This specification applies to external mail clients such as Thunderbird, Outlook Classic, and Outlook Web.
+For mail clients, **only one public read-only runtime endpoint** is exposed: `GET /api/v1/status`.
 
 ## Read endpoints
 
 ### 1) Combined status + policies
 - **HTTP method:** `GET`
-- **Path:** `/apps/nc_connector/api/v1/status`
+- **Path:** `/apps/nc_connector_backend/api/v1/status`
+- **Path variant without pretty URLs:** `/index.php/apps/nc_connector_backend/api/v1/status`
 - **Purpose:** Returns license state, seat state, and the effective policy settings in a single request.
 - **Auth / permissions:** Authenticated Nextcloud user (session or app password)
 - **Request parameters:**
   - Query: none for normal mail-client usage
   - Internal admin tooling may additionally use `user_id=<nextcloud-user-id>` to inspect or export the effective state for a specific user
   - Body: none
+- **Response shape:**
+  - `status`: license and seat state for the resolved user
+  - `policy`: effective settings grouped into `share` and `talk`
+  - `policy_editable`: add-on editability grouped into `share` and `talk`
+  - There is **no** separate `default` block in the runtime response.
 - **Policy null rules:**
   - `policy.share` and `policy.talk` are `null` when `status.overlicensed=true` or `status.seat_assigned=false`.
   - `policy_editable.share` and `policy_editable.talk` are also `null` when `status.overlicensed=true` or `status.seat_assigned=false`.
@@ -31,13 +37,18 @@ For mail clients, **only one read-only endpoint** is exposed: `GET /api/v1/statu
   - If a user override is removed and the setting falls back to a group override or the default again, `policy_editable` follows that lower layer again.
   - `policy.share.attachments_min_size_mb` is `null` when `policy.share.attachments_always_via_ncconnector=true`.
   - `policy.share.share_html_block_template` and `policy.share.share_password_template` are `null` when `policy.share.language_share_html_block != "custom"`.
-  - `policy.talk.talk_invitation_template` is `null` when `policy.talk.language_talk_description != "custom"`.
+  - `policy.talk.talk_invitation_template` and `policy.talk.talk_invitation_template_format` are `null` when `policy.talk.language_talk_description != "custom"`.
+  - `policy.talk.event_description_type` is always either `"html"` or `"plain_text"`.
+  - `policy_editable` does not contain `event_description_type`, because it is derived from the effective talk template mode and is not directly editable in mail clients.
   - If `custom` is active, `policy.share.share_html_block_template` contains the stored HTML template with the direct logo URL.
+  - If `policy.talk.talk_invitation_template_format = "html"`, `policy.talk.talk_invitation_template` contains the stored HTML template.
+  - If `policy.talk.talk_invitation_template_format = "plain_text"`, `policy.talk.talk_invitation_template` contains cleaned plain text with preserved raw URLs and preserved template variables such as `{MEETING_URL}` or `{PASSWORD}`.
+  - If `policy.talk.language_talk_description != "custom"`, `policy.talk.talk_invitation_template_format` is `null` and `policy.talk.event_description_type` falls back to `"plain_text"`.
 - **Example request (curl):**
 ```bash
 curl -u "alice:APP_PASSWORD" \
   -H "Accept: application/json" \
-  "https://cloud.example.com/index.php/apps/nc_connector/api/v1/status"
+  "https://cloud.example.com/apps/nc_connector_backend/api/v1/status"
 ```
 - **Example response (JSON):**
 ```json
@@ -69,7 +80,9 @@ curl -u "alice:APP_PASSWORD" \
       "language_share_html_block": "en"
     },
     "talk": {
+      "event_description_type": "plain_text",
       "language_talk_description": "en",
+      "talk_invitation_template_format": null,
       "talk_invitation_template": null,
       "talk_generate_password": true,
       "talk_title": "Meeting",
@@ -99,6 +112,7 @@ curl -u "alice:APP_PASSWORD" \
     },
     "talk": {
       "language_talk_description": true,
+      "talk_invitation_template_format": false,
       "talk_invitation_template": false,
       "talk_generate_password": true,
       "talk_title": true,
@@ -118,14 +132,12 @@ curl -u "alice:APP_PASSWORD" \
 - There are **no** write endpoints for mail clients.
 - Admin write operations remain internal to the admin UI and are not part of this client specification.
 
-## Standard error codes
+## Runtime status codes
 
+- `200 OK`: request accepted, response body contains `status`, `policy`, and `policy_editable`
 - `401 Unauthorized`: authentication missing or invalid
-- `403 Forbidden`: user has no access
-- `404 Not Found`: endpoint does not exist
-- `409 Conflict`: state conflict
-- `422 Unprocessable Entity`: invalid input data
-- `500 Internal Server Error`: unexpected server error
+- `404 Not Found`: wrong route or app not deployed under the expected app id
+- `500 Internal Server Error`: unexpected server error during request handling
 
 ## Conventions
 

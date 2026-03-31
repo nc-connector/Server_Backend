@@ -1,12 +1,12 @@
 # Administration Guide — NC Connector Backend
 
-This document is for **administrators** who want to deploy and operate the **NC Connector backend** in Nextcloud.
+This document is written for **administrators**, including administrators who have **never worked with Nextcloud before**.
 
-It explains the admin interface in practical terms:
-- where each setting lives
-- what it controls technically
-- which users it affects
-- how defaults, group overrides, and user overrides interact
+Its purpose is practical:
+- explain what this backend actually does
+- explain how to enable and configure it in Nextcloud
+- explain how Seats, defaults, group overrides, and user overrides interact
+- explain what mail clients finally read from the backend
 
 Related docs:
 - `development.md` — developer and maintenance guide
@@ -17,47 +17,117 @@ Related docs:
 
 ## Table of Contents
 
-- [1. Supported versions & requirements](#1-supported-versions--requirements)
-- [2. Where to find the backend settings](#2-where-to-find-the-backend-settings)
-- [3. General section (license mode and license state)](#3-general-section-license-mode-and-license-state)
-  - [3.1 Operating mode](#31-operating-mode)
-  - [3.2 License fields and sync](#32-license-fields-and-sync)
-  - [3.3 Reading the status block](#33-reading-the-status-block)
-- [4. Group Settings section](#4-group-settings-section)
-  - [4.1 Default Settings](#41-default-settings)
-  - [4.1.1 Share settings reference](#411-share-settings-reference)
-  - [4.1.2 Talk settings reference](#412-talk-settings-reference)
-  - [4.1.3 What “Editable in add-on” actually means](#413-what-editable-in-add-on-actually-means)
-  - [4.2 Seat assignment](#42-seat-assignment)
-  - [4.3 Assigned seats](#43-assigned-seats)
-  - [4.4 Group overrides](#44-group-overrides)
-  - [4.5 User overrides](#45-user-overrides)
-- [5. Effective precedence model](#5-effective-precedence-model)
-- [6. What mail clients read from the backend](#6-what-mail-clients-read-from-the-backend)
-- [7. Install, disable, remove, keep-data](#7-install-disable-remove-keep-data)
-- [8. Operational recommendations](#8-operational-recommendations)
+- [1. Audience, prerequisites, and scope](#1-audience-prerequisites-and-scope)
+- [2. First-time setup for admins new to Nextcloud](#2-first-time-setup-for-admins-new-to-nextcloud)
+  - [2.1 What you need beforehand](#21-what-you-need-beforehand)
+  - [2.2 Nextcloud terms used in this guide](#22-nextcloud-terms-used-in-this-guide)
+  - [2.3 First rollout walkthrough](#23-first-rollout-walkthrough)
+- [3. Where to find the backend settings](#3-where-to-find-the-backend-settings)
+- [4. General section](#4-general-section)
+  - [4.1 Operating mode](#41-operating-mode)
+  - [4.2 License fields and sync](#42-license-fields-and-sync)
+  - [4.3 Reading the status block](#43-reading-the-status-block)
+- [5. Group Settings section](#5-group-settings-section)
+  - [5.1 Default Settings](#51-default-settings)
+    - [5.1.1 Share settings reference](#511-share-settings-reference)
+    - [5.1.2 Talk settings reference](#512-talk-settings-reference)
+    - [5.1.3 What “Editable in add-on” actually means](#513-what-editable-in-add-on-actually-means)
+    - [5.1.4 Thunderbird attachment automation prerequisite: disable competing compose features](#thunderbird-attachment-automation-prerequisite)
+  - [5.2 Seat assignment](#52-seat-assignment)
+  - [5.3 Assigned seats](#53-assigned-seats)
+  - [5.4 Group overrides](#54-group-overrides)
+  - [5.5 User overrides](#55-user-overrides)
+- [6. Effective precedence model](#6-effective-precedence-model)
+- [7. What mail clients read from the backend](#7-what-mail-clients-read-from-the-backend)
+- [8. Install, disable, remove, keep-data](#8-install-disable-remove-keep-data)
+- [9. Operational recommendations](#9-operational-recommendations)
 
 ---
 
-## 1. Supported versions & requirements
+## 1. Audience, prerequisites, and scope
 
-Nextcloud:
-- Supported: **Nextcloud 31–34**
+Supported versions:
+- **Nextcloud 31–34**
+- **PHP 8.1+**
 
-PHP:
-- Required: **PHP 8.1+**
-
-App state:
-- The app must be enabled:
-  - `php occ app:enable nc_connector`
-
-Operational context:
+Operational scope:
 - The backend is the central policy source for the NC Connector mail add-ons.
 - One **Seat** always maps to exactly **one Nextcloud user**.
+- The backend controls:
+  - license mode and license synchronization
+  - seat assignment
+  - default policies
+  - group overrides
+  - user overrides
+  - template control for Share and Talk
+
+This backend does **not** replace mail-client deployment.
+You still need to deploy the Thunderbird or Outlook add-on separately.
 
 ---
 
-## 2. Where to find the backend settings
+## 2. First-time setup for admins new to Nextcloud
+
+### 2.1 What you need beforehand
+
+Before you configure NC Connector, make sure you have:
+- a working Nextcloud instance
+- a Nextcloud account with **administrator** rights
+- the NC Connector backend app installed or ready to install
+- if you want `Pro` mode:
+  - a license email
+  - a license key
+
+You can enable the app in two common ways:
+
+**Nextcloud web UI**
+- Open **Apps**
+- search for **NC Connector**
+- click **Download and enable** or **Enable**
+
+**Nextcloud command line**
+- `php occ app:enable nc_connector_backend`
+
+If you are new to Nextcloud and do not have shell access, the web UI path is usually enough.
+
+### 2.2 Nextcloud terms used in this guide
+
+These terms are important:
+
+| Term | Meaning |
+|---|---|
+| `User` | A normal Nextcloud account |
+| `Group` | A built-in Nextcloud group such as `Sales`, `HR`, or `Project-A` |
+| `Administrator` | A Nextcloud admin account; admins can configure NC Connector but cannot receive Seats |
+| `Seat` | A license slot in NC Connector; exactly one Seat belongs to one Nextcloud user |
+| `Default` | The baseline policy for all Seat users |
+| `Group override` | A group-specific policy layer above the defaults |
+| `User override` | A user-specific policy layer above group and default |
+| `occ` | Nextcloud’s command-line tool |
+
+The most important conceptual point is:
+- **NC Connector does not create its own user directory**
+- it reuses **existing Nextcloud users and groups**
+
+### 2.3 First rollout walkthrough
+
+If you want the shortest possible path to a working setup, do this in order:
+
+1. Enable the app.
+2. Open **Settings → Administration → NC Connector**.
+3. Decide whether the instance should run in `Community` or `Pro`.
+4. If `Pro`, store the license credentials and run a sync.
+5. Define clean **Default Settings** first.
+6. Assign Seats to the users who should use NC Connector.
+7. Test one real user with the mail add-on.
+8. Add **Group overrides** only if departments need different defaults.
+9. Add **User overrides** only for real exceptions.
+
+That order keeps the rollout understandable and avoids unnecessary exception handling too early.
+
+---
+
+## 3. Where to find the backend settings
 
 Path in Nextcloud:
 - **Settings → Administration → NC Connector**
@@ -75,9 +145,9 @@ Important UI note:
 
 ---
 
-## 3. General section (license mode and license state)
+## 4. General section
 
-### 3.1 Operating mode
+### 4.1 Operating mode
 
 The backend supports two operating modes:
 
@@ -95,7 +165,7 @@ UI behavior:
 - Explanatory details are shown in tooltips.
 - If **Pro** is active and no credentials are stored yet, the page shows an additional note that points admins to `nc-connector.de` for obtaining the license key.
 
-### 3.2 License fields and sync
+### 4.2 License fields and sync
 
 Relevant controls in `General`:
 
@@ -103,14 +173,14 @@ Relevant controls in `General`:
 |---|---|
 | `License email` | Account identifier for the NC Connector license backend |
 | `License key` | License secret used for backend sync |
-| `Save credentials` | Stores credentials in Nextcloud and triggers a sync path |
+| `Save license data` | Stores credentials in Nextcloud and triggers a sync path |
 | `Sync now` | Manually refreshes license state and seat entitlement |
 
 Operational note:
 - In **Community** mode, the backend does not need a license lookup.
 - In **Pro** mode, the license state becomes operationally relevant for seat availability.
 
-### 3.3 Reading the status block
+### 4.3 Reading the status block
 
 The status block is the first place to check when a seat or entitlement question comes up.
 
@@ -129,7 +199,7 @@ Use this section when the support question is:
 
 ---
 
-## 4. Group Settings section
+## 5. Group Settings section
 
 This area contains the actual policy and rollout logic.
 
@@ -140,7 +210,7 @@ It covers five operational layers:
 4. group overrides
 5. user overrides
 
-### 4.1 Default Settings
+### 5.1 Default Settings
 
 Default settings are the baseline policies for **all users with an assigned Seat**.
 
@@ -150,7 +220,7 @@ If there is:
 
 then the default values are the effective policy delivered to the mail add-on.
 
-### 4.1.1 Share settings reference
+### 5.1.1 Share settings reference
 
 | Setting | Purpose | Notes |
 |---|---|---|
@@ -186,11 +256,12 @@ Important dependency:
 - If `Language in share HTML block` is **not** `custom`, the template rows stay visibly inactive.
 - In that state, the UI hides the override-mode selector for those rows because the template content is not the active source.
 
-### 4.1.2 Talk settings reference
+### 5.1.2 Talk settings reference
 
 | Setting | Purpose | Notes |
 |---|---|---|
 | `Language in Talk description text` | Selects the built-in language for the Talk invitation text | Built-in default is **English** |
+| `Talk invitation output` | Controls whether the custom Talk template is delivered as HTML or as cleaned plain text | Only relevant when the language is set to `custom` |
 | `Talk invitation template` | Custom invitation template | Only active when the language is set to `custom` |
 | `Generate password for meetings` | Enables password generation by default for new Talk rooms | Default is add-on editable |
 | `Title` | Default room title | Used as prefill in the mail client |
@@ -201,14 +272,17 @@ Important dependency:
 | `Set password` | Enables Talk password protection by default | Separate Talk password dispatch was intentionally removed |
 | `Room type` | Selects the Talk room type | Affects room behavior on the Nextcloud side |
 
-Talk template variable:
+Talk template variables:
 - `{MEETING_URL}`
 - `{PASSWORD}`
 
 Important dependency:
 - If `Language in Talk description text` is **not** `custom`, the Talk template row stays visibly inactive.
+- If `Language in Talk description text` is `custom`, the Talk template row additionally shows an `HTML | Plain Text` output selector.
+- `HTML` returns the stored editor HTML unchanged through the runtime API.
+- `Plain Text` strips the HTML markup for runtime delivery while preserving visible URLs, including meeting and help links.
 
-### 4.1.3 What “Editable in add-on” actually means
+### 5.1.3 What “Editable in add-on” actually means
 
 This flag is easy to misunderstand, so it is worth being explicit.
 
@@ -220,6 +294,7 @@ It does **not** mean:
 It **does** mean:
 - the backend still sends a concrete effective value
 - the mail add-on is allowed to change that value locally for the user interaction
+- in the admin UI, the stored backend value stays visible but the value field is greyed out and locked as soon as **Editable in add-on** is enabled
 
 Built-in default behavior:
 - All **non-template Share/Talk settings** start with **Editable in add-on = enabled**.
@@ -234,7 +309,103 @@ Operational consequence:
 - If a later **forced** group override or user override exists for the same setting, the add-on is no longer allowed to change that setting.
 - If that override returns to `inherit`, the lower layer becomes effective again and `policy_editable` follows that lower layer again.
 
-### 4.2 Seat assignment
+<a id="thunderbird-attachment-automation-prerequisite"></a>
+### 5.1.4 Thunderbird attachment automation prerequisite: disable competing compose features
+
+This section matters **only for Thunderbird**.
+It does **not** apply to Outlook.
+
+If you want **NC Connector attachment automation** to be the only active compose flow, administrators should also disable Thunderbird’s own competing compose prompts centrally.
+
+Why this is necessary:
+- NC Connector can route attachments into its own sharing flow (`always` or `offer above threshold`).
+- Thunderbird itself still has native compose features for:
+  - **Check for missing attachments**
+  - **Upload for files larger than ...**
+- Per reviewer constraints and the add-on’s limited experiment scope, **NC Connector must not change these Thunderbird-wide compose settings itself**.
+- Therefore, if you want a deterministic admin-managed rollout, disable and lock these Thunderbird settings via `policies.json`.
+
+Relevant Thunderbird preferences:
+- `mail.compose.attachment_reminder`
+  - controls **Check for missing attachments**
+- `mail.compose.big_attachments.notify`
+  - controls **Upload for files larger than ...**
+- `mail.compose.big_attachments.threshold_kb`
+  - controls the native Thunderbird threshold value in **KB**
+
+Recommended lock state when NC Connector attachment automation should own the workflow:
+- `mail.compose.attachment_reminder` => `false` / `locked`
+- `mail.compose.big_attachments.notify` => `false` / `locked`
+- `mail.compose.big_attachments.threshold_kb` => `5120` / `locked`
+
+Notes:
+- `5120` KB is Thunderbird’s default threshold value (5 MB).
+- Once `mail.compose.big_attachments.notify=false`, the threshold is effectively inactive, but keeping it explicitly locked avoids drift and makes the admin intent visible.
+- Merge the example below into your existing `policies.json`; do not create a second policy file.
+
+Official references:
+- Thunderbird Enterprise Policies — `Preferences` policy:
+  - `https://thunderbird.github.io/policy-templates/templates/esr140/#preferences`
+- Thunderbird compose preferences source:
+  - `https://searchfox.org/comm-central/source/mail/components/preferences/compose.inc.xhtml`
+
+Example `policies.json` snippet:
+
+```json
+{
+  "policies": {
+    "Preferences": {
+      "mail.compose.attachment_reminder": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "mail.compose.big_attachments.notify": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "mail.compose.big_attachments.threshold_kb": {
+        "Value": 5120,
+        "Status": "locked"
+      }
+    }
+  }
+}
+```
+
+Example merged `policies.json` (force-install NC Connector + lock Thunderbird native attachment prompts):
+
+```json
+{
+  "policies": {
+    "ExtensionSettings": {
+      "*": {
+        "installation_mode": "allowed"
+      },
+      "{4a35421f-0906-439c-bff2-8eef39e2baee}": {
+        "installation_mode": "force_installed",
+        "install_url": "https://services.addons.thunderbird.net/thunderbird/downloads/latest/nc4tb/addon-989342-latest.xpi",
+        "updates_disabled": false
+      }
+    },
+    "Preferences": {
+      "mail.compose.attachment_reminder": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "mail.compose.big_attachments.notify": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "mail.compose.big_attachments.threshold_kb": {
+        "Value": 5120,
+        "Status": "locked"
+      }
+    }
+  }
+}
+```
+
+### 5.2 Seat assignment
 
 This section is used to assign NC Connector access to users.
 
@@ -256,7 +427,7 @@ Typical use:
 - Assign the relevant seat users
 - Verify the result in the **Assigned seats** table directly below
 
-### 4.3 Assigned seats
+### 5.3 Assigned seats
 
 This is the operational overview for support and audits.
 
@@ -283,7 +454,7 @@ CSV report:
 - Raw template HTML is intentionally **not** exported.
 - If a custom template is effective, the report shows `Custom` instead of embedding HTML into the file.
 
-### 4.4 Group overrides
+### 5.4 Group overrides
 
 This layer exists for team-level deviations from the global default.
 
@@ -313,7 +484,7 @@ Operational advice:
 2. Use group overrides for department-level exceptions.
 3. Use user overrides only when the group layer is still not specific enough.
 
-### 4.5 User overrides
+### 5.5 User overrides
 
 This is the highest policy layer.
 
@@ -340,7 +511,7 @@ Do not use user overrides as a substitute for missing group structure. That beco
 
 ---
 
-## 5. Effective precedence model
+## 6. Effective precedence model
 
 The backend resolves policies in this order:
 
@@ -364,10 +535,10 @@ This same precedence model is reflected in:
 
 ---
 
-## 6. What mail clients read from the backend
+## 7. What mail clients read from the backend
 
 Mail clients read the effective runtime state from:
-- `GET /apps/nc_connector/api/v1/status`
+- `GET /apps/nc_connector_backend/api/v1/status`
 
 The response contains:
 
@@ -386,16 +557,16 @@ For the detailed schema, see:
 
 ---
 
-## 7. Install, disable, remove, keep-data
+## 8. Install, disable, remove, keep-data
 
 The backend lifecycle is intentionally split into destructive and non-destructive paths.
 
 | Command | Expected behavior |
 |---|---|
-| `php occ app:enable nc_connector` | Creates missing schema objects if necessary |
-| `php occ app:disable nc_connector` | Disables the app **without deleting data** |
-| `php occ app:remove --keep-data nc_connector` | Removes the app code **but keeps data** |
-| `php occ app:remove nc_connector` | Removes app code **and deletes NC Connector data** |
+| `php occ app:enable nc_connector_backend` | Creates missing schema objects if necessary |
+| `php occ app:disable nc_connector_backend` | Disables the app **without deleting data** |
+| `php occ app:remove --keep-data nc_connector_backend` | Removes the app code **but keeps data** |
+| `php occ app:remove nc_connector_backend` | Removes app code **and deletes NC Connector data** |
 
 Deletion on full remove includes:
 - settings table
@@ -412,7 +583,7 @@ This distinction matters for real-world operations:
 
 ---
 
-## 8. Operational recommendations
+## 9. Operational recommendations
 
 Recommended order for a fresh setup:
 1. Enable the app.
@@ -431,5 +602,11 @@ Recommended support checklist:
 4. Check whether a matching group override exists.
 5. Check whether a direct user override exists.
 6. Check the effective runtime payload via `/api/v1/status`.
+7. Check the Nextcloud log for `warning` / `error` entries from `nc_connector_backend`.
+
+Logging note:
+- The backend now logs denied admin access, invalid admin payloads, and unexpected backend failures consistently.
+- Admin support should therefore treat the Nextcloud log as part of the normal troubleshooting workflow, not as an optional last resort.
+- Browser-side admin UI failures are additionally written to the browser console.
 
 If you follow that order, most support cases become straightforward instead of guesswork.

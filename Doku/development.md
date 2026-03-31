@@ -37,6 +37,7 @@ Related docs:
 - [9. Install, disable, remove, keep-data](#9-install-disable-remove-keep-data)
 - [10. Internationalization (i18n / l10n)](#10-internationalization-i18n--l10n)
 - [11. Local development and validation](#11-local-development-and-validation)
+  - [11.1 Logging and error-handling contract](#111-logging-and-error-handling-contract)
 - [12. Smoke-test checklist](#12-smoke-test-checklist)
 - [13. Packaging and release notes](#13-packaging-and-release-notes)
 
@@ -79,12 +80,12 @@ Background job:
 
 App registration:
 - metadata, dependencies, repair steps, and admin settings registration live in:
-  - `nc_connector/appinfo/info.xml`
+  - `nc_connector_backend/appinfo/info.xml`
 
 Important practical point:
 - The repository root is **not** the app root.
 - The actual Nextcloud app lives in:
-  - `nc_connector/`
+  - `nc_connector_backend/`
 
 In other words:
 - repo root: docs, release helpers, repo-level files
@@ -98,7 +99,7 @@ Top-level inside this repository:
 
 | Path | Purpose |
 |---|---|
-| `nc_connector/` | Actual Nextcloud app |
+| `nc_connector_backend/` | Actual Nextcloud app |
 | `Doku/` | Project documentation |
 | `release/` | Packaging and signing helpers |
 | `README.md` | Repository overview |
@@ -107,22 +108,22 @@ Key paths inside the app folder:
 
 | Path | Purpose |
 |---|---|
-| `nc_connector/appinfo/info.xml` | App metadata, dependencies, repair steps, background jobs |
-| `nc_connector/appinfo/database.xml` | Schema definition for all NC Connector tables |
-| `nc_connector/appinfo/routes.php` | Explicit route registration for the query-based group-override endpoints |
-| `nc_connector/lib/AppInfo/Application.php` | App bootstrapping and registration |
-| `nc_connector/lib/Controller/*` | Admin and runtime HTTP controllers |
-| `nc_connector/lib/Service/*` | Business logic, policy resolution, license logic, seat logic |
-| `nc_connector/lib/Db/*` | Entity and mapper classes |
-| `nc_connector/lib/Setup/*` | Install and uninstall repair steps |
-| `nc_connector/lib/Settings/*` | Nextcloud admin-settings integration |
-| `nc_connector/js/nc_connector-adminSettings.js` | Main admin UI logic |
-| `nc_connector/js/nc_connector-main.js` | Direct page UI under `/apps/nc_connector` |
-| `nc_connector/css/*` | Admin and direct-page styling |
-| `nc_connector/templates/*` | Nextcloud-rendered PHP templates |
-| `nc_connector/l10n/*.json` | Source translations |
-| `nc_connector/l10n/*.js` | Browser-loaded translation files |
-| `nc_connector/img/runtime/` | Local runtime image mirror for the editor |
+| `nc_connector_backend/appinfo/info.xml` | App metadata, dependencies, repair steps, background jobs |
+| `nc_connector_backend/appinfo/database.xml` | Schema definition for all NC Connector tables |
+| `nc_connector_backend/appinfo/routes.php` | Explicit route registration for the query-based group-override endpoints |
+| `nc_connector_backend/lib/AppInfo/Application.php` | App bootstrapping and registration |
+| `nc_connector_backend/lib/Controller/*` | Admin and runtime HTTP controllers |
+| `nc_connector_backend/lib/Service/*` | Business logic, policy resolution, license logic, seat logic |
+| `nc_connector_backend/lib/Db/*` | Entity and mapper classes |
+| `nc_connector_backend/lib/Setup/*` | Install and uninstall repair steps |
+| `nc_connector_backend/lib/Settings/*` | Nextcloud admin-settings integration |
+| `nc_connector_backend/js/nc_connector-adminSettings.js` | Main admin UI logic |
+| `nc_connector_backend/js/nc_connector-main.js` | Direct page UI under `/apps/nc_connector_backend` |
+| `nc_connector_backend/css/*` | Admin and direct-page styling |
+| `nc_connector_backend/templates/*` | Nextcloud-rendered PHP templates |
+| `nc_connector_backend/l10n/*.json` | Source translations |
+| `nc_connector_backend/l10n/*.js` | Browser-loaded translation files |
+| `nc_connector_backend/img/runtime/` | Local runtime image mirror for the editor |
 
 ---
 
@@ -139,9 +140,9 @@ That split is what keeps policy logic understandable.
 ### 4.1 Admin UI layer
 
 Main files:
-- `nc_connector/js/nc_connector-adminSettings.js`
-- `nc_connector/css/adminSettings.css`
-- `nc_connector/templates/adminSettings.php`
+- `nc_connector_backend/js/nc_connector-adminSettings.js`
+- `nc_connector_backend/css/adminSettings.css`
+- `nc_connector_backend/templates/adminSettings.php`
 
 Responsibilities:
 - render the admin tabs
@@ -169,7 +170,7 @@ Main controllers:
 | `AdminSeatController` | Seat assignment and assigned-seat overview |
 | `AdminClientSettingsController` | Defaults, user overrides, group overrides |
 | `StatusController` | Effective runtime API for mail clients |
-| `PageController` | Direct page under `/apps/nc_connector` |
+| `PageController` | Direct page under `/apps/nc_connector_backend` |
 
 Design intent:
 - Controllers should stay thin.
@@ -198,6 +199,9 @@ That file is the core of the backend because it owns:
 - editor asset handling
 - seat-overview helper data for matching overrides
 
+Logging rule for service/controller work:
+- server-side logging uses `Psr\Log\LoggerInterface`
+
 ### 4.4 Persistence layer
 
 Entity / mapper pairs exist for:
@@ -207,14 +211,14 @@ Entity / mapper pairs exist for:
 - group overrides
 
 Files:
-- `nc_connector/lib/Db/Setting.php`
-- `nc_connector/lib/Db/SettingMapper.php`
-- `nc_connector/lib/Db/Seat.php`
-- `nc_connector/lib/Db/SeatMapper.php`
-- `nc_connector/lib/Db/ClientOverride.php`
-- `nc_connector/lib/Db/ClientOverrideMapper.php`
-- `nc_connector/lib/Db/GroupOverride.php`
-- `nc_connector/lib/Db/GroupOverrideMapper.php`
+- `nc_connector_backend/lib/Db/Setting.php`
+- `nc_connector_backend/lib/Db/SettingMapper.php`
+- `nc_connector_backend/lib/Db/Seat.php`
+- `nc_connector_backend/lib/Db/SeatMapper.php`
+- `nc_connector_backend/lib/Db/ClientOverride.php`
+- `nc_connector_backend/lib/Db/ClientOverrideMapper.php`
+- `nc_connector_backend/lib/Db/GroupOverride.php`
+- `nc_connector_backend/lib/Db/GroupOverrideMapper.php`
 
 These classes map the Nextcloud database rows into the service layer.
 
@@ -226,10 +230,10 @@ Current schema objects:
 
 | Table | Purpose |
 |---|---|
-| `*dbprefix*nccv_settings` | Global backend settings and defaults |
-| `*dbprefix*nccv_seats` | Assigned seats per user |
-| `*dbprefix*nccv_client_overrides` | User-specific override rows |
-| `*dbprefix*nccv_group_overrides` | Group-specific override rows including priority |
+| `*dbprefix*nccb_settings` | Global backend settings and defaults |
+| `*dbprefix*nccb_seats` | Assigned seats per user |
+| `*dbprefix*nccb_client_overrides` | User-specific override rows |
+| `*dbprefix*nccb_group_overrides` | Group-specific override rows including priority |
 
 Important schema characteristics:
 - settings are keyed by `config_key`
@@ -238,7 +242,7 @@ Important schema characteristics:
 - group overrides additionally carry a numeric `priority`
 
 Schema source of truth:
-- `nc_connector/appinfo/database.xml`
+- `nc_connector_backend/appinfo/database.xml`
 
 Repair/install logic:
 - `OCA\NcConnector\Setup\InstallSchema`
@@ -295,6 +299,7 @@ Current rule set:
 - all non-template Share/Talk defaults start as **editable in add-on**
 - templates remain backend-controlled
 - any **forced** override disables local add-on editing for that specific setting
+- in the admin defaults table, `user_choice` is rendered as a checked **Editable in add-on** box and the corresponding backend value field is disabled for clarity
 - `attachments_min_size_mb` is nullable by design:
   - `null` means the threshold feature is disabled
   - a numeric value means the threshold feature is enabled
@@ -336,7 +341,7 @@ Export/report behavior:
 ### 8.1 Mail-client endpoint
 
 Main runtime endpoint:
-- `GET /apps/nc_connector/api/v1/status`
+- `GET /apps/nc_connector_backend/api/v1/status`
 
 Purpose:
 - deliver effective access state and effective policies to the mail add-on
@@ -353,20 +358,20 @@ Internal admin use:
 
 | Method | Path | Purpose |
 |---|---|---|
-| `GET` | `/apps/nc_connector/api/v1/admin/license` | Read current license state |
-| `PUT` | `/apps/nc_connector/api/v1/admin/license/credentials` | Store license credentials |
-| `PUT` | `/apps/nc_connector/api/v1/admin/license/mode` | Switch `Community` / `Pro` |
-| `POST` | `/apps/nc_connector/api/v1/admin/license/sync` | Trigger manual sync |
-| `GET` | `/apps/nc_connector/api/v1/admin/groups` | Read available Nextcloud groups |
-| `GET` | `/apps/nc_connector/api/v1/admin/users` | Read users, optionally filtered |
-| `GET` | `/apps/nc_connector/api/v1/admin/seats` | Read assigned seats overview |
-| `PUT` | `/apps/nc_connector/api/v1/admin/seats/{targetUserId}` | Assign or remove seat |
-| `GET` | `/apps/nc_connector/api/v1/admin/client-settings/schema` | Read admin settings schema and defaults metadata |
-| `PUT` | `/apps/nc_connector/api/v1/admin/client-settings/defaults` | Save global defaults |
-| `GET` | `/apps/nc_connector/api/v1/admin/client-settings/users/{targetUserId}` | Read user overrides |
-| `PUT` | `/apps/nc_connector/api/v1/admin/client-settings/users/{targetUserId}` | Save user overrides |
-| `GET` | `/apps/nc_connector/api/v1/admin/client-settings/groups?group_id=...` | Read group overrides |
-| `PUT` | `/apps/nc_connector/api/v1/admin/client-settings/groups` | Save group overrides |
+| `GET` | `/apps/nc_connector_backend/api/v1/admin/license` | Read current license state |
+| `PUT` | `/apps/nc_connector_backend/api/v1/admin/license/credentials` | Store license credentials |
+| `PUT` | `/apps/nc_connector_backend/api/v1/admin/license/mode` | Switch `Community` / `Pro` |
+| `POST` | `/apps/nc_connector_backend/api/v1/admin/license/sync` | Trigger manual sync |
+| `GET` | `/apps/nc_connector_backend/api/v1/admin/groups` | Read available Nextcloud groups |
+| `GET` | `/apps/nc_connector_backend/api/v1/admin/users` | Read users, optionally filtered |
+| `GET` | `/apps/nc_connector_backend/api/v1/admin/seats` | Read assigned seats overview |
+| `PUT` | `/apps/nc_connector_backend/api/v1/admin/seats/{targetUserId}` | Assign or remove seat |
+| `GET` | `/apps/nc_connector_backend/api/v1/admin/client-settings/schema` | Read admin settings schema and defaults metadata |
+| `PUT` | `/apps/nc_connector_backend/api/v1/admin/client-settings/defaults` | Save global defaults |
+| `GET` | `/apps/nc_connector_backend/api/v1/admin/client-settings/users/{targetUserId}` | Read user overrides |
+| `PUT` | `/apps/nc_connector_backend/api/v1/admin/client-settings/users/{targetUserId}` | Save user overrides |
+| `GET` | `/apps/nc_connector_backend/api/v1/admin/client-settings/groups?group_id=...` | Read group overrides |
+| `PUT` | `/apps/nc_connector_backend/api/v1/admin/client-settings/groups` | Save group overrides |
 
 Important implementation detail:
 - Group override endpoints intentionally use the query-based route in `appinfo/routes.php`.
@@ -375,7 +380,7 @@ Important implementation detail:
 ### 8.3 Direct page route
 
 Direct route:
-- `GET /apps/nc_connector/`
+- `GET /apps/nc_connector_backend/`
 
 Purpose:
 - direct page view without an app-bar entry
@@ -391,20 +396,20 @@ Status:
 Lifecycle behavior must stay stable. This was a source of regressions earlier and should not be changed casually.
 
 Install path:
-- `php occ app:enable nc_connector`
+- `php occ app:enable nc_connector_backend`
 - creates missing schema via `InstallSchema`
 
 Disable path:
-- `php occ app:disable nc_connector`
+- `php occ app:disable nc_connector_backend`
 - must **not** delete data
 
 Remove but keep data:
-- `php occ app:remove --keep-data nc_connector`
+- `php occ app:remove --keep-data nc_connector_backend`
 - removes app code only
 - keeps NC Connector data intact
 
 Remove including data:
-- `php occ app:remove nc_connector`
+- `php occ app:remove nc_connector_backend`
 - deletes:
   - settings table
   - seats table
@@ -427,8 +432,8 @@ Maintenance rule:
 ## 10. Internationalization (i18n / l10n)
 
 Translation model:
-- source translations live in `nc_connector/l10n/*.json`
-- browser-loaded translation files live in `nc_connector/l10n/*.js`
+- source translations live in `nc_connector_backend/l10n/*.json`
+- browser-loaded translation files live in `nc_connector_backend/l10n/*.js`
 
 Current behavior:
 - All visible JS UI strings go through the translation helper.
@@ -444,6 +449,10 @@ Important distinction:
 Current template-language rules:
 - `share_html_block_template` and `share_password_template` are relevant only when `language_share_html_block = custom`
 - `talk_invitation_template` is relevant only when `language_talk_description = custom`
+- `talk_invitation_template_format` is relevant only when `language_talk_description = custom`
+- `talk_invitation_template_format = html` returns stored editor HTML to the runtime API
+- `talk_invitation_template_format = plain_text` converts the stored HTML to cleaned plain text while preserving link targets as raw URLs
+- the runtime API additionally derives `event_description_type = html | plain_text` for clients that only need the final rendering mode
 - otherwise those template values are effectively inactive for runtime use
 
 Maintenance rule:
@@ -457,9 +466,9 @@ Maintenance rule:
 
 Typical local checks used in this repository:
 - JS syntax:
-  - `node --check nc_connector/nc_connector/js/nc_connector-adminSettings.js`
+  - `node --check nc_connector_backend/nc_connector_backend/js/nc_connector-adminSettings.js`
 - translation JS syntax:
-  - syntax-check `nc_connector/nc_connector/l10n/*.js`
+  - syntax-check `nc_connector_backend/nc_connector_backend/l10n/*.js`
 - XML sanity:
   - validate `appinfo/info.xml`
   - validate `appinfo/database.xml`
@@ -468,12 +477,35 @@ Environment note from this workspace:
 - `php` is not available in the local PATH here.
 - Real PHP linting and `occ`-based verification must therefore happen on the Nextcloud instance.
 
+### 11.1 Logging and error-handling contract
+
+Current logging contract:
+- do not silently swallow backend exceptions
+- do not use suppressed filesystem operators such as `@unlink`
+- do not keep silent JSON/API parse failures in app-owned JavaScript
+- log expected admin misuse / invalid input as `warning`
+- log unexpected backend failures as `error` with exception context
+
+Concrete implementation rules:
+- Controllers use `warning` for:
+  - denied admin access
+  - invalid payloads
+  - missing users / groups
+  - seat-conflict situations
+- Services use `error` when an operation that should succeed fails unexpectedly
+- JavaScript uses `console.error(...)` for UI/API failures and parse issues
+
+Practical audit checks:
+- `rg -n "@unlink|@rmdir|@mkdir|@file|@copy|@rename|catch \\{" nc_connector_backend/nc_connector_backend -g '!js/vendor/**' -g '!l10n/**'`
+- `rg -n "catch \\(" nc_connector_backend/nc_connector_backend -g '!js/vendor/**' -g '!l10n/**'`
+
 Good practical validation order:
 1. JS syntax
 2. translation syntax
 3. install / enable on Nextcloud
 4. admin UI smoke test
 5. runtime `/api/v1/status` check
+6. logging audit grep checks
 
 ---
 
@@ -481,12 +513,12 @@ Good practical validation order:
 
 A pragmatic smoke test for this backend should cover the actual operational risks.
 
-1. `php occ app:enable nc_connector`
+1. `php occ app:enable nc_connector_backend`
 2. Open the admin settings page
 3. Switch to `Community`
 4. Assign one Seat to a non-admin user
 5. Verify the assigned user appears in **Assigned seats**
-6. Check `GET /apps/nc_connector/api/v1/status` as that seat user
+6. Check `GET /apps/nc_connector_backend/api/v1/status` as that seat user
 7. Save default Share/Talk settings
 8. Verify that non-template settings default to `policy_editable = true`
 9. Configure a group override and confirm the seat overview marks group overrides as active for matching users
@@ -496,10 +528,10 @@ A pragmatic smoke test for this backend should cover the actual operational risk
 13. Download the seat CSV report and confirm effective policy data is present while template HTML is shown as `Custom`
 14. Switch to `Pro`, save credentials, run `Sync now`, and verify the status block updates
 15. Test lifecycle commands:
-    - `php occ app:disable nc_connector`
-    - `php occ app:enable nc_connector`
-    - `php occ app:remove --keep-data nc_connector`
-    - `php occ app:remove nc_connector`
+    - `php occ app:disable nc_connector_backend`
+    - `php occ app:enable nc_connector_backend`
+    - `php occ app:remove --keep-data nc_connector_backend`
+    - `php occ app:remove nc_connector_backend`
 
 If any of these fail, fix the underlying lifecycle or resolution logic before touching surface-level UI behavior.
 

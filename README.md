@@ -99,6 +99,17 @@ The backend includes:
 - language helper for supported locales
 - local runtime image handling for editor rendering
 
+### 5) Auditable operation
+
+The backend is meant to be supportable in production.
+
+That means:
+
+- server-side warnings and errors are logged consistently
+- denied admin actions and invalid payloads leave traces in the Nextcloud log
+- unexpected backend failures include exception context in the server log
+- admin UI and user-page failures are visible in the browser console
+
 ## Community vs. Pro
 
 The backend supports two operating modes:
@@ -138,7 +149,7 @@ That is exactly what this backend is for.
 
 ## Repository structure
 
-- `nc_connector/` – the actual Nextcloud app
+- `nc_connector_backend/` – the actual Nextcloud app
 - `Doku/` – project documentation
 - `release/` – signing and packaging helpers
 
@@ -149,4 +160,4 @@ Further details:
 - `Doku/admin.md`
 - `Doku/endpoints.md`
 - `Doku/development.md`
-- `Doku/Translations.md`
+- `Translations.md`

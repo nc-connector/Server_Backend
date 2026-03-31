@@ -1,6 +1,6 @@
 # Translations
 
-This app is localized via Nextcloud app l10n files (`nc_connector/l10n/*.json` and `*.js`).
+This app is localized via Nextcloud app l10n files (`nc_connector_backend/l10n/*.json` and `*.js`).
 
 ## Available locales
 
