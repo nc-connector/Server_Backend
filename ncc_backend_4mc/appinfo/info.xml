@@ -2,78 +2,111 @@
 <info>
 	<id>ncc_backend_4mc</id>
 	<name>NC Connector for mail integration</name>
-	<summary lang="en">Secure file sharing, Talk links and attachment automation directly in your familiar email client.</summary>
+	<summary lang="en">Secure file sharing, Talk meetings and intelligent attachment handling directly in your familiar email client.</summary>
+	<summary lang="de">Sicheres Teilen, Talk-Meetings und intelligente Anhangsverarbeitung direkt im gewohnten Mail-Client.</summary>
 	<description lang="en"><![CDATA[
 # NC Connector for mail integration
 
-NC Connector for mail integration provides the NC Connector backend for secure Nextcloud sharing, Talk meetings, and attachment automation directly in Thunderbird and Outlook Classic.
+NC Connector brings secure sharing, Talk meetings, and intelligent attachment handling directly into Thunderbird and Outlook Classic. This keeps daily work inside the familiar mail and calendar workflow instead of constantly moving back to the browser.
 
-## What it solves
+## What NC Connector simplifies
 
-- No constant switching between browser and mail client
-- No manual copy/paste of links, passwords, or expiry details
-- More consistent behavior across teams through central defaults and overrides
+- Share files securely directly from the email workflow
+- Create and maintain Talk rooms directly from calendar events
+- Move attachments above a defined size into Nextcloud when appropriate
+- Insert links, passwords, and expiry dates in a clean and consistent way
 
-## Core capabilities
+## Feature set
 
-### Share directly while composing
+### Share files securely
 
-- Guided share flow with files, expiry date, and note
-- Password-protected uploads
-- Formatted share block with URL, password, rights, and expiry
-- Optional separate password email
+- Guided share dialog with expiry date, permissions, and note
+- Password-protected shares
+- Formatted share block with link, password, rights, and expiry date
+- Optional separate password delivery
 
-### Automate attachment handling
+### Handle attachments intelligently
 
-- “Always share via NC Connector” mode
-- Upload offer above a configurable size threshold
-- Clear yes/no threshold decision
-- ZIP download-link mode with read-only recipient handling
+- Optionally route files through NC Connector by default
+- Offer uploads above a configurable file-size threshold
+- Clear user decision instead of uncontrolled automation
+- ZIP-download and download-link workflows for external recipients
 
-### Plan Talk meetings from the calendar
+### Create Talk meetings from the calendar
 
-- Create and update Talk rooms from calendar events
-- Configure room type, lobby, password, and moderation
-- Keep title and meeting link aligned with event changes
-- Cleanup for moved or cancelled events
+- Create and update Talk rooms from events
+- Manage room type, lobby, password, and moderation
+- Keep title and meeting link synchronized with the event
+- Clean up data for moved or deleted appointments
 
-## Backend mode
+## Backend note
 
-Seat assignment is handled in the Nextcloud backend. One seat maps to one Nextcloud user and can be reassigned at any time.
+NC Connector also works directly in the mail client.  
+With the optional Nextcloud backend, administrators additionally get central policies, Seat assignment, separate password delivery, and custom templates and branding for shares and Talk invitations.
 
-With backend mode, admins get:
+That makes NC Connector suitable both for individual users and for organizations that want to manage mail and calendar workflows centrally.
 
-- Seat assignment and central policy control for mail-client settings
-- Separate password delivery workflow
-- Per-user overrides for seat users
-- Custom text and design templates for Share and Talk
-- Visual editors with preview for templates
+## Mail clients
 
-Without backend mode, users can still start directly in the mail client, but there is no central seat management, no backend-controlled policies, and no backend-managed templates.
+- Thunderbird: [https://addons.thunderbird.net/thunderbird/addon/nc4tb/](https://addons.thunderbird.net/thunderbird/addon/nc4tb/)
+- Outlook Classic: [https://github.com/nc-connector/NC_Connector_for_Outlook/releases/latest](https://github.com/nc-connector/NC_Connector_for_Outlook/releases/latest)
 
-## Template customization
+## More information
 
-Admins can customize:
+- Homepage: [https://nc-connector.de](https://nc-connector.de)
+- Contact: [https://nc-connector.de/kontakt/](https://nc-connector.de/kontakt/)
+]]></description>
+	<description lang="de"><![CDATA[
+# NC Connector für Mail-Integration
 
-- Share email template (HTML)
-- Share password email template (HTML)
-- Talk invitation template
+NC Connector bringt sicheres Teilen, Talk-Meetings und intelligente Anhangsverarbeitung direkt in Thunderbird und Outlook Classic. So bleibt die Arbeit im gewohnten Mail- und Kalender-Workflow, ohne ständig in den Browser wechseln zu müssen.
 
-Available template variables:
+## Was NC Connector erleichtert
 
-- `{URL}`
-- `{PASSWORD}`
-- `{EXPIRATIONDATE}`
-- `{RIGHTS}`
-- `{NOTE}`
-- `{MEETING_URL}`
+- Dateien sicher direkt aus dem E-Mail-Workflow heraus teilen
+- Talk-Räume direkt aus Kalendereinträgen erstellen und pflegen
+- Anhänge ab einer definierten Größe gezielt in Nextcloud auslagern
+- Links, Passwörter und Ablaufdaten sauber und einheitlich einfügen
 
-## For admins
+## Funktionsumfang
 
-- Works with existing Nextcloud infrastructure
-- Central defaults and policy enforcement
-- Per-user overrides for seat users
-- Structured logs for support and troubleshooting
+### Dateien sicher teilen
+
+- Geführter Freigabe-Dialog mit Ablaufdatum, Berechtigungen und Notiz
+- Passwortgeschützte Freigaben
+- Formatierter Freigabeblock mit Link, Passwort, Rechten und Ablaufdatum
+- Optionaler separater Passwortversand
+
+### Anhänge intelligent verarbeiten
+
+- Dateien auf Wunsch immer über NC Connector teilen
+- Upload-Angebot ab konfigurierbarer Dateigröße
+- Klare Entscheidung statt unkontrollierter Automatik
+- ZIP-Downloads und Download-Link-Workflows für externe Empfänger
+
+### Talk direkt aus dem Kalender
+
+- Talk-Räume aus Terminen erstellen und aktualisieren
+- Raumtyp, Lobby, Passwort und Moderation verwalten
+- Titel und Besprechungslink mit dem Termin synchron halten
+- Aufräumen bei verschobenen oder gelöschten Terminen
+
+## Hinweis zum Backend
+
+NC Connector funktioniert auch direkt im Mail-Client.  
+Mit dem optionalen Nextcloud-Backend kommen zusätzlich zentrale Richtlinien, Seat-Zuweisung, separate Passwortzustellung sowie eigene Vorlagen und Designs für Freigaben und Talk-Einladungen hinzu.
+
+Damit eignet sich NC Connector sowohl für einzelne Nutzer als auch für Organisationen, die Mail- und Kalenderprozesse zentral steuern möchten.
+
+## Mail-Clients
+
+- Thunderbird: [https://addons.thunderbird.net/thunderbird/addon/nc4tb/](https://addons.thunderbird.net/thunderbird/addon/nc4tb/)
+- Outlook Classic: [https://github.com/nc-connector/NC_Connector_for_Outlook/releases/latest](https://github.com/nc-connector/NC_Connector_for_Outlook/releases/latest)
+
+## Weitere Informationen
+
+- Homepage: [https://nc-connector.de](https://nc-connector.de)
+- Kontakt: [https://nc-connector.de/kontakt/](https://nc-connector.de/kontakt/)
 ]]></description>
 	<version>1.0.0</version>
 	<licence>AGPL-3.0-or-later</licence>
@@ -84,6 +117,7 @@ Available template variables:
 	<website>https://nc-connector.de</website>
 	<bugs>https://nc-connector.de/kontakt/</bugs>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/appsettings.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/NC_Connector_for_Thunderbird/main/screenshots/talk_wizzard1.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/NC_Connector_for_Thunderbird/main/screenshots/filelink_wizzard1.png</screenshot>
 
