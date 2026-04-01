@@ -29,8 +29,8 @@ Util::addStyle($appId, 'tinymceSkin');
 Util::addStyle($appId, 'adminSettings');
 ?>
 
-<div class="nccb-top-banner" role="region" aria-label="<?php p($l->t('NC Connector notice')); ?>">
-	<div class="nccb-top-banner__title">NC Connector</div>
+<div class="nccb-top-banner" role="region" aria-label="NC Connector Backend">
+	<div class="nccb-top-banner__title">NC Connector Backend</div>
 	<div class="nccb-top-banner__text"><?php p($l->t('Mail client policies, seats and license status managed centrally.')); ?></div>
 </div>
 <div id="nccb-admin-settings"></div>

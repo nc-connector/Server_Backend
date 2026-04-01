@@ -1,6 +1,6 @@
 // Auto-generated from de.json
 OC.L10N.register(
-    'nc_connector_backend',
+    'ncc_backend_4mc',
 {
   "Active": "Aktiv",
   "Active used": "Aktiv genutzt",

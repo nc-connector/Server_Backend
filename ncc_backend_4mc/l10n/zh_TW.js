@@ -1,6 +1,6 @@
 // Auto-generated from zh_TW.json
 OC.L10N.register(
-    'nc_connector_backend',
+    'ncc_backend_4mc',
 {
   "Active": "積極的",
   "Active used": "活躍使用",

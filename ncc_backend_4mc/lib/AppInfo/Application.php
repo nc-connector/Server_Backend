@@ -16,7 +16,7 @@ use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 
 class Application extends App implements IBootstrap {
-	public const APP_ID = 'nc_connector_backend';
+	public const APP_ID = 'ncc_backend_4mc';
 
 	public function __construct(array $urlParams = []) {
 		parent::__construct(self::APP_ID, $urlParams);

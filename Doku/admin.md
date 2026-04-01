@@ -82,11 +82,11 @@ You can enable the app in two common ways:
 
 **Nextcloud web UI**
 - Open **Apps**
-- search for **NC Connector**
+- search for **NC Connector for mail integration**
 - click **Download and enable** or **Enable**
 
 **Nextcloud command line**
-- `php occ app:enable nc_connector_backend`
+- `php occ app:enable ncc_backend_4mc`
 
 If you are new to Nextcloud and do not have shell access, the web UI path is usually enough.
 
@@ -114,7 +114,7 @@ The most important conceptual point is:
 If you want the shortest possible path to a working setup, do this in order:
 
 1. Enable the app.
-2. Open **Settings → Administration → NC Connector**.
+2. Open **Settings → Administration → NC Connector Backend**.
 3. Decide whether the instance should run in `Community` or `Pro`.
 4. If `Pro`, store the license credentials and run a sync.
 5. Define clean **Default Settings** first.
@@ -130,7 +130,7 @@ That order keeps the rollout understandable and avoids unnecessary exception han
 ## 3. Where to find the backend settings
 
 Path in Nextcloud:
-- **Settings → Administration → NC Connector**
+- **Settings → Administration → NC Connector Backend**
 
 The interface is intentionally split into two main areas:
 
@@ -140,6 +140,8 @@ The interface is intentionally split into two main areas:
 | `Group Settings` | Default policies, seat assignment, assigned-seat overview, group overrides, and user overrides |
 
 Important UI note:
+- In the Nextcloud app list, the app is named **NC Connector for mail integration**.
+- In the Administration settings, the section label is **NC Connector Backend**.
 - There is currently **no NC Connector app-bar entry** in Nextcloud.
 - Administration happens only through the **Administration settings** page.
 
@@ -538,7 +540,7 @@ This same precedence model is reflected in:
 ## 7. What mail clients read from the backend
 
 Mail clients read the effective runtime state from:
-- `GET /apps/nc_connector_backend/api/v1/status`
+- `GET /apps/ncc_backend_4mc/api/v1/status`
 
 The response contains:
 
@@ -563,10 +565,10 @@ The backend lifecycle is intentionally split into destructive and non-destructiv
 
 | Command | Expected behavior |
 |---|---|
-| `php occ app:enable nc_connector_backend` | Creates missing schema objects if necessary |
-| `php occ app:disable nc_connector_backend` | Disables the app **without deleting data** |
-| `php occ app:remove --keep-data nc_connector_backend` | Removes the app code **but keeps data** |
-| `php occ app:remove nc_connector_backend` | Removes app code **and deletes NC Connector data** |
+| `php occ app:enable ncc_backend_4mc` | Creates missing schema objects if necessary |
+| `php occ app:disable ncc_backend_4mc` | Disables the app **without deleting data** |
+| `php occ app:remove --keep-data ncc_backend_4mc` | Removes the app code **but keeps data** |
+| `php occ app:remove ncc_backend_4mc` | Removes app code **and deletes NC Connector data** |
 
 Deletion on full remove includes:
 - settings table
@@ -602,7 +604,7 @@ Recommended support checklist:
 4. Check whether a matching group override exists.
 5. Check whether a direct user override exists.
 6. Check the effective runtime payload via `/api/v1/status`.
-7. Check the Nextcloud log for `warning` / `error` entries from `nc_connector_backend`.
+7. Check the Nextcloud log for `warning` / `error` entries from `ncc_backend_4mc`.
 
 Logging note:
 - The backend now logs denied admin access, invalid admin payloads, and unexpected backend failures consistently.

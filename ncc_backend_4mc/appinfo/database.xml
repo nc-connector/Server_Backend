@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <database>
-	<name>nc_connector_backend</name>
+	<name>ncc_backend_4mc</name>
 
 	<table>
 		<name>*dbprefix*nccb_settings</name>

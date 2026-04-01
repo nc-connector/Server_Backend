@@ -1,6 +1,6 @@
 // Auto-generated from ja.json
 OC.L10N.register(
-    'nc_connector_backend',
+    'ncc_backend_4mc',
 {
   "Active": "アクティブ",
   "Active used": "アクティブな使用済み",

@@ -857,8 +857,8 @@ HTML;
 
 		$template = str_replace(
 			[
-				'src="../../apps/nc_connector_backend/img/header.png"',
-				"src='../../apps/nc_connector_backend/img/header.png'",
+				'src="../../apps/ncc_backend_4mc/img/header.png"',
+				"src='../../apps/ncc_backend_4mc/img/header.png'",
 				'src="../img/header.png"',
 				"src='../img/header.png'",
 			],

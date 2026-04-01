@@ -1,6 +1,6 @@
 // Auto-generated from ru.json
 OC.L10N.register(
-    'nc_connector_backend',
+    'ncc_backend_4mc',
 {
   "Active": "Активный",
   "Active used": "Активный б/у",

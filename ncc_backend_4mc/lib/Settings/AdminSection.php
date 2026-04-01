@@ -27,7 +27,7 @@ class AdminSection implements IIconSection {
 	}
 
 	public function getName(): string {
-		return $this->l->t('NC Connector');
+		return $this->l->t('NC Connector Backend');
 	}
 
 	public function getPriority(): int {

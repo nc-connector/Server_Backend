@@ -7,8 +7,8 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
 
 ### 1) Combined status + policies
 - **HTTP method:** `GET`
-- **Path:** `/apps/nc_connector_backend/api/v1/status`
-- **Path variant without pretty URLs:** `/index.php/apps/nc_connector_backend/api/v1/status`
+- **Path:** `/apps/ncc_backend_4mc/api/v1/status`
+- **Path variant without pretty URLs:** `/index.php/apps/ncc_backend_4mc/api/v1/status`
 - **Purpose:** Returns license state, seat state, and the effective policy settings in a single request.
 - **Auth / permissions:** Authenticated Nextcloud user (session or app password)
 - **Request parameters:**
@@ -48,7 +48,7 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
 ```bash
 curl -u "alice:APP_PASSWORD" \
   -H "Accept: application/json" \
-  "https://cloud.example.com/apps/nc_connector_backend/api/v1/status"
+  "https://cloud.example.com/apps/ncc_backend_4mc/api/v1/status"
 ```
 - **Example response (JSON):**
 ```json

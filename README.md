@@ -149,7 +149,7 @@ That is exactly what this backend is for.
 
 ## Repository structure
 
-- `nc_connector_backend/` – the actual Nextcloud app
+- `ncc_backend_4mc/` – the actual Nextcloud app
 - `Doku/` – project documentation
 - `release/` – signing and packaging helpers
 

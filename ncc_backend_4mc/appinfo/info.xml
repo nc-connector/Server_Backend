@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <info>
-	<id>nc_connector_backend</id>
-	<name>NC Connector</name>
+	<id>ncc_backend_4mc</id>
+	<name>NC Connector for mail integration</name>
 	<summary lang="en">Secure file sharing, Talk links and attachment automation directly in your familiar email client.</summary>
 	<description lang="en"><![CDATA[
-# NC Connector
+# NC Connector for mail integration
 
-NC Connector brings secure Nextcloud sharing, Talk meetings, and attachment automation directly into Thunderbird and Outlook Classic.
+NC Connector for mail integration provides the NC Connector backend for secure Nextcloud sharing, Talk meetings, and attachment automation directly in Thunderbird and Outlook Classic.
 
 ## What it solves
 
