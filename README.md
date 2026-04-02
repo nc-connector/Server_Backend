@@ -147,6 +147,10 @@ A company wants:
 
 That is exactly what this backend is for.
 
+**Get it**
+- [Nextcloud App Store](https://apps.nextcloud.com/apps/ncc_backend_4mc)
+  https://apps.nextcloud.com/apps/ncc_backend_4mc
+  
 ## Repository structure
 
 - `ncc_backend_4mc/` – the actual Nextcloud app
