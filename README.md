@@ -149,7 +149,6 @@ That is exactly what this backend is for.
 
 **Get it**
 - [Nextcloud App Store](https://apps.nextcloud.com/apps/ncc_backend_4mc)
-  https://apps.nextcloud.com/apps/ncc_backend_4mc
 
 **Requirements**
 - Mail Cliend Addon Version >=3.0.0
