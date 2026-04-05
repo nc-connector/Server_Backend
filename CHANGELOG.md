@@ -29,4 +29,3 @@ Initial public release of the **NC Connector backend** for Nextcloud.
 - Browser-console logging for admin UI and user-page API/UI failures
 - Removal of silent catch paths and suppressed runtime-file deletion in app-owned code
 - Admin documentation and development documentation under `Doku/`
-- Release helper scripts for packaging and signing under `release/`
