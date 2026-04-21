@@ -57,7 +57,7 @@ OC.L10N.register(
   "Failed to save operating mode.": "Не удалось сохранить рабочий режим.",
   "Failed to save overrides.": "Не удалось сохранить переопределения.",
   "Failed to save seat.": "Не удалось сохранить Seat.",
-  "Files are stored below this folder (for example \"90 Shares - external\").": "В этой папке хранятся файлы (например, «90 общих ресурсов — внешние»).",
+  "Files are stored below this folder (for example \"NC Connector\").": "Файлы будут храниться в этом каталоге (например, \"NC Connector\").",
   "Forced value": "Принудительное значение",
   "free": "свободных",
   "Free": "свободных",
@@ -241,3 +241,5 @@ OC.L10N.register(
 ,
     "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2));"
 );
+
+

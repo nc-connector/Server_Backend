@@ -150,7 +150,7 @@ HTML;
 	 * @var array<string, array<string, mixed>>
 	 */
 	private const DEFINITIONS = [
-		'share_base_directory' => ['type' => 'string', 'default' => '90 Shares - external', 'max_length' => 255],
+		'share_base_directory' => ['type' => 'string', 'default' => 'NC Connector', 'max_length' => 255],
 		'share_name_template' => ['type' => 'string', 'default' => 'Share name', 'max_length' => 120],
 		'share_permission_upload' => ['type' => 'bool', 'default' => true],
 		'share_permission_edit' => ['type' => 'bool', 'default' => true],
@@ -1303,3 +1303,5 @@ HTML;
 		$this->logger->error($message, $context);
 	}
 }
+
+

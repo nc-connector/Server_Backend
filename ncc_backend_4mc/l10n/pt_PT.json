@@ -55,7 +55,7 @@
         "Failed to save operating mode.": "Falha ao guardar o modo de operação.",
         "Failed to save overrides.": "Falha ao guardar substituições.",
         "Failed to save seat.": "Falha ao guardar o Seat.",
-        "Files are stored below this folder (for example \"90 Shares - external\").": "Os ficheiros são armazenados abaixo desta pasta (por exemplo \"90 partilhas - externas\").",
+        "Files are stored below this folder (for example \"NC Connector\").": "Os ficheiros são armazenados sob este diretório (ex.: \"NC Connector\").",
         "Forced value": "Valor forçado",
         "free": "livres",
         "Free": "livres",
@@ -238,3 +238,5 @@
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }
+
+

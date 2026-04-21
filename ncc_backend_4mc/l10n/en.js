@@ -57,7 +57,7 @@ OC.L10N.register(
   "Failed to save operating mode.": "Failed to save operating mode.",
   "Failed to save overrides.": "Failed to save overrides.",
   "Failed to save seat.": "Failed to save seat.",
-  "Files are stored below this folder (for example \"90 Shares - external\").": "Files are stored below this folder (for example \"90 Shares - external\").",
+  "Files are stored below this folder (for example \"NC Connector\").": "Files are stored beneath this directory (e.g. \"NC Connector\").",
   "Forced value": "Forced value",
   "free": "free",
   "Free": "free",
@@ -241,3 +241,5 @@ OC.L10N.register(
 ,
     "nplurals=2; plural=(n != 1);"
 );
+
+

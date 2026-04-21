@@ -18,7 +18,7 @@
 	const SETTING_META = {
 		share_base_directory: {
 			label: 'Base directory',
-			tooltip: ['Files are stored below this folder (for example "90 Shares - external").'],
+			tooltip: ['Files are stored below this folder (for example "NC Connector").'],
 		},
 		share_name_template: {
 			label: 'Share name',
@@ -3413,3 +3413,5 @@
 
 	void main()
 })()
+
+

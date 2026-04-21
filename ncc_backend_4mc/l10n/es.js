@@ -57,7 +57,7 @@ OC.L10N.register(
   "Failed to save operating mode.": "No se pudo guardar el modo de funcionamiento.",
   "Failed to save overrides.": "No se pudieron guardar las anulaciones.",
   "Failed to save seat.": "No se pudo guardar el Seat.",
-  "Files are stored below this folder (for example \"90 Shares - external\").": "Los archivos se almacenan debajo de esta carpeta (por ejemplo, \"90 recursos compartidos - externos\").",
+  "Files are stored below this folder (for example \"NC Connector\").": "Los archivos se guardan dentro de este directorio (p. ej. \"NC Connector\").",
   "Forced value": "Valor forzado",
   "free": "libres",
   "Free": "libres",
@@ -241,3 +241,5 @@ OC.L10N.register(
 ,
     "nplurals=2; plural=(n != 1);"
 );
+
+

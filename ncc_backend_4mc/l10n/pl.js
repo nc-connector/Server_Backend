@@ -57,7 +57,7 @@ OC.L10N.register(
   "Failed to save operating mode.": "Nie udało się zapisać trybu pracy.",
   "Failed to save overrides.": "Nie udało się zapisać zastąpień.",
   "Failed to save seat.": "Nie udało się zapisać Seata.",
-  "Files are stored below this folder (for example \"90 Shares - external\").": "Pliki są przechowywane poniżej tego folderu (na przykład „90 udziałów – zewnętrzne”).",
+  "Files are stored below this folder (for example \"NC Connector\").": "Pliki są przechowywane w tym katalogu (np. \"NC Connector\").",
   "Forced value": "Wymuszona wartość",
   "free": "wolne",
   "Free": "wolne",
@@ -241,3 +241,5 @@ OC.L10N.register(
 ,
     "nplurals=3; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4 && (n%100<12 || n%100>14)) ? 1 : 2);"
 );
+
+

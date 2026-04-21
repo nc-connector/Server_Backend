@@ -57,7 +57,7 @@ OC.L10N.register(
   "Failed to save operating mode.": "Nem sikerült menteni az üzemmódot.",
   "Failed to save overrides.": "Nem sikerült menteni a felülírásokat.",
   "Failed to save seat.": "Nem sikerült menteni a Seatot.",
-  "Files are stored below this folder (for example \"90 Shares - external\").": "A fájlok e mappa alatt tárolódnak (például \"90 Shares - external\").",
+  "Files are stored below this folder (for example \"NC Connector\").": "A fájlok e könyvtár alatt tárolódnak (pl. „NC Connector”).",
   "Forced value": "Kényszer érték",
   "free": "szabad",
   "Free": "szabad",
@@ -241,3 +241,4 @@ OC.L10N.register(
 ,
     "nplurals=2; plural=(n != 1);"
 );
+

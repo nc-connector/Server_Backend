@@ -57,7 +57,7 @@ OC.L10N.register(
   "Failed to save operating mode.": "Nepodařilo se uložit provozní režim.",
   "Failed to save overrides.": "Nepodařilo se uložit přepsání.",
   "Failed to save seat.": "Nepodařilo se uložit Seat.",
-  "Files are stored below this folder (for example \"90 Shares - external\").": "Soubory jsou uloženy pod touto složkou (například „90 sdílených složek – externí“).",
+  "Files are stored below this folder (for example \"NC Connector\").": "Soubory jsou ukládány pod tento adresář (např. \"NC Connector\").",
   "Forced value": "Vynucená hodnota",
   "free": "volná",
   "Free": "volná",
@@ -241,3 +241,5 @@ OC.L10N.register(
 ,
     "nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;"
 );
+
+

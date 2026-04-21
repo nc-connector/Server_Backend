@@ -65,7 +65,7 @@ curl -u "alice:APP_PASSWORD" \
   },
   "policy": {
     "share": {
-      "share_base_directory": "90 Shares - external",
+      "share_base_directory": "NC Connector",
       "share_name_template": "Share name",
       "share_permission_upload": true,
       "share_permission_edit": true,
@@ -145,3 +145,5 @@ curl -u "alice:APP_PASSWORD" \
 - **Field names:** `snake_case`
 - **Paging:** not required for the exposed mail-client endpoint
 - **Seat state values:** `seat_state` is `none`, `active`, or `suspended_overlimit`
+
+

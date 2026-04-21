@@ -57,7 +57,7 @@ OC.L10N.register(
   "Failed to save operating mode.": "Kan de bedrijfsmodus niet opslaan.",
   "Failed to save overrides.": "Kan overschrijvingen niet opslaan.",
   "Failed to save seat.": "De Seat kon niet worden opgeslagen.",
-  "Files are stored below this folder (for example \"90 Shares - external\").": "Bestanden worden onder deze map opgeslagen (bijvoorbeeld \"90 Shares - extern\").",
+  "Files are stored below this folder (for example \"NC Connector\").": "Bestanden worden onder deze map opgeslagen (bijv. \"NC Connector\").",
   "Forced value": "Geforceerde waarde",
   "free": "vrij",
   "Free": "vrij",
@@ -241,3 +241,5 @@ OC.L10N.register(
 ,
     "nplurals=2; plural=(n != 1);"
 );
+
+

@@ -55,7 +55,7 @@
         "Failed to save operating mode.": "無法儲存操作模式。",
         "Failed to save overrides.": "無法保存覆蓋。",
         "Failed to save seat.": "保存Seat失敗。",
-        "Files are stored below this folder (for example \"90 Shares - external\").": "檔案儲存在此資料夾下（例如“90 Shares - external”）。",
+        "Files are stored below this folder (for example \"NC Connector\").": "檔案會儲存在此目錄下（例如 \"NC Connector\"）。",
         "Forced value": "強制值",
         "free": "可用",
         "Free": "可用",
@@ -238,3 +238,5 @@
     },
     "pluralForm": "nplurals=1; plural=0;"
 }
+
+

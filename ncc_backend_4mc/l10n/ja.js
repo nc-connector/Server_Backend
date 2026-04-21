@@ -57,7 +57,7 @@ OC.L10N.register(
   "Failed to save operating mode.": "動作モードの保存に失敗しました。",
   "Failed to save overrides.": "オーバーライドの保存に失敗しました。",
   "Failed to save seat.": "座Seatsの保存に失敗しました。",
-  "Files are stored below this folder (for example \"90 Shares - external\").": "ファイルはこのフォルダーの下に保存されます (たとえば、「90 共有 - 外部」)。",
+  "Files are stored below this folder (for example \"NC Connector\").": "ファイルはこのディレクトリ配下に保存されます（例: \"NC Connector\"）。",
   "Forced value": "強制値",
   "free": "空き",
   "Free": "空き",
@@ -241,3 +241,5 @@ OC.L10N.register(
 ,
     "nplurals=1; plural=0;"
 );
+
+
