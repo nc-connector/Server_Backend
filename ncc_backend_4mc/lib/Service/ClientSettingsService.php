@@ -26,7 +26,7 @@ use Psr\Log\LoggerInterface;
 class ClientSettingsService {
 	private const MAIL_TEMPLATE_LOGO_URL = 'https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png';
 	private const MAIL_TEMPLATE_LOGO_LINK = 'https://nc-connector.de';
-	private const TALK_HELP_URL = 'https://docs.nextcloud.com/server/latest/user_manual/en/talk/join_a_call_or_chat_as_guest.html';
+	private const TALK_HELP_URL = 'https://docs.nextcloud.com/server/latest/user_manual/en/talk/guest.html';
 	private const DEFAULT_KEY_PREFIX = 'client.default.';
 	private const DEFAULT_MODE_KEY_PREFIX = 'client.default_mode.';
 	private const MODE_INHERIT = 'inherit';
@@ -143,7 +143,7 @@ HTML;
 <p>Join the meeting now:<br><a href="{MEETING_URL}">{MEETING_URL}</a></p>
 <p>Password: {PASSWORD}</p>
 <p>Need help?</p>
-<p><a href="https://docs.nextcloud.com/server/latest/user_manual/en/talk/join_a_call_or_chat_as_guest.html">https://docs.nextcloud.com/server/latest/user_manual/en/talk/join_a_call_or_chat_as_guest.html</a></p>
+<p><a href="https://docs.nextcloud.com/server/latest/user_manual/en/talk/guest.html">https://docs.nextcloud.com/server/latest/user_manual/en/talk/guest.html</a></p>
 HTML;
 
 	/**
