@@ -109,7 +109,7 @@ Key paths inside the app folder:
 | Path | Purpose |
 |---|---|
 | `ncc_backend_4mc/appinfo/info.xml` | App metadata, dependencies, repair steps, background jobs |
-| `ncc_backend_4mc/appinfo/database.xml` | Schema definition for all NC Connector tables |
+| `ncc_backend_4mc/lib/Setup/InstallSchema.php` | Install-time schema creation for all NC Connector tables |
 | `ncc_backend_4mc/appinfo/routes.php` | Explicit route registration for the query-based group-override endpoints |
 | `ncc_backend_4mc/lib/AppInfo/Application.php` | App bootstrapping and registration |
 | `ncc_backend_4mc/lib/Controller/*` | Admin and runtime HTTP controllers |
@@ -242,7 +242,7 @@ Important schema characteristics:
 - group overrides additionally carry a numeric `priority`
 
 Schema source of truth:
-- `ncc_backend_4mc/appinfo/database.xml`
+- `OCA\NcConnector\Setup\InstallSchema`
 
 Repair/install logic:
 - `OCA\NcConnector\Setup\InstallSchema`
@@ -471,7 +471,6 @@ Typical local checks used in this repository:
   - syntax-check `ncc_backend_4mc/l10n/*.js`
 - XML sanity:
   - validate `appinfo/info.xml`
-  - validate `appinfo/database.xml`
 
 Environment note from this workspace:
 - `php` is not available in the local PATH here.
