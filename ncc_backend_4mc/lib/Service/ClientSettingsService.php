@@ -61,7 +61,7 @@ class ClientSettingsService {
 						</table>
 						<div style="padding:18px 18px 12px 18px;">
 							<p style="margin:0 0 14px 0;line-height:1.4;">{NOTE}</p>
-							<p style="margin:0 0 14px 0;line-height:1.4;">I would like to securely share files with you while protecting your privacy. Click the link below to download your files.</p>
+							<p style="margin:0 0 14px 0;line-height:1.4;">The files have been provided securely and in a privacy-compliant manner via Nextcloud. You can download them using the link below.</p>
 							<table style="width:100%;border-collapse:collapse;margin-bottom:10px;">
 								<tbody>
 									<tr>
@@ -139,8 +139,8 @@ HTML;
 </html>
 HTML;
 	private const DEFAULT_TALK_INVITATION_TEMPLATE = <<<'HTML'
-<p>Nextcloud Talk</p>
-<p>Join the meeting now:<br><a href="{MEETING_URL}">{MEETING_URL}</a></p>
+<p>This meeting takes place in Nextcloud Talk</p>
+<p>Meeting link:<br><a href="{MEETING_URL}">{MEETING_URL}</a></p>
 <p>Password: {PASSWORD}</p>
 <p>Need help?</p>
 <p><a href="https://docs.nextcloud.com/server/latest/user_manual/en/talk/guest.html">https://docs.nextcloud.com/server/latest/user_manual/en/talk/guest.html</a></p>
