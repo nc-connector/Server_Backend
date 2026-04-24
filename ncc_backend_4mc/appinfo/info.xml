@@ -108,7 +108,7 @@ Damit eignet sich NC Connector sowohl für einzelne Nutzer als auch für Organis
 - Homepage: [https://nc-connector.de](https://nc-connector.de)
 - Kontakt: [https://nc-connector.de/kontakt/](https://nc-connector.de/kontakt/)
 ]]></description>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<licence>AGPL-3.0-or-later</licence>
 	<author mail="info@nc-connector.de" homepage="https://nc-connector.de">NC Connector</author>
 	<namespace>NcConnector</namespace>
@@ -118,6 +118,7 @@ Damit eignet sich NC Connector sowohl für einzelne Nutzer als auch für Organis
 	<bugs>https://nc-connector.de/kontakt/</bugs>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/appsettings.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/screenshots/TemplateEditor.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/NC_Connector_for_Thunderbird/main/screenshots/talk_wizzard1.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/NC_Connector_for_Thunderbird/main/screenshots/filelink_wizzard1.png</screenshot>
 
