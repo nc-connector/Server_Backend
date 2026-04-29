@@ -17,12 +17,12 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
   - Body: none
 - **Response shape:**
   - `status`: license and seat state for the resolved user
-  - `policy`: effective settings grouped into `share` and `talk`
-  - `policy_editable`: add-on editability grouped into `share` and `talk`
+  - `policy`: effective settings grouped into `share`, `talk`, and `email_signature`
+  - `policy_editable`: add-on editability grouped into `share`, `talk`, and `email_signature`
   - There is **no** separate `default` block in the runtime response.
 - **Policy null rules:**
-  - `policy.share` and `policy.talk` are `null` when `status.overlicensed=true` or `status.seat_assigned=false`.
-  - `policy_editable.share` and `policy_editable.talk` are also `null` when `status.overlicensed=true` or `status.seat_assigned=false`.
+  - `policy.share`, `policy.talk`, and `policy.email_signature` are `null` when `status.overlicensed=true` or `status.seat_assigned=false`.
+  - `policy_editable.share`, `policy_editable.talk`, and `policy_editable.email_signature` are also `null` when `status.overlicensed=true` or `status.seat_assigned=false`.
   - For settings with **Editable in add-on** enabled, `policy` still returns the configured backend default value.
   - Whether a setting may be changed in the add-on is returned separately in `policy_editable` as `true` or `false`.
   - Effective precedence is:
@@ -44,6 +44,9 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
   - If `policy.talk.talk_invitation_template_format = "html"`, `policy.talk.talk_invitation_template` contains the stored HTML template.
   - If `policy.talk.talk_invitation_template_format = "plain_text"`, `policy.talk.talk_invitation_template` contains cleaned plain text with preserved raw URLs and preserved template variables such as `{MEETING_URL}` or `{PASSWORD}`.
   - If `policy.talk.language_talk_description != "custom"`, `policy.talk.talk_invitation_template_format` is `null` and `policy.talk.event_description_type` falls back to `"plain_text"`.
+  - `policy.email_signature.email_signature_template` always contains HTML when policies are available.
+  - Email signature profile variables are resolved by the backend for the resolved Seat user before the template is returned.
+  - Mail clients may derive plain text from the returned HTML when needed; the backend does not provide a separate plain-text signature.
 - **Example request (curl):**
 ```bash
 curl -u "alice:APP_PASSWORD" \
@@ -92,6 +95,11 @@ curl -u "alice:APP_PASSWORD" \
       "talk_add_guests": false,
       "talk_set_password": true,
       "talk_room_type": "event"
+    },
+    "email_signature": {
+      "email_signature_on_compose": true,
+      "email_signature_on_reply_forward": false,
+      "email_signature_template": "<table>...</table>"
     }
   },
   "policy_editable": {
@@ -122,6 +130,11 @@ curl -u "alice:APP_PASSWORD" \
       "talk_add_guests": true,
       "talk_set_password": true,
       "talk_room_type": true
+    },
+    "email_signature": {
+      "email_signature_on_compose": true,
+      "email_signature_on_reply_forward": true,
+      "email_signature_template": false
     }
   }
 }

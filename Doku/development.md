@@ -58,7 +58,7 @@ What this backend is responsible for:
 - default settings
 - group overrides
 - user overrides
-- template editing and rendering support for Share and Talk content
+- template editing and rendering support for Share, Talk, and email signature content
 
 What this backend is **not** responsible for:
 - rendering the mail-client UI itself
@@ -157,7 +157,7 @@ Important UI behaviors currently implemented there:
 - runtime image refresh for newly inserted image URLs
 - clickable tooltip links from seat overview to group/user overrides
 - CSV export for assigned seats
-- language dropdown in the editor modal for built-in template translation
+- language dropdown in the editor modal for built-in Share/Talk template translation
 
 ### 4.2 Controller layer
 
@@ -184,7 +184,7 @@ Core services:
 |---|---|
 | `LicenseService` | License mode, credentials, sync, entitlement state |
 | `SeatService` | Seat assignment and seat-limit enforcement |
-| `ClientSettingsService` | Default values, group/user overrides, effective policy resolution, template normalization, runtime image cache |
+| `ClientSettingsService` | Default values, group/user overrides, effective policy resolution, template normalization, email signature profile rendering, runtime image cache |
 | `AccessService` | Access checks for direct page visibility and user-facing runtime state |
 
 Most important service in day-to-day maintenance:
@@ -196,6 +196,7 @@ That file is the core of the backend because it owns:
 - override modes
 - precedence resolution
 - template activation rules
+- email signature profile variable rendering
 - editor asset handling
 - seat-overview helper data for matching overrides
 
@@ -296,7 +297,7 @@ Those map to:
 - `policy_editable`
 
 Current rule set:
-- all non-template Share/Talk defaults start as **editable in add-on**
+- all non-template Share/Talk/email signature defaults start as **editable in add-on**
 - templates remain backend-controlled
 - any **forced** override disables local add-on editing for that specific setting
 - in the admin defaults table, `user_choice` is rendered as a checked **Editable in add-on** box and the corresponding backend value field is disabled for clarity
@@ -317,7 +318,8 @@ The editor path deserves its own section because it is more than simple form sto
 
 Relevant responsibilities in `ClientSettingsService` and `ncc_backend_4mc-adminSettings.js`:
 - detect whether a template row is active at all
-- treat template rows as active only when the corresponding language is `custom`
+- treat Share/Talk template rows as active only when the corresponding language is `custom`
+- keep the email signature template independent from template-language selection
 - mirror external image URLs into local runtime files for editor rendering
 - keep the original external image URL in stored template HTML
 - refresh draft images immediately inside the open modal editor
@@ -444,7 +446,7 @@ Current behavior:
 Important distinction:
 - UI translation and template-language translation are different concerns.
 - The UI follows Nextcloud translation loading.
-- The template language dropdown rewrites the built-in template fragments only.
+- The template language dropdown rewrites built-in Share/Talk template fragments only.
 
 Current template-language rules:
 - `share_html_block_template` and `share_password_template` are relevant only when `language_share_html_block = custom`
@@ -453,6 +455,8 @@ Current template-language rules:
 - `talk_invitation_template_format = html` returns stored editor HTML to the runtime API
 - `talk_invitation_template_format = plain_text` converts the stored HTML to cleaned plain text while preserving link targets as raw URLs
 - the runtime API additionally derives `event_description_type = html | plain_text` for clients that only need the final rendering mode
+- `email_signature_template` has no language selector and is always delivered as HTML when policies are available
+- `email_signature_template` is rendered for the resolved Seat user by replacing `{NAME}`, `{EMAIL}`, `{PHONE}`, `{ABOUT}`, `{FUNCTION}`, and `{ORGANISATION}` from Nextcloud user/profile data
 - otherwise those template values are effectively inactive for runtime use
 
 Maintenance rule:
@@ -518,7 +522,7 @@ A pragmatic smoke test for this backend should cover the actual operational risk
 4. Assign one Seat to a non-admin user
 5. Verify the assigned user appears in **Assigned seats**
 6. Check `GET /apps/ncc_backend_4mc/api/v1/status` as that seat user
-7. Save default Share/Talk settings
+7. Save default Share/Talk/email signature settings
 8. Verify that non-template settings default to `policy_editable = true`
 9. Configure a group override and confirm the seat overview marks group overrides as active for matching users
 10. Configure a user override and confirm it wins over the group layer

@@ -31,6 +31,7 @@ Related docs:
   - [5.1 Default Settings](#51-default-settings)
     - [5.1.1 Share settings reference](#511-share-settings-reference)
     - [5.1.2 Talk settings reference](#512-talk-settings-reference)
+    - [Email signature settings reference](#email-signature-settings-reference)
     - [5.1.3 What “Editable in add-on” actually means](#513-what-editable-in-add-on-actually-means)
     - [5.1.4 Thunderbird attachment automation prerequisite: disable competing compose features](#thunderbird-attachment-automation-prerequisite)
   - [5.2 Seat assignment](#52-seat-assignment)
@@ -59,7 +60,7 @@ Operational scope:
   - default policies
   - group overrides
   - user overrides
-  - template control for Share and Talk
+  - template control for Share, Talk, and email signatures
 
 This backend does **not** replace mail-client deployment.
 You still need to deploy the Thunderbird or Outlook add-on separately.
@@ -284,6 +285,30 @@ Important dependency:
 - `HTML` returns the stored editor HTML unchanged through the runtime API.
 - `Plain Text` strips the HTML markup for runtime delivery while preserving visible URLs, including meeting and help links.
 
+### Email signature settings reference
+
+| Setting | Purpose | Notes |
+|---|---|---|
+| `Add signature when composing` | Enables centrally managed signatures for new messages | Delivered as a boolean policy flag |
+| `Add signature when replying or forwarding` | Enables centrally managed signatures for replies and forwarded messages | Delivered as a boolean policy flag |
+| `Email signature template` | Central HTML signature template | Backend-controlled template field |
+
+Email signature runtime behavior:
+- The backend delivers **HTML only** for the signature.
+- Mail clients may derive plain text from that HTML when needed.
+- There is intentionally **no language selector** for email signatures.
+- The template is rendered for the resolved Seat user before it is returned by `/api/v1/status`.
+- Profile values are HTML-escaped by the backend before placeholder replacement.
+- Missing profile values are rendered as empty strings.
+
+Email signature template variables:
+- `{NAME}` → Nextcloud display name
+- `{EMAIL}` → Nextcloud user email address
+- `{PHONE}` → Nextcloud profile phone
+- `{ABOUT}` → Nextcloud profile biography/about text
+- `{FUNCTION}` → Nextcloud profile role/function
+- `{ORGANISATION}` → Nextcloud profile organisation
+
 ### 5.1.3 What “Editable in add-on” actually means
 
 This flag is easy to misunderstand, so it is worth being explicit.
@@ -299,7 +324,7 @@ It **does** mean:
 - in the admin UI, the stored backend value stays visible but the value field is greyed out and locked as soon as **Editable in add-on** is enabled
 
 Built-in default behavior:
-- All **non-template Share/Talk settings** start with **Editable in add-on = enabled**.
+- All **non-template Share/Talk/email signature settings** start with **Editable in add-on = enabled**.
 - Template fields intentionally stay backend-controlled.
 
 API consequence:
@@ -547,7 +572,7 @@ The response contains:
 | Block | Meaning |
 |---|---|
 | `status` | Current seat/license/user access state |
-| `policy` | Effective Share and Talk policies after full resolution |
+| `policy` | Effective Share, Talk, and email signature policies after full resolution |
 | `policy_editable` | Per-setting information whether the add-on may still change the effective value locally |
 
 Important current behavior:

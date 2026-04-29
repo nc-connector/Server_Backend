@@ -21,7 +21,7 @@ It gives admins a central place to manage:
 - **default policies** for mail clients
 - **group overrides** for teams or departments
 - **user overrides** for individual exceptions
-- **Share and Talk templates**, including visual editors and preview
+- **Share, Talk, and email signature templates**, including visual editors and preview
 
 In short:
 
@@ -37,7 +37,7 @@ In short:
 | Separate password delivery workflow | ❌ | ✅ |
 | Group-based policy overrides | ❌ | ✅ |
 | User-specific policy overrides | ❌ | ✅ |
-| Custom Share and Talk templates | ❌ | ✅ |
+| Custom Share, Talk, and email signature templates | ❌ | ✅ |
 | Visual template editor with preview | ❌ | ✅ |
 | Central reporting for assigned seats | ❌ | ✅ |
 
@@ -64,6 +64,7 @@ The backend provides effective settings to the mail add-ons, for example:
 - expiry defaults
 - attachment handling
 - Talk room defaults
+- central email signature defaults
 - language and template selection
 
 This means the add-on does not have to guess how it should behave.  
@@ -90,13 +91,14 @@ Admins can centrally manage:
 - Share HTML template
 - Share password email template
 - Talk invitation template
+- Email signature template
 
 The backend includes:
 
 - visual editor modal
 - live preview
 - template variables
-- language helper for supported locales
+- language helper for supported Share/Talk locales
 - local runtime image handling for editor rendering
 
 ### 5) Auditable operation
@@ -130,6 +132,7 @@ They receive:
 - current seat/license state
 - effective Share policies
 - effective Talk policies
+- effective email signature policies
 - information about which settings are still editable in the add-on
 
 This keeps the client implementation simpler and makes support cases easier to reason about.
@@ -141,6 +144,7 @@ A company wants:
 - centrally managed Share defaults
 - separate password delivery
 - controlled Talk defaults
+- centrally managed email signatures
 - templates in corporate wording/design
 - different rules for departments
 - a clear list of licensed users
