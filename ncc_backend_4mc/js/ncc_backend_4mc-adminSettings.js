@@ -164,12 +164,28 @@
 				'Group conversation: persistent with full history.',
 			],
 		},
+		email_signature_on_compose: {
+			label: 'Add signature when composing',
+			tooltip: ['Controls whether mail clients should add the centrally managed signature to new messages.'],
+		},
+		email_signature_on_reply_forward: {
+			label: 'Add signature when replying or forwarding',
+			tooltip: ['Controls whether mail clients should add the centrally managed signature to replies and forwarded messages.'],
+		},
+		email_signature_template: {
+			label: 'Email signature template',
+			tooltip: [
+				'HTML signature template delivered to mail clients.',
+				'Available variables: {NAME}, {EMAIL}, {PHONE}, {ABOUT}, {FUNCTION}, {ORGANISATION}.',
+			],
+		},
 	}
 
 	const SHARE_HTML_TEMPLATE_KEY = 'share_html_block_template'
 	const SHARE_PASSWORD_TEMPLATE_KEY = 'share_password_template'
 	const TALK_INVITATION_TEMPLATE_KEY = 'talk_invitation_template'
 	const TALK_INVITATION_TEMPLATE_FORMAT_KEY = 'talk_invitation_template_format'
+	const EMAIL_SIGNATURE_TEMPLATE_KEY = 'email_signature_template'
 	const TALK_TEMPLATE_FORMAT_HTML = 'html'
 	const TALK_TEMPLATE_FORMAT_PLAIN_TEXT = 'plain_text'
 	const DEFAULT_TEMPLATE_LOGO_URL = 'https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png'
@@ -179,11 +195,13 @@
 		SHARE_HTML_TEMPLATE_KEY,
 		SHARE_PASSWORD_TEMPLATE_KEY,
 		TALK_INVITATION_TEMPLATE_KEY,
+		EMAIL_SIGNATURE_TEMPLATE_KEY,
 	])
 	const TEMPLATE_VARIABLES_BY_SETTING = {
 		[SHARE_HTML_TEMPLATE_KEY]: ['URL', 'PASSWORD', 'EXPIRATIONDATE', 'RIGHTS', 'NOTE'],
 		[SHARE_PASSWORD_TEMPLATE_KEY]: ['PASSWORD'],
 		[TALK_INVITATION_TEMPLATE_KEY]: ['MEETING_URL', 'PASSWORD'],
+		[EMAIL_SIGNATURE_TEMPLATE_KEY]: ['NAME', 'EMAIL', 'PHONE', 'ABOUT', 'FUNCTION', 'ORGANISATION'],
 	}
 	const ENUM_OPTION_LABELS = {
 		talk_room_type: {
@@ -793,6 +811,9 @@
 			'talk_add_guests',
 			'talk_set_password',
 			'talk_room_type',
+			'email_signature_on_compose',
+			'email_signature_on_reply_forward',
+			EMAIL_SIGNATURE_TEMPLATE_KEY,
 		]
 		const positions = new Map(order.map((key, index) => [key, index]))
 		return Object.keys(schema || {}).sort((left, right) => {
@@ -806,6 +827,9 @@
 	}
 
 	function settingCategory(settingKey) {
+		if (String(settingKey).startsWith('email_signature_')) {
+			return 'email_signature'
+		}
 		if (settingKey === 'language_talk_description' || String(settingKey).startsWith('talk_')) {
 			return 'talk'
 		}
@@ -1963,7 +1987,7 @@
 	 * @param {Record<string, any>} schema
 	 * @param {Record<string, any>} defaults
 	 * @param {Record<string, string>} defaultModes
-	 * @param {'share'|'talk'} category
+	 * @param {'share'|'talk'|'email_signature'} category
 	 * @returns {void}
 	 */
 	function renderDefaultsRows(tbody, schema, defaults, defaultModes, templateAssets, defaultTemplateAssets, category) {
@@ -2064,7 +2088,7 @@
 	 * @param {HTMLTableSectionElement} tbody
 	 * @param {Record<string, any>} schema
 	 * @param {Record<string, any>} items
-	 * @param {'share'|'talk'} category
+	 * @param {'share'|'talk'|'email_signature'} category
 	 * @returns {void}
 	 */
 	function renderOverrideRows(tbody, schema, items, templateAssets, defaultTemplateAssets, category) {
@@ -2144,10 +2168,12 @@
 		if (!hasSelectedUser) {
 			renderOverridePlaceholder(refs.overrideTableShare)
 			renderOverridePlaceholder(refs.overrideTableTalk)
+			renderOverridePlaceholder(refs.overrideTableEmailSignature)
 			return
 		}
 		renderOverrideRows(refs.overrideTableShare, state.schema, state.overrides, state.overrideTemplateAssets, state.schemaTemplateAssets, 'share')
 		renderOverrideRows(refs.overrideTableTalk, state.schema, state.overrides, state.overrideTemplateAssets, state.schemaTemplateAssets, 'talk')
+		renderOverrideRows(refs.overrideTableEmailSignature, state.schema, state.overrides, state.overrideTemplateAssets, state.schemaTemplateAssets, 'email_signature')
 		syncOverrideControlState(root)
 		attachOverrideModeHandlers(root)
 		attachAttachmentDependencyHandlers(root)
@@ -2268,10 +2294,12 @@
 		if (!hasSelectedGroup) {
 			renderGroupOverridePlaceholder(refs.groupOverrideTableShare)
 			renderGroupOverridePlaceholder(refs.groupOverrideTableTalk)
+			renderGroupOverridePlaceholder(refs.groupOverrideTableEmailSignature)
 			return
 		}
 		renderGroupOverrideRows(refs.groupOverrideTableShare, state.schema, state.groupOverrides, state.groupOverrideTemplateAssets, state.schemaTemplateAssets, 'share')
 		renderGroupOverrideRows(refs.groupOverrideTableTalk, state.schema, state.groupOverrides, state.groupOverrideTemplateAssets, state.schemaTemplateAssets, 'talk')
+		renderGroupOverrideRows(refs.groupOverrideTableEmailSignature, state.schema, state.groupOverrides, state.groupOverrideTemplateAssets, state.schemaTemplateAssets, 'email_signature')
 		syncGroupOverrideControlState(root)
 		attachGroupOverrideModeHandlers(root)
 		attachAttachmentDependencyHandlers(root, 'group-override')
@@ -2669,6 +2697,7 @@
 						<div class="nccb-tabbar nccb-tabbar--sub">
 							<button class="button active" data-default-tab-button="share">${escapeHtml(tr('Shares'))}</button>
 							<button class="button" data-default-tab-button="talk">${escapeHtml(tr('Talk'))}</button>
+							<button class="button" data-default-tab-button="email_signature">${escapeHtml(tr('Email signature'))}</button>
 						</div>
 						<section data-default-tab-panel="share">
 							<div class="nccb-scroll nccb-scroll--settings">
@@ -2695,6 +2724,20 @@
 										</tr>
 									</thead>
 									<tbody id="nccb-default-tbody-talk"></tbody>
+								</table>
+							</div>
+						</section>
+						<section data-default-tab-panel="email_signature" hidden>
+							<div class="nccb-scroll nccb-scroll--settings">
+								<table class="nccb-table">
+									<thead>
+										<tr>
+											<th style="width: 360px;">${escapeHtml(tr('Setting'))}</th>
+											<th style="width: 220px;">${escapeHtml(tr('Editable in add-on'))}</th>
+											<th>${escapeHtml(tr('Value'))}</th>
+										</tr>
+									</thead>
+									<tbody id="nccb-default-tbody-email-signature"></tbody>
 								</table>
 							</div>
 						</section>
@@ -2771,6 +2814,7 @@
 						<div class="nccb-tabbar nccb-tabbar--sub">
 							<button class="button active" data-group-override-tab-button="share">${escapeHtml(tr('Shares'))}</button>
 							<button class="button" data-group-override-tab-button="talk">${escapeHtml(tr('Talk'))}</button>
+							<button class="button" data-group-override-tab-button="email_signature">${escapeHtml(tr('Email signature'))}</button>
 						</div>
 						<section data-group-override-tab-panel="share">
 							<div class="nccb-scroll nccb-scroll--settings">
@@ -2800,6 +2844,20 @@
 								</table>
 							</div>
 						</section>
+						<section data-group-override-tab-panel="email_signature" hidden>
+							<div class="nccb-scroll nccb-scroll--settings">
+								<table class="nccb-table">
+									<thead>
+										<tr>
+											<th style="width:360px;">${escapeHtml(tr('Setting'))}</th>
+											<th style="width:220px;">${escapeHtml(tr('Preset'))}</th>
+											<th>${escapeHtml(tr('Value'))}</th>
+										</tr>
+									</thead>
+									<tbody id="nccb-group-override-tbody-email-signature"></tbody>
+								</table>
+							</div>
+						</section>
 					</div>
 				</section>
 
@@ -2818,6 +2876,7 @@
 						<div class="nccb-tabbar nccb-tabbar--sub">
 							<button class="button active" data-override-tab-button="share">${escapeHtml(tr('Shares'))}</button>
 							<button class="button" data-override-tab-button="talk">${escapeHtml(tr('Talk'))}</button>
+							<button class="button" data-override-tab-button="email_signature">${escapeHtml(tr('Email signature'))}</button>
 						</div>
 						<section data-override-tab-panel="share">
 							<div class="nccb-scroll nccb-scroll--settings">
@@ -2844,6 +2903,20 @@
 										</tr>
 									</thead>
 									<tbody id="nccb-override-tbody-talk"></tbody>
+								</table>
+							</div>
+						</section>
+						<section data-override-tab-panel="email_signature" hidden>
+							<div class="nccb-scroll nccb-scroll--settings">
+								<table class="nccb-table">
+									<thead>
+										<tr>
+											<th style="width:360px;">${escapeHtml(tr('Setting'))}</th>
+											<th style="width:220px;">${escapeHtml(tr('Preset'))}</th>
+											<th>${escapeHtml(tr('Value'))}</th>
+										</tr>
+									</thead>
+									<tbody id="nccb-override-tbody-email-signature"></tbody>
 								</table>
 							</div>
 						</section>
@@ -2909,6 +2982,7 @@
 			defaultMessage: root.querySelector('#nccb-default-message'),
 			defaultTableShare: root.querySelector('#nccb-default-tbody-share'),
 			defaultTableTalk: root.querySelector('#nccb-default-tbody-talk'),
+			defaultTableEmailSignature: root.querySelector('#nccb-default-tbody-email-signature'),
 			defaultSave: root.querySelector('#nccb-default-save'),
 			seatUsage: root.querySelector('#nccb-seat-usage'),
 			assignedSeatUsage: root.querySelector('#nccb-assigned-seat-usage'),
@@ -2930,11 +3004,13 @@
 			groupOverrideMessage: root.querySelector('#nccb-group-override-message'),
 			groupOverrideTableShare: root.querySelector('#nccb-group-override-tbody-share'),
 			groupOverrideTableTalk: root.querySelector('#nccb-group-override-tbody-talk'),
+			groupOverrideTableEmailSignature: root.querySelector('#nccb-group-override-tbody-email-signature'),
 			overrideUser: root.querySelector('#nccb-override-user'),
 			overrideSave: root.querySelector('#nccb-override-save'),
 			overrideMessage: root.querySelector('#nccb-override-message'),
 			overrideTableShare: root.querySelector('#nccb-override-tbody-share'),
 			overrideTableTalk: root.querySelector('#nccb-override-tbody-talk'),
+			overrideTableEmailSignature: root.querySelector('#nccb-override-tbody-email-signature'),
 		}
 
 		let licenseSnapshot = null
@@ -3257,6 +3333,7 @@
 			state.schemaTemplateAssets = response.schema_template_assets || {}
 			renderDefaultsRows(refs.defaultTableShare, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'share')
 			renderDefaultsRows(refs.defaultTableTalk, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'talk')
+			renderDefaultsRows(refs.defaultTableEmailSignature, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'email_signature')
 			syncDefaultControlState(root)
 			attachDefaultModeHandlers(root)
 			attachAttachmentDependencyHandlers(root)
@@ -3583,6 +3660,7 @@
 				removeTemplateEditorsByPrefix('default')
 				renderDefaultsRows(refs.defaultTableShare, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'share')
 				renderDefaultsRows(refs.defaultTableTalk, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'talk')
+				renderDefaultsRows(refs.defaultTableEmailSignature, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'email_signature')
 				syncDefaultControlState(root)
 				attachDefaultModeHandlers(root)
 				attachAttachmentDependencyHandlers(root)
@@ -3683,4 +3761,3 @@
 
 	void main()
 })()
-
