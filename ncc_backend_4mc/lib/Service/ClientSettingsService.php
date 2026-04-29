@@ -16,10 +16,14 @@ use OCA\NcConnector\Db\ClientOverrideMapper;
 use OCA\NcConnector\Db\GroupOverride;
 use OCA\NcConnector\Db\GroupOverrideMapper;
 use OCA\NcConnector\Db\SettingMapper;
+use OCP\Accounts\IAccount;
+use OCP\Accounts\IAccountManager;
+use OCP\Accounts\PropertyDoesNotExistException;
 use OCP\Http\Client\IClientService;
 use OCP\IGroup;
 use OCP\IGroupManager;
 use OCP\IURLGenerator;
+use OCP\IUser;
 use OCP\IUserManager;
 use Psr\Log\LoggerInterface;
 
@@ -145,6 +149,53 @@ HTML;
 <p>Need help?</p>
 <p><a href="https://docs.nextcloud.com/server/latest/user_manual/en/talk/guest.html">https://docs.nextcloud.com/server/latest/user_manual/en/talk/guest.html</a></p>
 HTML;
+	private const DEFAULT_EMAIL_SIGNATURE_TEMPLATE = <<<'HTML'
+<style>
+  table, td, th {
+    border: 0 !important;
+    outline: 0 !important;
+    -moz-outline: 0 !important;
+    border-color: transparent !important;
+    outline-color: transparent !important;
+    border-collapse: collapse !important;
+  }
+  table[border="0"], table[border="0"] td, table[border="0"] th {
+    border: 0 !important;
+    outline: 0 !important;
+    -moz-outline: 0 !important;
+  }
+</style>
+
+<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;font-size:12px;line-height:16px">
+  <tr><td style="padding:0 0 12px 0">
+    Kind regards,<br>
+    <strong style="font-size:12px">{NAME}</strong><br>
+    <em>{FUNCTION}</em>
+  </td></tr>
+  <tr><td style="padding:0 0 8px 0;font-size:11px;line-height:15px">
+    {ORGANISATION}<br>
+    {ABOUT}
+  </td></tr>
+  <tr><td style="padding:0 0 2px 0">
+    Phone: <a href="tel:{PHONE}" style="color:windowtext;text-decoration:none">{PHONE}</a>
+  </td></tr>
+  <tr><td style="padding:0 0 10px 0">
+    Email: <a href="mailto:{EMAIL}" style="color:windowtext;text-decoration:none">{EMAIL}</a>
+  </td></tr>
+  <tr><td style="padding:0 0 14px 0">
+    <a href="https://nc-connector.de" style="display:inline-block;text-decoration:none;line-height:0" target="_blank" rel="noopener">
+      <img src="https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/ncc_backend_4mc/img/header.png" height="48" alt="NC Connector" style="display:block;height:48px;width:auto;border:0">
+    </a>
+  </td></tr>
+  <tr><td style="padding:10px 0 0 0;font-size:11px;line-height:15px">
+    This email and any attachments may contain confidential and/or legally protected information. If you are not the intended recipient or have received this email in error,<br>
+    please inform the sender immediately and delete this email. Any use, reproduction, or distribution is not permitted.
+  </td></tr>
+  <tr><td style="padding:6px 0 0 0;font-size:11px;line-height:15px">
+    <em><font color="#2e7d32">Please consider the environment before printing this email.</font></em>
+  </td></tr>
+</table>
+HTML;
 
 	/**
 	 * @var array<string, array<string, mixed>>
@@ -183,6 +234,10 @@ HTML;
 		'talk_add_guests' => ['type' => 'bool', 'default' => false],
 		'talk_set_password' => ['type' => 'bool', 'default' => true],
 		'talk_room_type' => ['type' => 'enum', 'default' => 'event', 'options' => ['event', 'group']],
+
+		'email_signature_on_compose' => ['type' => 'bool', 'default' => true],
+		'email_signature_on_reply_forward' => ['type' => 'bool', 'default' => false],
+		'email_signature_template' => ['type' => 'string', 'default' => self::DEFAULT_EMAIL_SIGNATURE_TEMPLATE, 'max_length' => 32768],
 	];
 
 	public function __construct(
@@ -191,6 +246,7 @@ HTML;
 		private GroupOverrideMapper $groupOverrides,
 		private IGroupManager $groupManager,
 		private IUserManager $userManager,
+		private IAccountManager $accountManager,
 		private IClientService $clientService,
 		private IURLGenerator $urlGenerator,
 		private LoggerInterface $logger,
@@ -554,6 +610,7 @@ HTML;
 		}
 		$this->applyAttachmentPolicyDependency($settings);
 		$this->applyTemplateLanguageDependency($settings);
+		$this->applyEmailSignatureProfileVariables($settings, $userId);
 
 		return [
 			'settings' => $settings,
@@ -941,6 +998,90 @@ HTML;
 		);
 	}
 
+	/**
+	 * @param array<string, mixed> $settings
+	 */
+	private function applyEmailSignatureProfileVariables(array &$settings, string $userId): void {
+		if (!array_key_exists('email_signature_template', $settings)) {
+			return;
+		}
+
+		$template = $settings['email_signature_template'];
+		if ($template === null || $template === '') {
+			$settings['email_signature_template'] = '';
+			return;
+		}
+
+		$settings['email_signature_template'] = $this->renderEmailSignatureTemplateForPolicy((string)$template, $userId);
+	}
+
+	private function renderEmailSignatureTemplateForPolicy(string $template, string $userId): string {
+		$variables = $this->getEmailSignatureTemplateVariables($userId);
+		$replacements = [];
+
+		foreach ($variables as $name => $value) {
+			$replacements['{' . $name . '}'] = $this->escapeEmailSignatureTemplateValue($value);
+		}
+
+		return strtr($template, $replacements);
+	}
+
+	/**
+	 * @return array<string, string>
+	 */
+	private function getEmailSignatureTemplateVariables(string $userId): array {
+		$variables = [
+			'NAME' => '',
+			'EMAIL' => '',
+			'PHONE' => '',
+			'ABOUT' => '',
+			'FUNCTION' => '',
+			'ORGANISATION' => '',
+		];
+
+		$user = $this->userManager->get($userId);
+		if (!$user instanceof IUser) {
+			return $variables;
+		}
+
+		$variables['NAME'] = (string)$user->getDisplayName();
+		$variables['EMAIL'] = (string)($user->getEMailAddress() ?? '');
+
+		try {
+			$account = $this->accountManager->getAccount($user);
+		} catch (\Throwable $e) {
+			$this->logError('Email signature profile lookup failed.', [
+				'userId' => $userId,
+				'exception' => $e,
+			]);
+			return $variables;
+		}
+
+		if ($variables['EMAIL'] === '') {
+			$variables['EMAIL'] = $this->getAccountPropertyValue($account, IAccountManager::PROPERTY_EMAIL);
+		}
+
+		$variables['PHONE'] = $this->getAccountPropertyValue($account, IAccountManager::PROPERTY_PHONE);
+		$variables['ABOUT'] = $this->getAccountPropertyValue($account, IAccountManager::PROPERTY_BIOGRAPHY);
+		$variables['FUNCTION'] = $this->getAccountPropertyValue($account, IAccountManager::PROPERTY_ROLE);
+		$variables['ORGANISATION'] = $this->getAccountPropertyValue($account, IAccountManager::PROPERTY_ORGANISATION);
+
+		return $variables;
+	}
+
+	private function getAccountPropertyValue(IAccount $account, string $property): string {
+		try {
+			return (string)$account->getProperty($property)->getValue();
+		} catch (PropertyDoesNotExistException) {
+			return '';
+		}
+	}
+
+	private function escapeEmailSignatureTemplateValue(string $value): string {
+		$normalized = trim((string)preg_replace('/\s+/u', ' ', $value));
+		return htmlspecialchars($normalized, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+	}
+
 	private function normalizeDefaultMode(string $key, string $mode): string {
 		if (!$this->isAddonControllableSetting($key)) {
 			return self::MODE_DEFAULT;
@@ -971,7 +1112,8 @@ HTML;
 	private function isTemplateEditorSetting(string $key): bool {
 		return $key === 'share_html_block_template'
 			|| $key === 'share_password_template'
-			|| $key === 'talk_invitation_template';
+			|| $key === 'talk_invitation_template'
+			|| $key === 'email_signature_template';
 	}
 
 	private function normalizeTalkTemplateFormat(string $format): string {
@@ -1303,5 +1445,3 @@ HTML;
 		$this->logger->error($message, $context);
 	}
 }
-
-

@@ -59,10 +59,12 @@ class StatusController extends Controller {
 		$policy = [
 			'share' => null,
 			'talk' => null,
+			'email_signature' => null,
 		];
 		$policyEditable = [
 			'share' => null,
 			'talk' => null,
+			'email_signature' => null,
 		];
 		if (!$overlicensed && $seatAssigned && $canReadPolicies) {
 			$effective = $this->clientSettings->getEffectiveForUser($targetUserId);
@@ -88,26 +90,40 @@ class StatusController extends Controller {
 
 	/**
 	 * @param array<string, mixed> $settings
-	 * @return array{share: array<string, mixed>, talk: array<string, mixed>}
+	 * @return array{share: array<string, mixed>, talk: array<string, mixed>, email_signature: array<string, mixed>}
 	 */
 	private function groupPolicyByAddonArea(array $settings): array {
 		$grouped = [
 			'share' => [],
 			'talk' => [],
+			'email_signature' => [],
 		];
 
 		foreach ($settings as $key => $value) {
-			$bucket = (str_starts_with((string)$key, 'talk_') || $key === 'language_talk_description') ? 'talk' : 'share';
+			$bucket = $this->resolvePolicyBucket((string)$key);
 			$grouped[$bucket][(string)$key] = $value;
 		}
 
 		ksort($grouped['share']);
 		ksort($grouped['talk']);
+		ksort($grouped['email_signature']);
 
 		$grouped['talk']['event_description_type'] = $this->resolveEventDescriptionType($grouped['talk']);
 		ksort($grouped['talk']);
 
 		return $grouped;
+	}
+
+	private function resolvePolicyBucket(string $key): string {
+		if (str_starts_with($key, 'email_signature_')) {
+			return 'email_signature';
+		}
+
+		if (str_starts_with($key, 'talk_') || $key === 'language_talk_description') {
+			return 'talk';
+		}
+
+		return 'share';
 	}
 
 	/**
