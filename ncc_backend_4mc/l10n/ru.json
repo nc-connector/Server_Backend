@@ -242,9 +242,11 @@
         "HTML": "HTML",
         "Plain Text": "Обычный текст",
         "Thunderbird only: if NC Connector attachment automation should be the only active compose flow, also disable Thunderbird's own attachment prompts centrally.": "Только для Thunderbird: если автоматизация вложений NC Connector должна быть единственным активным сценарием создания письма, централизованно отключите и собственные уведомления Thunderbird о вложениях.",
-        "Read the Thunderbird prerequisite in the admin guide": "Открыть требование для Thunderbird в руководстве администратора"
+        "Read the Thunderbird prerequisite in the admin guide": "Открыть требование для Thunderbird в руководстве администратора",
+        "Delete Talk room when deleting a saved event": "Удалять комнату Talk при удалении сохранённого события",
+        "Only saved events with NC Connector Talk metadata are eligible.": "Допускаются только сохранённые события с метаданными Talk NC Connector.",
+        "Generic Talk links in location or URL fields are ignored by the mail clients.": "Почтовые клиенты игнорируют обычные ссылки Talk в полях места или URL.",
+        "Unsaved event cleanup remains active independently.": "Очистка несохранённых событий остаётся включённой независимо от этого."
     },
     "pluralForm": "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2));"
 }
-
-

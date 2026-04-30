@@ -157,6 +157,14 @@
 			label: 'Set password',
 			tooltip: ['Defines whether new Talk rooms should use a password by default.'],
 		},
+		talk_delete_room_on_event_delete: {
+			label: 'Delete Talk room when deleting a saved event',
+			tooltip: [
+				'Only saved events with NC Connector Talk metadata are eligible.',
+				'Generic Talk links in location or URL fields are ignored by the mail clients.',
+				'Unsaved event cleanup remains active independently.',
+			],
+		},
 		talk_room_type: {
 			label: 'Room type',
 			tooltip: [
@@ -810,6 +818,7 @@
 			'talk_add_users',
 			'talk_add_guests',
 			'talk_set_password',
+			'talk_delete_room_on_event_delete',
 			'talk_room_type',
 			'email_signature_on_compose',
 			'email_signature_on_reply_forward',

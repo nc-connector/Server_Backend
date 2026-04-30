@@ -244,10 +244,13 @@ OC.L10N.register(
   "HTML": "HTML",
   "Plain Text": "プレーンテキスト",
   "Thunderbird only: if NC Connector attachment automation should be the only active compose flow, also disable Thunderbird's own attachment prompts centrally.": "Thunderbird のみ: NC Connector の添付ファイル自動化を唯一の有効な作成フローにする場合は、Thunderbird 標準の添付ファイル確認も集中管理で無効化してください。",
-  "Read the Thunderbird prerequisite in the admin guide": "管理ガイドで Thunderbird の前提条件を読む"
+  "Read the Thunderbird prerequisite in the admin guide": "管理ガイドで Thunderbird の前提条件を読む",
+  "Delete Talk room when deleting a saved event": "保存済み予定を削除するときに Talk ルームも削除する",
+  "Only saved events with NC Connector Talk metadata are eligible.": "NC Connector Talk メタデータを持つ保存済み予定のみ対象です。",
+  "Generic Talk links in location or URL fields are ignored by the mail clients.": "場所または URL フィールド内の一般的な Talk リンクはメールクライアントによって無視されます。",
+  "Unsaved event cleanup remains active independently.": "未保存予定のクリーンアップは独立して有効のままです。"
 }
 ,
     "nplurals=1; plural=0;"
 );
-
 

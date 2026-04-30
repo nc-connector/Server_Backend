@@ -242,9 +242,11 @@
         "HTML": "HTML",
         "Plain Text": "Prostý text",
         "Thunderbird only: if NC Connector attachment automation should be the only active compose flow, also disable Thunderbird's own attachment prompts centrally.": "Pouze pro Thunderbird: pokud má být automatizace příloh NC Connector jediným aktivním pracovním postupem při psaní, deaktivujte centrálně také vlastní výzvy Thunderbirdu pro přílohy.",
-        "Read the Thunderbird prerequisite in the admin guide": "Přečíst předpoklad pro Thunderbird v administrátorské příručce"
+        "Read the Thunderbird prerequisite in the admin guide": "Přečíst předpoklad pro Thunderbird v administrátorské příručce",
+        "Delete Talk room when deleting a saved event": "Odstranit místnost Talk při odstranění uložené události",
+        "Only saved events with NC Connector Talk metadata are eligible.": "Vhodné jsou pouze uložené události s metadaty Talk NC Connector.",
+        "Generic Talk links in location or URL fields are ignored by the mail clients.": "Poštovní klienti ignorují obecné odkazy Talk v polích místa nebo URL.",
+        "Unsaved event cleanup remains active independently.": "Čištění neuložených událostí zůstává aktivní nezávisle."
     },
     "pluralForm": "nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;"
 }
-
-

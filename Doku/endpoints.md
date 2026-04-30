@@ -94,6 +94,7 @@ curl -u "alice:APP_PASSWORD" \
       "talk_add_users": true,
       "talk_add_guests": false,
       "talk_set_password": true,
+      "talk_delete_room_on_event_delete": false,
       "talk_room_type": "event"
     },
     "email_signature": {
@@ -129,6 +130,7 @@ curl -u "alice:APP_PASSWORD" \
       "talk_add_users": true,
       "talk_add_guests": true,
       "talk_set_password": true,
+      "talk_delete_room_on_event_delete": true,
       "talk_room_type": true
     },
     "email_signature": {

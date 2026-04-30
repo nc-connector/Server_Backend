@@ -242,9 +242,11 @@
         "HTML": "HTML",
         "Plain Text": "纯文本",
         "Thunderbird only: if NC Connector attachment automation should be the only active compose flow, also disable Thunderbird's own attachment prompts centrally.": "仅适用于 Thunderbird：如果 NC Connector 附件自动化应成为唯一有效的撰写流程，也请集中禁用 Thunderbird 自带的附件提示。",
-        "Read the Thunderbird prerequisite in the admin guide": "在管理指南中阅读 Thunderbird 前置要求"
+        "Read the Thunderbird prerequisite in the admin guide": "在管理指南中阅读 Thunderbird 前置要求",
+        "Delete Talk room when deleting a saved event": "删除已保存事件时删除 Talk 房间",
+        "Only saved events with NC Connector Talk metadata are eligible.": "仅带有 NC Connector Talk 元数据的已保存事件符合条件。",
+        "Generic Talk links in location or URL fields are ignored by the mail clients.": "邮件客户端会忽略位置或 URL 字段中的普通 Talk 链接。",
+        "Unsaved event cleanup remains active independently.": "未保存事件的清理仍会独立保持启用。"
     },
     "pluralForm": "nplurals=1; plural=0;"
 }
-
-

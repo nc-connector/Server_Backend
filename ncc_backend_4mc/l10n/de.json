@@ -242,10 +242,11 @@
         "Controls whether the Talk template is delivered to mail clients as HTML or as cleaned plain text.": "Legt fest, ob die Talk-Vorlage an Mailclients als HTML oder als bereinigter Klartext geliefert wird.",
         "Output": "Ausgabe",
         "HTML": "HTML",
-        "Plain Text": "Klartext"
+        "Plain Text": "Klartext",
+        "Delete Talk room when deleting a saved event": "Talk-Raum beim Löschen eines gespeicherten Termins löschen",
+        "Only saved events with NC Connector Talk metadata are eligible.": "Nur gespeicherte Termine mit NC Connector Talk-Metadaten kommen dafür infrage.",
+        "Generic Talk links in location or URL fields are ignored by the mail clients.": "Normale Talk-Links in Orts- oder URL-Feldern werden von den Mail-Clients ignoriert.",
+        "Unsaved event cleanup remains active independently.": "Die Bereinigung nicht gespeicherter Termine bleibt unabhängig davon aktiv."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }
-
-
-

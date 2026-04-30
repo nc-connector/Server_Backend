@@ -233,6 +233,7 @@ HTML;
 		'talk_add_users' => ['type' => 'bool', 'default' => true],
 		'talk_add_guests' => ['type' => 'bool', 'default' => false],
 		'talk_set_password' => ['type' => 'bool', 'default' => true],
+		'talk_delete_room_on_event_delete' => ['type' => 'bool', 'default' => false],
 		'talk_room_type' => ['type' => 'enum', 'default' => 'event', 'options' => ['event', 'group']],
 
 		'email_signature_on_compose' => ['type' => 'bool', 'default' => true],

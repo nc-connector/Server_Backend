@@ -242,9 +242,11 @@
         "HTML": "HTML",
         "Plain Text": "Platte tekst",
         "Thunderbird only: if NC Connector attachment automation should be the only active compose flow, also disable Thunderbird's own attachment prompts centrally.": "Alleen voor Thunderbird: als de bijlage-automatisering van NC Connector de enige actieve opstelworkflow moet zijn, schakel dan ook Thunderbirds eigen bijlageprompts centraal uit.",
-        "Read the Thunderbird prerequisite in the admin guide": "Lees de Thunderbird-voorwaarde in de beheerdershandleiding"
+        "Read the Thunderbird prerequisite in the admin guide": "Lees de Thunderbird-voorwaarde in de beheerdershandleiding",
+        "Delete Talk room when deleting a saved event": "Talk-ruimte verwijderen wanneer een opgeslagen afspraak wordt verwijderd",
+        "Only saved events with NC Connector Talk metadata are eligible.": "Alleen opgeslagen afspraken met NC Connector Talk-metagegevens komen in aanmerking.",
+        "Generic Talk links in location or URL fields are ignored by the mail clients.": "Algemene Talk-links in locatie- of URL-velden worden door de mailclients genegeerd.",
+        "Unsaved event cleanup remains active independently.": "Opschoning van niet-opgeslagen afspraken blijft onafhankelijk actief."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }
-
-

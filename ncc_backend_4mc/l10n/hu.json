@@ -242,8 +242,11 @@
         "HTML": "HTML",
         "Plain Text": "Egyszerű szöveg",
         "Thunderbird only: if NC Connector attachment automation should be the only active compose flow, also disable Thunderbird's own attachment prompts centrally.": "Csak Thunderbird esetén: ha az NC Connector melléklet-automatizálása legyen az egyetlen aktív levélírási folyamat, központilag tiltsa le a Thunderbird saját mellékletfigyelmeztetéseit is.",
-        "Read the Thunderbird prerequisite in the admin guide": "Olvassa el a Thunderbird-előfeltételt az adminisztrátori útmutatóban"
+        "Read the Thunderbird prerequisite in the admin guide": "Olvassa el a Thunderbird-előfeltételt az adminisztrátori útmutatóban",
+        "Delete Talk room when deleting a saved event": "Talk-szoba törlése mentett esemény törlésekor",
+        "Only saved events with NC Connector Talk metadata are eligible.": "Csak az NC Connector Talk-metaadatokkal rendelkező mentett események jogosultak.",
+        "Generic Talk links in location or URL fields are ignored by the mail clients.": "A levelezőkliensek figyelmen kívül hagyják a hely vagy URL mezőkben lévő általános Talk-hivatkozásokat.",
+        "Unsaved event cleanup remains active independently.": "A nem mentett események takarítása ettől függetlenül aktív marad."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }
-

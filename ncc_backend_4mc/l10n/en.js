@@ -244,10 +244,13 @@ OC.L10N.register(
   "Controls whether the Talk template is delivered to mail clients as HTML or as cleaned plain text.": "Controls whether the Talk template is delivered to mail clients as HTML or as cleaned plain text.",
   "Output": "Output",
   "HTML": "HTML",
-  "Plain Text": "Plain Text"
+  "Plain Text": "Plain Text",
+  "Delete Talk room when deleting a saved event": "Delete Talk room when deleting a saved event",
+  "Only saved events with NC Connector Talk metadata are eligible.": "Only saved events with NC Connector Talk metadata are eligible.",
+  "Generic Talk links in location or URL fields are ignored by the mail clients.": "Generic Talk links in location or URL fields are ignored by the mail clients.",
+  "Unsaved event cleanup remains active independently.": "Unsaved event cleanup remains active independently."
 }
 ,
     "nplurals=2; plural=(n != 1);"
 );
-
 

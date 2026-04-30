@@ -244,10 +244,13 @@ OC.L10N.register(
   "HTML": "HTML",
   "Plain Text": "Texto plano",
   "Thunderbird only: if NC Connector attachment automation should be the only active compose flow, also disable Thunderbird's own attachment prompts centrally.": "Solo para Thunderbird: si la automatización de adjuntos de NC Connector debe ser el único flujo activo de redacción, desactive también de forma centralizada los propios avisos de adjuntos de Thunderbird.",
-  "Read the Thunderbird prerequisite in the admin guide": "Leer el requisito previo de Thunderbird en la guía de administración"
+  "Read the Thunderbird prerequisite in the admin guide": "Leer el requisito previo de Thunderbird en la guía de administración",
+  "Delete Talk room when deleting a saved event": "Eliminar la sala Talk al eliminar un evento guardado",
+  "Only saved events with NC Connector Talk metadata are eligible.": "Solo se admiten eventos guardados con metadatos Talk de NC Connector.",
+  "Generic Talk links in location or URL fields are ignored by the mail clients.": "Los clientes de correo ignoran los enlaces Talk genéricos en los campos de ubicación o URL.",
+  "Unsaved event cleanup remains active independently.": "La limpieza de eventos no guardados permanece activa de forma independiente."
 }
 ,
     "nplurals=2; plural=(n != 1);"
 );
-
 

@@ -273,6 +273,7 @@ Important dependency:
 | `Add users` | Adds internal users by default | Applied by the add-on when invitees are synchronized |
 | `Add guests` | Adds external recipients as guests by default | Depends on server-side Talk behavior |
 | `Set password` | Enables Talk password protection by default | Separate Talk password dispatch was intentionally removed |
+| `Delete Talk room when deleting a saved event` | Allows mail clients to delete a linked Talk room when a saved NC Connector event is deleted | Off by default; generic Talk links in location/URL fields are ignored by clients |
 | `Room type` | Selects the Talk room type | Affects room behavior on the Nextcloud side |
 
 Talk template variables:
