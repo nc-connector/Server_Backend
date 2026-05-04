@@ -578,6 +578,10 @@ textarea.nccb-setting-control {
 	font-size: 13px;
 }
 
+.nccb-template-editor-language[hidden] {
+	display: none !important;
+}
+
 .nccb-template-editor-language select {
 	min-width: 220px;
 	max-width: 220px;

@@ -455,8 +455,10 @@ Current template-language rules:
 - `talk_invitation_template_format = html` returns stored editor HTML to the runtime API
 - `talk_invitation_template_format = plain_text` converts the stored HTML to cleaned plain text while preserving link targets as raw URLs
 - the runtime API additionally derives `event_description_type = html | plain_text` for clients that only need the final rendering mode
-- `email_signature_template` has no language selector and is always delivered as HTML when policies are available
+- `email_signature_template` has no language selector and is delivered as HTML when policies are available and `email_signature_on_compose = true`
+- if `email_signature_on_compose = false`, `email_signature_on_reply`, `email_signature_on_forward`, and `email_signature_template` are returned as `null` in the runtime policy
 - `email_signature_template` is rendered for the resolved Seat user by replacing `{NAME}`, `{EMAIL}`, `{PHONE}`, `{ABOUT}`, `{FUNCTION}`, and `{ORGANISATION}` from Nextcloud user/profile data
+- `{ABOUT}` is the only multiline-capable email signature variable: it is HTML-escaped, CRLF/CR line endings are normalized, and line breaks are rendered as `<br>`
 - otherwise those template values are effectively inactive for runtime use
 
 Maintenance rule:

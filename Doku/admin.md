@@ -291,22 +291,25 @@ Important dependency:
 | Setting | Purpose | Notes |
 |---|---|---|
 | `Add signature when composing` | Enables centrally managed signatures for new messages | Delivered as a boolean policy flag |
-| `Add signature when replying or forwarding` | Enables centrally managed signatures for replies and forwarded messages | Delivered as a boolean policy flag |
+| `Add signature when replying` | Enables centrally managed signatures for replies | Runtime value becomes `null` when composing signatures are disabled |
+| `Add signature when forwarding` | Enables centrally managed signatures for forwarded messages | Runtime value becomes `null` when composing signatures are disabled |
 | `Email signature template` | Central HTML signature template | Backend-controlled template field |
 
 Email signature runtime behavior:
 - The backend delivers **HTML only** for the signature.
 - Mail clients may derive plain text from that HTML when needed.
-- There is intentionally **no language selector** for email signatures.
+- There is intentionally **no language selector** for email signatures, including the template editor modal.
+- If `Add signature when composing` is disabled, the reply setting, forward setting, and template are inactive and the runtime API returns `null` for each dependent value.
 - The template is rendered for the resolved Seat user before it is returned by `/api/v1/status`.
 - Profile values are HTML-escaped by the backend before placeholder replacement.
+- `{ABOUT}` is the only multiline-capable profile placeholder: line breaks are normalized and rendered as `<br>`.
 - Missing profile values are rendered as empty strings.
 
 Email signature template variables:
 - `{NAME}` → Nextcloud display name
 - `{EMAIL}` → Nextcloud user email address
 - `{PHONE}` → Nextcloud profile phone
-- `{ABOUT}` → Nextcloud profile biography/about text
+- `{ABOUT}` → Nextcloud profile biography/about text, with line breaks preserved
 - `{FUNCTION}` → Nextcloud profile role/function
 - `{ORGANISATION}` → Nextcloud profile organisation
 

@@ -237,7 +237,8 @@ HTML;
 		'talk_room_type' => ['type' => 'enum', 'default' => 'event', 'options' => ['event', 'group']],
 
 		'email_signature_on_compose' => ['type' => 'bool', 'default' => true],
-		'email_signature_on_reply_forward' => ['type' => 'bool', 'default' => false],
+		'email_signature_on_reply' => ['type' => 'bool', 'default' => false],
+		'email_signature_on_forward' => ['type' => 'bool', 'default' => false],
 		'email_signature_template' => ['type' => 'string', 'default' => self::DEFAULT_EMAIL_SIGNATURE_TEMPLATE, 'max_length' => 32768],
 	];
 
@@ -611,6 +612,7 @@ HTML;
 		}
 		$this->applyAttachmentPolicyDependency($settings);
 		$this->applyTemplateLanguageDependency($settings);
+		$this->applyEmailSignaturePolicyDependency($settings);
 		$this->applyEmailSignatureProfileVariables($settings, $userId);
 
 		return [
@@ -1002,13 +1004,29 @@ HTML;
 	/**
 	 * @param array<string, mixed> $settings
 	 */
+	private function applyEmailSignaturePolicyDependency(array &$settings): void {
+		if (($settings['email_signature_on_compose'] ?? false) === true) {
+			return;
+		}
+
+		$settings['email_signature_on_reply'] = null;
+		$settings['email_signature_on_forward'] = null;
+		$settings['email_signature_template'] = null;
+	}
+
+	/**
+	 * @param array<string, mixed> $settings
+	 */
 	private function applyEmailSignatureProfileVariables(array &$settings, string $userId): void {
 		if (!array_key_exists('email_signature_template', $settings)) {
 			return;
 		}
 
 		$template = $settings['email_signature_template'];
-		if ($template === null || $template === '') {
+		if ($template === null) {
+			return;
+		}
+		if ($template === '') {
 			$settings['email_signature_template'] = '';
 			return;
 		}
@@ -1021,7 +1039,9 @@ HTML;
 		$replacements = [];
 
 		foreach ($variables as $name => $value) {
-			$replacements['{' . $name . '}'] = $this->escapeEmailSignatureTemplateValue($value);
+			$replacements['{' . $name . '}'] = $name === 'ABOUT'
+				? $this->escapeEmailSignatureTemplateMultilineValue($value)
+				: $this->escapeEmailSignatureTemplateValue($value);
 		}
 
 		return strtr($template, $replacements);
@@ -1081,6 +1101,15 @@ HTML;
 	private function escapeEmailSignatureTemplateValue(string $value): string {
 		$normalized = trim((string)preg_replace('/\s+/u', ' ', $value));
 		return htmlspecialchars($normalized, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+	}
+
+	private function escapeEmailSignatureTemplateMultilineValue(string $value): string {
+		$normalized = trim(str_replace(["\r\n", "\r"], "\n", $value));
+		return str_replace(
+			"\n",
+			'<br>',
+			htmlspecialchars($normalized, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+		);
 	}
 
 	private function normalizeDefaultMode(string $key, string $mode): string {

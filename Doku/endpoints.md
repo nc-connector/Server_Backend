@@ -44,8 +44,10 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
   - If `policy.talk.talk_invitation_template_format = "html"`, `policy.talk.talk_invitation_template` contains the stored HTML template.
   - If `policy.talk.talk_invitation_template_format = "plain_text"`, `policy.talk.talk_invitation_template` contains cleaned plain text with preserved raw URLs and preserved template variables such as `{MEETING_URL}` or `{PASSWORD}`.
   - If `policy.talk.language_talk_description != "custom"`, `policy.talk.talk_invitation_template_format` is `null` and `policy.talk.event_description_type` falls back to `"plain_text"`.
-  - `policy.email_signature.email_signature_template` always contains HTML when policies are available.
+  - If `policy.email_signature.email_signature_on_compose=false`, `policy.email_signature.email_signature_on_reply`, `policy.email_signature.email_signature_on_forward`, and `policy.email_signature.email_signature_template` are `null`.
+  - If `policy.email_signature.email_signature_on_compose=true`, `policy.email_signature.email_signature_template` contains rendered HTML.
   - Email signature profile variables are resolved by the backend for the resolved Seat user before the template is returned.
+  - `{ABOUT}` is the only multiline-capable email signature variable. It is HTML-escaped, CRLF/CR line endings are normalized, and line breaks are rendered as `<br>`.
   - Mail clients may derive plain text from the returned HTML when needed; the backend does not provide a separate plain-text signature.
 - **Example request (curl):**
 ```bash
@@ -99,7 +101,8 @@ curl -u "alice:APP_PASSWORD" \
     },
     "email_signature": {
       "email_signature_on_compose": true,
-      "email_signature_on_reply_forward": false,
+      "email_signature_on_reply": false,
+      "email_signature_on_forward": false,
       "email_signature_template": "<table>...</table>"
     }
   },
@@ -135,7 +138,8 @@ curl -u "alice:APP_PASSWORD" \
     },
     "email_signature": {
       "email_signature_on_compose": true,
-      "email_signature_on_reply_forward": true,
+      "email_signature_on_reply": true,
+      "email_signature_on_forward": true,
       "email_signature_template": false
     }
   }

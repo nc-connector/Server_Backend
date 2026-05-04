@@ -176,15 +176,20 @@
 			label: 'Add signature when composing',
 			tooltip: ['Controls whether mail clients should add the centrally managed signature to new messages.'],
 		},
-		email_signature_on_reply_forward: {
-			label: 'Add signature when replying or forwarding',
-			tooltip: ['Controls whether mail clients should add the centrally managed signature to replies and forwarded messages.'],
+		email_signature_on_reply: {
+			label: 'Add signature when replying',
+			tooltip: ['Controls whether mail clients should add the centrally managed signature to replies.'],
+		},
+		email_signature_on_forward: {
+			label: 'Add signature when forwarding',
+			tooltip: ['Controls whether mail clients should add the centrally managed signature to forwarded messages.'],
 		},
 		email_signature_template: {
 			label: 'Email signature template',
 			tooltip: [
 				'HTML signature template delivered to mail clients.',
 				'Available variables: {NAME}, {EMAIL}, {PHONE}, {ABOUT}, {FUNCTION}, {ORGANISATION}.',
+				'The {ABOUT} variable preserves line breaks.',
 			],
 		},
 	}
@@ -193,6 +198,9 @@
 	const SHARE_PASSWORD_TEMPLATE_KEY = 'share_password_template'
 	const TALK_INVITATION_TEMPLATE_KEY = 'talk_invitation_template'
 	const TALK_INVITATION_TEMPLATE_FORMAT_KEY = 'talk_invitation_template_format'
+	const EMAIL_SIGNATURE_ON_COMPOSE_KEY = 'email_signature_on_compose'
+	const EMAIL_SIGNATURE_ON_REPLY_KEY = 'email_signature_on_reply'
+	const EMAIL_SIGNATURE_ON_FORWARD_KEY = 'email_signature_on_forward'
 	const EMAIL_SIGNATURE_TEMPLATE_KEY = 'email_signature_template'
 	const TALK_TEMPLATE_FORMAT_HTML = 'html'
 	const TALK_TEMPLATE_FORMAT_PLAIN_TEXT = 'plain_text'
@@ -820,8 +828,9 @@
 			'talk_set_password',
 			'talk_delete_room_on_event_delete',
 			'talk_room_type',
-			'email_signature_on_compose',
-			'email_signature_on_reply_forward',
+			EMAIL_SIGNATURE_ON_COMPOSE_KEY,
+			EMAIL_SIGNATURE_ON_REPLY_KEY,
+			EMAIL_SIGNATURE_ON_FORWARD_KEY,
 			EMAIL_SIGNATURE_TEMPLATE_KEY,
 		]
 		const positions = new Map(order.map((key, index) => [key, index]))
@@ -847,6 +856,12 @@
 
 	function isTemplateEditorSettingKey(settingKey) {
 		return TEMPLATE_EDITOR_SETTING_KEYS.has(String(settingKey || ''))
+	}
+
+	function getTemplateInactiveNote(settingKey) {
+		return String(settingKey || '') === EMAIL_SIGNATURE_TEMPLATE_KEY
+			? 'Only active when signatures for new messages are enabled.'
+			: 'Only active when language is set to Custom.'
 	}
 
 	function isEmbeddedTalkTemplateSettingKey(settingKey) {
@@ -1199,6 +1214,11 @@
 		}
 		if (modal instanceof HTMLElement) {
 			modal.classList.remove('nccb-template-editor-modal--open')
+			const languageWrapper = modal.querySelector('.nccb-template-editor-language')
+			if (languageWrapper instanceof HTMLElement) {
+				languageWrapper.hidden = false
+				languageWrapper.style.display = ''
+			}
 			const saveButton = modal.querySelector('.nccb-template-editor-save')
 			if (saveButton instanceof HTMLButtonElement) {
 				saveButton.textContent = tr('Save')
@@ -1230,6 +1250,7 @@
 		const title = modal.querySelector('.nccb-template-editor-title')
 		const container = modal.querySelector('.nccb-template-editor-body')
 		const saveButton = modal.querySelector('.nccb-template-editor-save')
+		const languageWrapper = modal.querySelector('.nccb-template-editor-language')
 		const languageSelect = modal.querySelector('.nccb-template-editor-language-select')
 		if (!(title instanceof HTMLElement) || !(container instanceof HTMLElement)) {
 			return
@@ -1245,13 +1266,22 @@
 		templateEditorModalState.wrapper = wrapper
 		templateEditorModalState.editorId = `${control.id}--modal`
 		templateEditorModalState.assetMap = { ...getTemplateAssetMap(wrapper) }
-		templateEditorModalState.languageSelect = languageSelect instanceof HTMLSelectElement ? languageSelect : null
+		const supportsLanguageSelect = String(wrapper.dataset.settingKey || '') !== EMAIL_SIGNATURE_TEMPLATE_KEY
+		if (languageWrapper instanceof HTMLElement) {
+			languageWrapper.hidden = !supportsLanguageSelect
+			languageWrapper.style.display = supportsLanguageSelect ? '' : 'none'
+		}
+		templateEditorModalState.languageSelect = supportsLanguageSelect && languageSelect instanceof HTMLSelectElement ? languageSelect : null
 
 		title.textContent = settingLabel(wrapper.dataset.settingKey || '')
 		if (saveButton instanceof HTMLButtonElement) {
 			saveButton.textContent = tr('Save')
 		}
-		populateTemplateLanguageSelect(templateEditorModalState.languageSelect)
+		if (supportsLanguageSelect) {
+			populateTemplateLanguageSelect(templateEditorModalState.languageSelect)
+		} else if (languageSelect instanceof HTMLSelectElement) {
+			languageSelect.innerHTML = ''
+		}
 		const modalTextarea = document.createElement('textarea')
 		modalTextarea.id = templateEditorModalState.editorId
 		modalTextarea.className = 'nccb-template-modal-control'
@@ -1783,6 +1813,88 @@
 		})
 	}
 
+	function isEmailSignatureComposeEnabled(container, prefix) {
+		const composeControl = container.querySelector(`.nccb-setting-control[data-prefix="${prefix}"][data-setting-key="${EMAIL_SIGNATURE_ON_COMPOSE_KEY}"]`)
+		return composeControl instanceof HTMLInputElement ? composeControl.checked : true
+	}
+
+	function applyEmailSignatureDependency(container, prefix) {
+		const composeEnabled = isEmailSignatureComposeEnabled(container, prefix)
+		const dependentKeys = [
+			EMAIL_SIGNATURE_ON_REPLY_KEY,
+			EMAIL_SIGNATURE_ON_FORWARD_KEY,
+			EMAIL_SIGNATURE_TEMPLATE_KEY,
+		]
+
+		for (const key of dependentKeys) {
+			const control = container.querySelector(`.nccb-setting-control[data-prefix="${prefix}"][data-setting-key="${key}"]`)
+			if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement || control instanceof HTMLTextAreaElement)) {
+				continue
+			}
+
+			const disabledByMode = control.dataset.disabledByMode === '1'
+			control.disabled = disabledByMode || !composeEnabled
+			const row = control.closest('tr')
+			if (row instanceof HTMLElement) {
+				row.classList.toggle('nccb-default-value-cell--disabled', !composeEnabled)
+			}
+
+			if (prefix === 'default') {
+				const addonToggle = container.querySelector(`.nccb-addon-changeable[data-setting-key="${key}"]`)
+				if (addonToggle instanceof HTMLInputElement) {
+					addonToggle.disabled = !composeEnabled
+				}
+			} else {
+				const modeSelect = container.querySelector(`.${prefix === 'group-override' ? 'nccb-group-mode' : 'nccb-user-mode'}[data-setting-key="${key}"]`)
+				if (modeSelect instanceof HTMLSelectElement) {
+					modeSelect.disabled = !composeEnabled
+				}
+			}
+
+			if (key === EMAIL_SIGNATURE_TEMPLATE_KEY) {
+				const templateEditor = control.closest('.nccb-template-editor')
+				if (templateEditor instanceof HTMLElement) {
+					templateEditor.classList.toggle('nccb-template-editor--inactive', !composeEnabled)
+					templateEditor.querySelectorAll('.nccb-template-note').forEach((note) => {
+						if (note instanceof HTMLElement) {
+							note.hidden = composeEnabled
+						}
+					})
+				}
+				const templateRow = control.closest('.nccb-template-row')
+				if (templateRow instanceof HTMLElement) {
+					templateRow.querySelectorAll('.nccb-template-row-head-note').forEach((note) => {
+						if (note instanceof HTMLElement) {
+							note.hidden = composeEnabled
+						}
+					})
+				}
+			}
+		}
+	}
+
+	function attachEmailSignatureDependencyHandlers(container, prefix) {
+		const control = container.querySelector(`.nccb-setting-control[data-prefix="${prefix}"][data-setting-key="${EMAIL_SIGNATURE_ON_COMPOSE_KEY}"]`)
+		if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement || control instanceof HTMLTextAreaElement)) {
+			return
+		}
+		if (control.dataset.nccbEmailSignatureDependencyBound === '1') {
+			return
+		}
+		control.dataset.nccbEmailSignatureDependencyBound = '1'
+		control.addEventListener('change', () => {
+			if (prefix === 'default') {
+				syncDefaultControlState(container)
+				return
+			}
+			if (prefix === 'group-override') {
+				syncGroupOverrideControlState(container)
+				return
+			}
+			syncOverrideControlState(container)
+		})
+	}
+
 	function attachAttachmentDependencyHandlers(root) {
 		root.querySelectorAll('.nccb-setting-control[data-setting-key="attachments_always_via_ncconnector"], .nccb-threshold-enabled[data-setting-key="attachments_min_size_mb"]').forEach((control) => {
 			if (control.dataset.nccbDependencyBound === '1') {
@@ -1939,7 +2051,7 @@
 				<div class="nccb-template-editor" data-prefix="${escapeHtml(prefix)}" data-setting-key="${escapeHtml(key)}" data-template-assets="${assetsJson}" data-template-default-assets="${defaultAssetsJson}">
 					<div class="nccb-template-toolbar">
 						<button type="button" class="button button-small nccb-template-toggle nccb-template-action" data-expanded="0">${escapeHtml(tr('Show editor'))}</button>
-						<span class="nccb-template-note" hidden>${escapeHtml(tr('Only active when language is set to Custom.'))}</span>
+						<span class="nccb-template-note" hidden>${escapeHtml(tr(getTemplateInactiveNote(key)))}</span>
 					</div>
 					<div class="nccb-template-body">
 						<textarea id="${escapeHtml(id)}" ${common} rows="14" ${maxLengthAttr}>${escapeHtml(valueText)}</textarea>
@@ -2081,6 +2193,7 @@
 		}
 		syncAttachmentMinSizeDependency(root, 'default')
 		applyTemplateLanguageDependency(root, 'default')
+		applyEmailSignatureDependency(root, 'default')
 		syncTemplateEditorState(root, 'default')
 	}
 
@@ -2141,7 +2254,7 @@
 									${modeSelect}
 								</select>
 								${talkTemplateFormat}
-								<span class="nccb-template-row-head-note" hidden>${escapeHtml(tr('Only active when language is set to Custom.'))}</span>
+								<span class="nccb-template-row-head-note" hidden>${escapeHtml(tr(getTemplateInactiveNote(key)))}</span>
 							</div>
 							${renderSettingControl('override', key, definition, currentValue, mode !== 'forced', templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}
 						</td>
@@ -2187,6 +2300,7 @@
 		attachOverrideModeHandlers(root)
 		attachAttachmentDependencyHandlers(root)
 		attachTemplateLanguageDependencyHandlers(root, 'override')
+		attachEmailSignatureDependencyHandlers(root, 'override')
 		attachTemplateEditorHandlers(root)
 	}
 
@@ -2215,6 +2329,7 @@
 		}
 		syncAttachmentMinSizeDependency(tbody, 'override')
 		applyTemplateLanguageDependency(tbody, 'override')
+		applyEmailSignatureDependency(tbody, 'override')
 		syncTemplateEditorState(tbody, 'override')
 	}
 
@@ -2266,7 +2381,7 @@
 									${modeSelect}
 								</select>
 								${talkTemplateFormat}
-								<span class="nccb-template-row-head-note" hidden>${escapeHtml(tr('Only active when language is set to Custom.'))}</span>
+								<span class="nccb-template-row-head-note" hidden>${escapeHtml(tr(getTemplateInactiveNote(key)))}</span>
 							</div>
 							${renderSettingControl('group-override', key, definition, currentValue, mode !== 'forced', templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}
 						</td>
@@ -2313,6 +2428,7 @@
 		attachGroupOverrideModeHandlers(root)
 		attachAttachmentDependencyHandlers(root, 'group-override')
 		attachTemplateLanguageDependencyHandlers(root, 'group-override')
+		attachEmailSignatureDependencyHandlers(root, 'group-override')
 		attachTemplateEditorHandlers(root)
 	}
 
@@ -2341,6 +2457,7 @@
 		}
 		syncAttachmentMinSizeDependency(tbody, 'group-override')
 		applyTemplateLanguageDependency(tbody, 'group-override')
+		applyEmailSignatureDependency(tbody, 'group-override')
 		syncTemplateEditorState(tbody, 'group-override')
 	}
 
@@ -3347,6 +3464,7 @@
 			attachDefaultModeHandlers(root)
 			attachAttachmentDependencyHandlers(root)
 			attachTemplateLanguageDependencyHandlers(root, 'default')
+			attachEmailSignatureDependencyHandlers(root, 'default')
 			attachTemplateEditorHandlers(root)
 			renderGroupOverrideTables(root, refs, state, refs.groupOverrideGroup.value)
 			renderOverrideTables(root, refs, state, refs.overrideUser.value)
@@ -3674,6 +3792,7 @@
 				attachDefaultModeHandlers(root)
 				attachAttachmentDependencyHandlers(root)
 				attachTemplateLanguageDependencyHandlers(root, 'default')
+				attachEmailSignatureDependencyHandlers(root, 'default')
 				attachTemplateEditorHandlers(root)
 				setMessage(refs.defaultMessage, tr('Default settings saved.'), 'success')
 				if (refs.overrideUser.value) {
