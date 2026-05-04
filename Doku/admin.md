@@ -301,6 +301,7 @@ Email signature runtime behavior:
 - There is intentionally **no language selector** for email signatures, including the template editor modal.
 - If `Add signature when composing` is disabled, the reply setting, forward setting, and template are inactive and the runtime API returns `null` for each dependent value.
 - The template is rendered for the resolved Seat user before it is returned by `/api/v1/status`.
+- The runtime API also returns `policy.email_signature.user_email`, the resolved Nextcloud profile email address of the Seat user. Mail clients use it to apply the central signature only to matching sender identities.
 - Profile values are HTML-escaped by the backend before placeholder replacement.
 - `{ABOUT}` is the only multiline-capable profile placeholder: line breaks are normalized and rendered as `<br>`.
 - Missing profile values are rendered as empty strings.

@@ -1034,6 +1034,11 @@ HTML;
 		$settings['email_signature_template'] = $this->renderEmailSignatureTemplateForPolicy((string)$template, $userId);
 	}
 
+	public function getEmailSignatureUserEmail(string $userId): string {
+		$variables = $this->getEmailSignatureTemplateVariables($userId);
+		return (string)($variables['EMAIL'] ?? '');
+	}
+
 	private function renderEmailSignatureTemplateForPolicy(string $template, string $userId): string {
 		$variables = $this->getEmailSignatureTemplateVariables($userId);
 		$replacements = [];

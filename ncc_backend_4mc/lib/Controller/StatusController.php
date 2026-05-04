@@ -70,6 +70,8 @@ class StatusController extends Controller {
 			$effective = $this->clientSettings->getEffectiveForUser($targetUserId);
 			$policy = $this->groupPolicyByAddonArea($effective['settings'] ?? []);
 			$policyEditable = $this->groupPolicyByAddonArea($effective['addon_editable'] ?? []);
+			$policy['email_signature']['user_email'] = $this->clientSettings->getEmailSignatureUserEmail($targetUserId);
+			ksort($policy['email_signature']);
 		}
 
 		return new DataResponse([
