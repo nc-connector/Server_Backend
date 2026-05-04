@@ -17,7 +17,7 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
   - Body: none
 - **Response shape:**
   - `status`: license and seat state for the resolved user
-  - `policy`: effective settings grouped into `share`, `talk`, and `email_signature`
+  - `policy`: effective settings grouped into `share`, `talk`, and `email_signature`; the `email_signature` group also contains runtime metadata for sender-identity matching
   - `policy_editable`: add-on editability grouped into `share`, `talk`, and `email_signature`
   - There is **no** separate `default` block in the runtime response.
 - **Policy null rules:**
