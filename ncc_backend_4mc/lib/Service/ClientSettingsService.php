@@ -150,51 +150,35 @@ HTML;
 <p><a href="https://docs.nextcloud.com/server/latest/user_manual/en/talk/guest.html">https://docs.nextcloud.com/server/latest/user_manual/en/talk/guest.html</a></p>
 HTML;
 	private const DEFAULT_EMAIL_SIGNATURE_TEMPLATE = <<<'HTML'
-<style>
-  table, td, th {
-    border: 0 !important;
-    outline: 0 !important;
-    -moz-outline: 0 !important;
-    border-color: transparent !important;
-    outline-color: transparent !important;
-    border-collapse: collapse !important;
-  }
-  table[border="0"], table[border="0"] td, table[border="0"] th {
-    border: 0 !important;
-    outline: 0 !important;
-    -moz-outline: 0 !important;
-  }
-</style>
-
-<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;font-size:12px;line-height:16px">
-  <tr><td style="padding:0 0 12px 0">
+<div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px">
+  <div style="margin:0 0 12px 0">
     Kind regards,<br>
     <strong style="font-size:12px">{NAME}</strong><br>
     <em>{FUNCTION}</em>
-  </td></tr>
-  <tr><td style="padding:0 0 8px 0;font-size:11px;line-height:15px">
+  </div>
+  <div style="margin:0 0 8px 0;font-size:11px;line-height:15px">
     {ORGANISATION}<br>
     {ABOUT}
-  </td></tr>
-  <tr><td style="padding:0 0 2px 0">
+  </div>
+  <div style="margin:0 0 2px 0">
     Phone: <a href="tel:{PHONE}" style="color:windowtext;text-decoration:none">{PHONE}</a>
-  </td></tr>
-  <tr><td style="padding:0 0 10px 0">
+  </div>
+  <div style="margin:0 0 10px 0">
     Email: <a href="mailto:{EMAIL}" style="color:windowtext;text-decoration:none">{EMAIL}</a>
-  </td></tr>
-  <tr><td style="padding:0 0 14px 0">
+  </div>
+  <div style="margin:0 0 14px 0">
     <a href="https://nc-connector.de" style="display:inline-block;text-decoration:none;line-height:0" target="_blank" rel="noopener">
       <img src="https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/ncc_backend_4mc/img/header.png" height="48" alt="NC Connector" style="display:block;height:48px;width:auto;border:0">
     </a>
-  </td></tr>
-  <tr><td style="padding:10px 0 0 0;font-size:11px;line-height:15px">
+  </div>
+  <div style="margin:10px 0 0 0;font-size:11px;line-height:15px">
     This email and any attachments may contain confidential and/or legally protected information. If you are not the intended recipient or have received this email in error,<br>
     please inform the sender immediately and delete this email. Any use, reproduction, or distribution is not permitted.
-  </td></tr>
-  <tr><td style="padding:6px 0 0 0;font-size:11px;line-height:15px">
+  </div>
+  <div style="margin:6px 0 0 0;font-size:11px;line-height:15px">
     <em><font color="#2e7d32">Please consider the environment before printing this email.</font></em>
-  </td></tr>
-</table>
+  </div>
+</div>
 HTML;
 
 	/**

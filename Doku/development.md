@@ -460,6 +460,7 @@ Current template-language rules:
 - `policy.email_signature.user_email` is returned as runtime-only metadata so mail clients can apply the central signature only to matching sender identities
 - `email_signature_template` is rendered for the resolved Seat user by replacing `{NAME}`, `{EMAIL}`, `{PHONE}`, `{ABOUT}`, `{FUNCTION}`, and `{ORGANISATION}` from Nextcloud user/profile data
 - `{ABOUT}` is the only multiline-capable email signature variable: it is HTML-escaped, CRLF/CR line endings are normalized, and line breaks are rendered as `<br>`
+- the built-in default email signature template is intentionally table-free and does not rely on `<style>` tags, because mail clients may sanitize style blocks before inserting the signature
 - otherwise those template values are effectively inactive for runtime use
 
 Maintenance rule:
