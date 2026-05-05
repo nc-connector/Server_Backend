@@ -4,6 +4,20 @@ All notable changes to this repository are documented in this file.
 
 The format is based on **Keep a Changelog** and uses a simple version-first structure.
 
+## [1.1.0] - 2026-05-05
+
+### Added
+- Add central email signature policy
+- Add email signature settings to the admin UI
+- Add Talk room deletion policy toggle
+
+### Changed
+- Clarify admin seat exclusion in backend UI and docs
+
+### Documentation
+- Document central email signature policies
+- Update runtime metadata documentation
+
 ## [1.0.1] - 2026-04-24
 
 ### Changed
