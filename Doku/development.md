@@ -378,6 +378,7 @@ Internal admin use:
 Important implementation detail:
 - Group override endpoints intentionally use the query-based route in `appinfo/routes.php`.
 - That path was chosen because it behaves deterministically with group identifiers and avoids the earlier path-segment routing problem.
+- `GET /apps/ncc_backend_4mc/api/v1/admin/users` returns `hints.admin_self_excluded=true` when the current admin account matches the active search scope but is intentionally filtered out because admin accounts cannot receive seats.
 
 ### 8.3 Direct page route
 

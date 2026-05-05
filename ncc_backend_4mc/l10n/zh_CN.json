@@ -250,7 +250,9 @@
         "Delete Talk room when deleting a saved event": "删除已保存事件时删除 Talk 房间",
         "Only saved events with NC Connector Talk metadata are eligible.": "仅带有 NC Connector Talk 元数据的已保存事件符合条件。",
         "Generic Talk links in location or URL fields are ignored by the mail clients.": "邮件客户端会忽略位置或 URL 字段中的普通 Talk 链接。",
-        "Unsaved event cleanup remains active independently.": "未保存事件的清理仍会独立保持启用。"
+        "Unsaved event cleanup remains active independently.": "未保存事件的清理仍会独立保持启用。",
+        "Your own admin account is not shown here because administrator accounts cannot receive seats.": "Your own admin account is not shown here because administrator accounts cannot receive seats.",
+        "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks."
     },
     "pluralForm": "nplurals=1; plural=0;"
 }

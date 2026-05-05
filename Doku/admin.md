@@ -303,6 +303,8 @@ Email signature runtime behavior:
 - The template is rendered for the resolved Seat user before it is returned by `/api/v1/status`.
 - The built-in default signature template avoids layout tables and `<style>` tags so mail clients can sanitize it without reintroducing Thunderbird composer table guides.
 - The runtime API also returns `policy.email_signature.user_email`, the resolved Nextcloud profile email address of the Seat user. Mail clients use it to apply the central signature only to matching sender identities.
+- Signature variables are filled from the assigned Seat user's **Nextcloud user profile settings** before the template is sent to Thunderbird or Outlook.
+- Example: if the Seat belongs to `alex@example.com`, `{PHONE}`, `{ABOUT}`, `{FUNCTION}`, and `{ORGANISATION}` are read from that Nextcloud user's profile fields.
 - Profile values are HTML-escaped by the backend before placeholder replacement.
 - `{ABOUT}` is the only multiline-capable profile placeholder: line breaks are normalized and rendered as `<br>`.
 - Missing profile values are rendered as empty strings.
@@ -451,6 +453,10 @@ Main controls:
 
 Rules that matter operationally:
 - **Admin users cannot receive Seats.**
+- If an administrator searches for their own account in this section, the account is intentionally not listed.
+- Reason:
+  - cost protection (admin/automation accounts should not consume productive seats by mistake)
+  - identity separation (admin role and daily-work mailbox role should stay separate)
 - Seat availability depends on the active mode and license state.
 - In **Community**, only one Seat is available.
 - In **Pro**, seat entitlement comes from the license backend.
@@ -459,6 +465,9 @@ Typical use:
 - Filter by department or group
 - Assign the relevant seat users
 - Verify the result in the **Assigned seats** table directly below
+- Recommended admin workflow:
+  - use a dedicated non-admin account for Thunderbird/Outlook daily work
+  - keep a separate admin-only account for Nextcloud administration tasks
 
 ### 5.3 Assigned seats
 

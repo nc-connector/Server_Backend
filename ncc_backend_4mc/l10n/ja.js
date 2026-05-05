@@ -252,9 +252,9 @@ OC.L10N.register(
   "Delete Talk room when deleting a saved event": "保存済み予定を削除するときに Talk ルームも削除する",
   "Only saved events with NC Connector Talk metadata are eligible.": "NC Connector Talk メタデータを持つ保存済み予定のみ対象です。",
   "Generic Talk links in location or URL fields are ignored by the mail clients.": "場所または URL フィールド内の一般的な Talk リンクはメールクライアントによって無視されます。",
-  "Unsaved event cleanup remains active independently.": "未保存予定のクリーンアップは独立して有効のままです。"
-}
-,
-    "nplurals=1; plural=0;"
+  "Unsaved event cleanup remains active independently.": "未保存予定のクリーンアップは独立して有効のままです。",
+  "Your own admin account is not shown here because administrator accounts cannot receive seats.": "Your own admin account is not shown here because administrator accounts cannot receive seats.",
+  "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks."
+},
+"nplurals=1; plural=0;"
 );
-

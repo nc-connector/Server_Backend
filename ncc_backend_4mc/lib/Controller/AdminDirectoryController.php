@@ -106,6 +106,13 @@ class AdminDirectoryController extends Controller {
 		}
 
 		$filteredUsers = $this->filterUsers($this->toUsers($users), trim($search));
+		$adminSelfExcluded = false;
+		foreach ($filteredUsers as $candidate) {
+			if ($this->userId !== null && $candidate->getUID() === $this->userId && $this->access->isAdmin($candidate->getUID())) {
+				$adminSelfExcluded = true;
+				break;
+			}
+		}
 		$filteredUsers = array_values(array_filter($filteredUsers, fn (IUser $user): bool => !$this->access->isAdmin($user->getUID())));
 		usort($filteredUsers, static function (IUser $left, IUser $right): int {
 			$leftDisplay = trim($left->getDisplayName());
@@ -136,6 +143,9 @@ class AdminDirectoryController extends Controller {
 				'limit' => $limit,
 				'offset' => $offset,
 				'total' => count($filteredUsers),
+			],
+			'hints' => [
+				'admin_self_excluded' => $adminSelfExcluded,
 			],
 		]);
 	}

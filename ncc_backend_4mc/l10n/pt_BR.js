@@ -252,9 +252,9 @@ OC.L10N.register(
   "Delete Talk room when deleting a saved event": "Excluir a sala Talk ao excluir um evento salvo",
   "Only saved events with NC Connector Talk metadata are eligible.": "Somente eventos salvos com metadados Talk do NC Connector são elegíveis.",
   "Generic Talk links in location or URL fields are ignored by the mail clients.": "Os clientes de email ignoram links Talk genéricos nos campos de local ou URL.",
-  "Unsaved event cleanup remains active independently.": "A limpeza de eventos não salvos permanece ativa de forma independente."
-}
-,
-    "nplurals=2; plural=(n > 1);"
+  "Unsaved event cleanup remains active independently.": "A limpeza de eventos não salvos permanece ativa de forma independente.",
+  "Your own admin account is not shown here because administrator accounts cannot receive seats.": "Your own admin account is not shown here because administrator accounts cannot receive seats.",
+  "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks."
+},
+"nplurals=2; plural=(n > 1);"
 );
-

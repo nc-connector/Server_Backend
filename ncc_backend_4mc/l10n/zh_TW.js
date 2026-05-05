@@ -252,9 +252,9 @@ OC.L10N.register(
   "Delete Talk room when deleting a saved event": "刪除已儲存事件時刪除 Talk 房間",
   "Only saved events with NC Connector Talk metadata are eligible.": "僅含有 NC Connector Talk 中繼資料的已儲存事件符合條件。",
   "Generic Talk links in location or URL fields are ignored by the mail clients.": "郵件用戶端會忽略位置或 URL 欄位中的一般 Talk 連結。",
-  "Unsaved event cleanup remains active independently.": "未儲存事件的清理仍會獨立保持啟用。"
-}
-,
-    "nplurals=1; plural=0;"
+  "Unsaved event cleanup remains active independently.": "未儲存事件的清理仍會獨立保持啟用。",
+  "Your own admin account is not shown here because administrator accounts cannot receive seats.": "Your own admin account is not shown here because administrator accounts cannot receive seats.",
+  "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks."
+},
+"nplurals=1; plural=0;"
 );
-

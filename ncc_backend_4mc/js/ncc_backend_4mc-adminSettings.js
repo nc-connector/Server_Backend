@@ -3417,6 +3417,12 @@
 				state.userPaging.offset = 0
 			}
 			const response = await api.loadUsers(refs.userSearch.value, refs.groupSelect.value, state.userPaging.limit + 1, state.userPaging.offset)
+			const adminSelfExcludedMessage = `${tr('Your own admin account is not shown here because administrator accounts cannot receive seats.')} ${tr('Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.')}`
+			if (response?.hints?.admin_self_excluded) {
+				setMessage(refs.seatMessage, adminSelfExcludedMessage, '')
+			} else if (refs.seatMessage.textContent === adminSelfExcludedMessage) {
+				setMessage(refs.seatMessage, '', '')
+			}
 			const fetched = response.items || []
 			state.userPaging.hasNext = fetched.length > state.userPaging.limit
 			const visible = state.userPaging.hasNext ? fetched.slice(0, state.userPaging.limit) : fetched

@@ -250,7 +250,9 @@
         "Delete Talk room when deleting a saved event": "Elimina la stanza Talk quando elimini un evento salvato",
         "Only saved events with NC Connector Talk metadata are eligible.": "Sono idonei solo gli eventi salvati con metadati Talk di NC Connector.",
         "Generic Talk links in location or URL fields are ignored by the mail clients.": "I client di posta ignorano i link Talk generici nei campi posizione o URL.",
-        "Unsaved event cleanup remains active independently.": "La pulizia degli eventi non salvati rimane attiva in modo indipendente."
+        "Unsaved event cleanup remains active independently.": "La pulizia degli eventi non salvati rimane attiva in modo indipendente.",
+        "Your own admin account is not shown here because administrator accounts cannot receive seats.": "Your own admin account is not shown here because administrator accounts cannot receive seats.",
+        "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }
