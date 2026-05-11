@@ -99,7 +99,7 @@ These terms are important:
 |---|---|
 | `User` | A normal Nextcloud account |
 | `Group` | A built-in Nextcloud group such as `Sales`, `HR`, or `Project-A` |
-| `Administrator` | A Nextcloud admin account; admins can configure NC Connector but cannot receive Seats |
+| `Administrator` | A Nextcloud admin account; admins can configure NC Connector; by default, admins cannot receive Seats |
 | `Seat` | A license slot in NC Connector; exactly one Seat belongs to one Nextcloud user |
 | `Default` | The baseline policy for all Seat users |
 | `Group override` | A group-specific policy layer above the defaults |
@@ -452,11 +452,14 @@ Main controls:
 - bulk removal for all filtered users
 
 Rules that matter operationally:
-- **Admin users cannot receive Seats.**
+- **Admin users cannot receive Seats by default.**
 - If an administrator searches for their own account in this section, the account is intentionally not listed.
 - Reason:
   - cost protection (admin/automation accounts should not consume productive seats by mistake)
   - identity separation (admin role and daily-work mailbox role should stay separate)
+- If an organization deliberately wants to assign Seats to admin accounts, a server administrator with shell access can enable that behavior with `php occ ncc:admin-seat-assignment enable`.
+- Use `php occ ncc:admin-seat-assignment disable` to restore the default safety behavior.
+- Disabling the override does not delete already assigned admin Seats automatically; remove them from **Assigned seats** if they should no longer consume a Seat.
 - Seat availability depends on the active mode and license state.
 - In **Community**, only one Seat is available.
 - In **Pro**, seat entitlement comes from the license backend.
@@ -609,6 +612,9 @@ The backend lifecycle is intentionally split into destructive and non-destructiv
 | `php occ app:disable ncc_backend_4mc` | Disables the app **without deleting data** |
 | `php occ app:remove --keep-data ncc_backend_4mc` | Removes the app code **but keeps data** |
 | `php occ app:remove ncc_backend_4mc` | Removes app code **and deletes NC Connector data** |
+| `php occ ncc:admin-seat-assignment status` | Shows whether admin accounts may receive Seats |
+| `php occ ncc:admin-seat-assignment enable` | Allows admin accounts to appear in Seat search and receive Seats |
+| `php occ ncc:admin-seat-assignment disable` | Restores the default safety behavior and blocks new admin Seat assignment |
 
 Deletion on full remove includes:
 - settings table

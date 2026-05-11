@@ -11,8 +11,11 @@ declare(strict_types=1);
 namespace OCA\NcConnector\Service;
 
 use OCA\NcConnector\Db\SeatMapper;
+use OCA\NcConnector\Db\SettingMapper;
 
 class SeatService {
+	private const KEY_ALLOW_ADMIN_SEAT_ASSIGNMENT = 'seat.allow_admin_assignment';
+
 	public const SEAT_STATE_NONE = 'none';
 	public const SEAT_STATE_ACTIVE = 'active';
 	public const SEAT_STATE_SUSPENDED_OVERLIMIT = 'suspended_overlimit';
@@ -24,8 +27,17 @@ class SeatService {
 
 	public function __construct(
 		private SeatMapper $seatMapper,
+		private SettingMapper $settings,
 		private LicenseService $licenseService,
 	) {
+	}
+
+	public function adminSeatAssignmentAllowed(): bool {
+		return $this->settings->getValue(self::KEY_ALLOW_ADMIN_SEAT_ASSIGNMENT, '0') === '1';
+	}
+
+	public function setAdminSeatAssignmentAllowed(bool $allowed): void {
+		$this->settings->setValue(self::KEY_ALLOW_ADMIN_SEAT_ASSIGNMENT, $allowed ? '1' : '0', time());
 	}
 
 	public function getTotalSeats(): int {

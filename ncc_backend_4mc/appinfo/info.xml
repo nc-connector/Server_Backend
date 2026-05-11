@@ -131,6 +131,10 @@ Damit eignet sich NC Connector sowohl für einzelne Nutzer als auch für Organis
 		<job>OCA\NcConnector\Cron\LicenseSyncJob</job>
 	</background-jobs>
 
+	<commands>
+		<command>OCA\NcConnector\Command\AdminSeatAssignmentCommand</command>
+	</commands>
+
 	<repair-steps>
 		<pre-migration>
 			<step>OCA\NcConnector\Setup\InstallSchema</step>

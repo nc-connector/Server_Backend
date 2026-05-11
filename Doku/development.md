@@ -183,7 +183,7 @@ Core services:
 | Service | Responsibility |
 |---|---|
 | `LicenseService` | License mode, credentials, sync, entitlement state |
-| `SeatService` | Seat assignment and seat-limit enforcement |
+| `SeatService` | Seat assignment, seat-limit enforcement, and the explicit admin-seat override |
 | `ClientSettingsService` | Default values, group/user overrides, effective policy resolution, template normalization, email signature profile rendering, runtime image cache |
 | `AccessService` | Access checks for direct page visibility and user-facing runtime state |
 
@@ -378,7 +378,10 @@ Internal admin use:
 Important implementation detail:
 - Group override endpoints intentionally use the query-based route in `appinfo/routes.php`.
 - That path was chosen because it behaves deterministically with group identifiers and avoids the earlier path-segment routing problem.
-- `GET /apps/ncc_backend_4mc/api/v1/admin/users` returns `hints.admin_self_excluded=true` when the current admin account matches the active search scope but is intentionally filtered out because admin accounts cannot receive seats.
+- Admin accounts are excluded from Seat search by default.
+- `GET /apps/ncc_backend_4mc/api/v1/admin/users` returns `hints.admin_self_excluded=true` when the current admin account matches the active search scope but is intentionally filtered out.
+- `php occ ncc:admin-seat-assignment enable` intentionally disables that safety behavior; admin accounts then appear in Seat search and can receive Seats.
+- `php occ ncc:admin-seat-assignment disable` restores the default safety behavior.
 
 ### 8.3 Direct page route
 
@@ -540,6 +543,12 @@ A pragmatic smoke test for this backend should cover the actual operational risk
     - `php occ app:enable ncc_backend_4mc`
     - `php occ app:remove --keep-data ncc_backend_4mc`
     - `php occ app:remove ncc_backend_4mc`
+16. Test the admin-seat override command:
+    - `php occ ncc:admin-seat-assignment status`
+    - `php occ ncc:admin-seat-assignment enable`
+    - verify admin accounts appear in Seat search
+    - `php occ ncc:admin-seat-assignment disable`
+    - verify admin accounts are hidden from Seat search again
 
 If any of these fail, fix the underlying lifecycle or resolution logic before touching surface-level UI behavior.
 

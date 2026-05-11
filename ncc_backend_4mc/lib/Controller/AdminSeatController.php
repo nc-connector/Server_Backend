@@ -61,9 +61,6 @@ class AdminSeatController extends Controller {
 		$rows = [];
 		foreach ($this->seatMapper->listAssigned($limit, $offset) as $seat) {
 			$targetUserId = $seat->getUserId();
-			if ($this->access->isAdmin($targetUserId)) {
-				continue;
-			}
 
 			$user = $this->userManager->get($targetUserId);
 			$seatState = $seatStates[$targetUserId] ?? SeatService::SEAT_STATE_ACTIVE;
@@ -107,7 +104,7 @@ class AdminSeatController extends Controller {
 			]);
 		}
 
-		if ($this->access->isAdmin($targetUserId)) {
+		if (!$this->seats->adminSeatAssignmentAllowed() && $this->access->isAdmin($targetUserId)) {
 			if ($assigned) {
 				return $this->warningResponse('Administrator cannot be assigned a seat', Http::STATUS_UNPROCESSABLE_ENTITY, [
 					'actor_user_id' => $this->userId,

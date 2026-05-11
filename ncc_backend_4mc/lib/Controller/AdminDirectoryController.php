@@ -12,6 +12,7 @@ namespace OCA\NcConnector\Controller;
 
 use OCA\NcConnector\Db\SeatMapper;
 use OCA\NcConnector\Service\AccessService;
+use OCA\NcConnector\Service\SeatService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\FrontpageRoute;
@@ -32,6 +33,7 @@ class AdminDirectoryController extends Controller {
 		private AccessService $access,
 		private IGroupManager $groupManager,
 		private IUserManager $userManager,
+		private SeatService $seats,
 		private SeatMapper $seatMapper,
 		private LoggerInterface $logger,
 		private ?string $userId,
@@ -106,14 +108,17 @@ class AdminDirectoryController extends Controller {
 		}
 
 		$filteredUsers = $this->filterUsers($this->toUsers($users), trim($search));
+		$adminSeatAssignmentAllowed = $this->seats->adminSeatAssignmentAllowed();
 		$adminSelfExcluded = false;
-		foreach ($filteredUsers as $candidate) {
-			if ($this->userId !== null && $candidate->getUID() === $this->userId && $this->access->isAdmin($candidate->getUID())) {
-				$adminSelfExcluded = true;
-				break;
+		if (!$adminSeatAssignmentAllowed) {
+			foreach ($filteredUsers as $candidate) {
+				if ($this->userId !== null && $candidate->getUID() === $this->userId && $this->access->isAdmin($candidate->getUID())) {
+					$adminSelfExcluded = true;
+					break;
+				}
 			}
+			$filteredUsers = array_values(array_filter($filteredUsers, fn (IUser $user): bool => !$this->access->isAdmin($user->getUID())));
 		}
-		$filteredUsers = array_values(array_filter($filteredUsers, fn (IUser $user): bool => !$this->access->isAdmin($user->getUID())));
 		usort($filteredUsers, static function (IUser $left, IUser $right): int {
 			$leftDisplay = trim($left->getDisplayName());
 			$rightDisplay = trim($right->getDisplayName());
@@ -146,6 +151,7 @@ class AdminDirectoryController extends Controller {
 			],
 			'hints' => [
 				'admin_self_excluded' => $adminSelfExcluded,
+				'admin_seat_assignment_allowed' => $adminSeatAssignmentAllowed,
 			],
 		]);
 	}
