@@ -14,6 +14,7 @@ NC Connector brings secure sharing, Talk meetings, and intelligent attachment ha
 - Share files securely directly from the email workflow
 - Create and maintain Talk rooms directly from calendar events
 - Move attachments above a defined size into Nextcloud when appropriate
+- Manage central email signatures for Thunderbird and Outlook Classic
 - Insert links, passwords, and expiry dates in a clean and consistent way
 
 ## Feature set
@@ -31,6 +32,13 @@ NC Connector brings secure sharing, Talk meetings, and intelligent attachment ha
 - Offer uploads above a configurable file-size threshold
 - Clear user decision instead of uncontrolled automation
 - ZIP-download and download-link workflows for external recipients
+
+### Manage email signatures centrally
+
+- Provide one central HTML signature template from Nextcloud
+- Fill signature variables from Nextcloud user profiles
+- Add per-user override values for matching email addresses, mobile numbers, and custom fields
+- Apply signatures only to matching Thunderbird and Outlook sender identities
 
 ### Create Talk meetings from the calendar
 
@@ -66,6 +74,7 @@ NC Connector bringt sicheres Teilen, Talk-Meetings und intelligente Anhangsverar
 - Dateien sicher direkt aus dem E-Mail-Workflow heraus teilen
 - Talk-Räume direkt aus Kalendereinträgen erstellen und pflegen
 - Anhänge ab einer definierten Größe gezielt in Nextcloud auslagern
+- Zentrale E-Mail-Signaturen für Thunderbird und Outlook Classic verwalten
 - Links, Passwörter und Ablaufdaten sauber und einheitlich einfügen
 
 ## Funktionsumfang
@@ -83,6 +92,13 @@ NC Connector bringt sicheres Teilen, Talk-Meetings und intelligente Anhangsverar
 - Upload-Angebot ab konfigurierbarer Dateigröße
 - Klare Entscheidung statt unkontrollierter Automatik
 - ZIP-Downloads und Download-Link-Workflows für externe Empfänger
+
+### E-Mail-Signaturen zentral verwalten
+
+- Eine zentrale HTML-Signaturvorlage aus Nextcloud bereitstellen
+- Signaturvariablen aus Nextcloud-Benutzerprofilen füllen
+- Benutzerbezogene Zusatzwerte für Absenderadresse, Mobilnummern und eigene Felder setzen
+- Signaturen nur bei passenden Thunderbird- und Outlook-Absenderidentitäten anwenden
 
 ### Talk direkt aus dem Kalender
 
@@ -119,6 +135,7 @@ Damit eignet sich NC Connector sowohl für einzelne Nutzer als auch für Organis
 	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/appsettings.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/screenshots/TemplateEditor.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/screenshots/email_sig.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/NC_Connector_for_Thunderbird/main/screenshots/talk_wizzard1.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/NC_Connector_for_Thunderbird/main/screenshots/filelink_wizzard1.png</screenshot>
 
