@@ -254,7 +254,17 @@ OC.L10N.register(
   "Generic Talk links in location or URL fields are ignored by the mail clients.": "Les liens Talk génériques dans les champs lieu ou URL sont ignorés par les clients de messagerie.",
   "Unsaved event cleanup remains active independently.": "Le nettoyage des événements non enregistrés reste actif indépendamment.",
   "Your own admin account is not shown here because administrator accounts cannot receive seats.": "Your own admin account is not shown here because administrator accounts cannot receive seats.",
-  "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks."
+  "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.",
+  "Available variables: {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.": "Variables disponibles : {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.",
+  "Signature email address": "Adresse e-mail de signature",
+  "Overrides the profile email used for {EMAIL} and sender matching.": "Remplace l’e-mail du profil utilisé pour {EMAIL} et la correspondance de l’expéditeur.",
+  "Use inherit to keep the Nextcloud profile email.": "Utilisez hériter pour conserver l’e-mail du profil Nextcloud.",
+  "Mobile phone": "Téléphone mobile",
+  "Optional value for {PHONE_MOBILE}.": "Valeur facultative pour {PHONE_MOBILE}.",
+  "Custom 1": "Personnalisé 1",
+  "Optional value for {CUSTOM1}.": "Valeur facultative pour {CUSTOM1}.",
+  "Custom 2": "Personnalisé 2",
+  "Optional value for {CUSTOM2}.": "Valeur facultative pour {CUSTOM2}."
 },
 "nplurals=2; plural=(n > 1);"
 );

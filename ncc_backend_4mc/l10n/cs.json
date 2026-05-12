@@ -252,7 +252,17 @@
         "Generic Talk links in location or URL fields are ignored by the mail clients.": "Poštovní klienti ignorují obecné odkazy Talk v polích místa nebo URL.",
         "Unsaved event cleanup remains active independently.": "Čištění neuložených událostí zůstává aktivní nezávisle.",
         "Your own admin account is not shown here because administrator accounts cannot receive seats.": "Your own admin account is not shown here because administrator accounts cannot receive seats.",
-        "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks."
+        "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.",
+        "Available variables: {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.": "Dostupné proměnné: {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.",
+        "Signature email address": "E-mailová adresa podpisu",
+        "Overrides the profile email used for {EMAIL} and sender matching.": "Přepíše e-mail z profilu použitý pro {EMAIL} a shodu odesílatele.",
+        "Use inherit to keep the Nextcloud profile email.": "Použijte dědění, chcete-li ponechat e-mail z profilu Nextcloud.",
+        "Mobile phone": "Mobilní telefon",
+        "Optional value for {PHONE_MOBILE}.": "Volitelná hodnota pro {PHONE_MOBILE}.",
+        "Custom 1": "Vlastní 1",
+        "Optional value for {CUSTOM1}.": "Volitelná hodnota pro {CUSTOM1}.",
+        "Custom 2": "Vlastní 2",
+        "Optional value for {CUSTOM2}.": "Volitelná hodnota pro {CUSTOM2}."
     },
     "pluralForm": "nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;"
 }

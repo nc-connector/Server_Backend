@@ -46,9 +46,12 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
   - If `policy.talk.language_talk_description != "custom"`, `policy.talk.talk_invitation_template_format` is `null` and `policy.talk.event_description_type` falls back to `"plain_text"`.
   - If `policy.email_signature.email_signature_on_compose=false`, `policy.email_signature.email_signature_on_reply`, `policy.email_signature.email_signature_on_forward`, and `policy.email_signature.email_signature_template` are `null`.
   - If `policy.email_signature.email_signature_on_compose=true`, `policy.email_signature.email_signature_template` contains rendered HTML.
-  - `policy.email_signature.user_email` contains the resolved Nextcloud profile email address of the Seat user. Mail clients use it to apply the central signature only to matching sender identities.
+  - `policy.email_signature.user_email` contains the sender identity email for the Seat user. It comes from the `Signature email address` user override when forced, otherwise from the Nextcloud profile email. Mail clients use it to apply the central signature only to matching sender identities.
   - Email signature profile variables are resolved by the backend for the resolved Seat user before the template is returned.
+  - `{EMAIL}` follows the same rule as `policy.email_signature.user_email`: forced user override first, Nextcloud profile email otherwise.
+  - `{PHONE_MOBILE}`, `{CUSTOM1}`, and `{CUSTOM2}` are user-override-only signature variables.
   - `{ABOUT}` is the only multiline-capable email signature variable. It is HTML-escaped, CRLF/CR line endings are normalized, and line breaks are rendered as `<br>`.
+  - Empty signature placeholders remove their surrounding line or table row before the HTML is returned.
   - Mail clients may derive plain text from the returned HTML when needed; the backend does not provide a separate plain-text signature.
 - **Example request (curl):**
 ```bash

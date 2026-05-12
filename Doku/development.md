@@ -462,8 +462,11 @@ Current template-language rules:
 - `email_signature_template` has no language selector and is delivered as HTML when policies are available and `email_signature_on_compose = true`
 - if `email_signature_on_compose = false`, `email_signature_on_reply`, `email_signature_on_forward`, and `email_signature_template` are returned as `null` in the runtime policy
 - `policy.email_signature.user_email` is returned as runtime-only metadata so mail clients can apply the central signature only to matching sender identities
-- `email_signature_template` is rendered for the resolved Seat user by replacing `{NAME}`, `{EMAIL}`, `{PHONE}`, `{ABOUT}`, `{FUNCTION}`, and `{ORGANISATION}` from Nextcloud user/profile data
+- a forced `Signature email address` user override replaces the profile email for both `policy.email_signature.user_email` and `{EMAIL}`
+- `email_signature_template` is rendered for the resolved Seat user by replacing `{NAME}`, `{EMAIL}`, `{PHONE}`, `{PHONE_MOBILE}`, `{ABOUT}`, `{FUNCTION}`, `{ORGANISATION}`, `{CUSTOM1}`, and `{CUSTOM2}`
+- `{PHONE_MOBILE}`, `{CUSTOM1}`, and `{CUSTOM2}` come only from user overrides
 - `{ABOUT}` is the only multiline-capable email signature variable: it is HTML-escaped, CRLF/CR line endings are normalized, and line breaks are rendered as `<br>`
+- empty signature placeholders remove their surrounding line or table row before the rendered HTML is returned
 - the built-in default email signature template is intentionally table-free and does not rely on `<style>` tags, because mail clients may sanitize style blocks before inserting the signature
 - otherwise those template values are effectively inactive for runtime use
 

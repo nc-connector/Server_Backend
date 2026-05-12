@@ -31,6 +31,7 @@ This app is localized via Nextcloud app l10n files (`ncc_backend_4mc/l10n/*.json
 - Important: this check validates coverage and empty values, not linguistic quality. Native-language review is still required for semantic correctness.
 - Additional update: new template-related keys were translated for all locales (`en`, `de`, `fr`, `cs`, `es`, `hu`, `it`, `ja`, `nl`, `pl`, `pt_BR`, `pt_PT`, `ru`, `zh_CN`, `zh_TW`).
 - Additional update: the visible seat/report texts that were still left in English were localized for every supported locale.
+- Additional update: email signature user-override labels and tooltips were localized for every supported locale.
 
 ## Template editor language helper
 

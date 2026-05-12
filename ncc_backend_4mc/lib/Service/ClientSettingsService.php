@@ -40,6 +40,16 @@ class ClientSettingsService {
 	private const GROUP_OVERRIDE_PRIORITY_DEFAULT = 100;
 	private const TALK_TEMPLATE_FORMAT_HTML = 'html';
 	private const TALK_TEMPLATE_FORMAT_PLAIN_TEXT = 'plain_text';
+	private const EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY = 'email_signature_email_address';
+	private const EMAIL_SIGNATURE_PHONE_MOBILE_KEY = 'email_signature_phone_mobile';
+	private const EMAIL_SIGNATURE_CUSTOM1_KEY = 'email_signature_custom1';
+	private const EMAIL_SIGNATURE_CUSTOM2_KEY = 'email_signature_custom2';
+	private const USER_OVERRIDE_ONLY_SETTINGS = [
+		self::EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY => true,
+		self::EMAIL_SIGNATURE_PHONE_MOBILE_KEY => true,
+		self::EMAIL_SIGNATURE_CUSTOM1_KEY => true,
+		self::EMAIL_SIGNATURE_CUSTOM2_KEY => true,
+	];
 	private const DEFAULT_SHARE_HTML_BLOCK_TEMPLATE = <<<'HTML'
 <!DOCTYPE html>
 <html>
@@ -224,6 +234,10 @@ HTML;
 		'email_signature_on_reply' => ['type' => 'bool', 'default' => false],
 		'email_signature_on_forward' => ['type' => 'bool', 'default' => false],
 		'email_signature_template' => ['type' => 'string', 'default' => self::DEFAULT_EMAIL_SIGNATURE_TEMPLATE, 'max_length' => 32768],
+		self::EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY => ['type' => 'string', 'default' => '', 'max_length' => 255],
+		self::EMAIL_SIGNATURE_PHONE_MOBILE_KEY => ['type' => 'string', 'default' => '', 'max_length' => 255],
+		self::EMAIL_SIGNATURE_CUSTOM1_KEY => ['type' => 'string', 'default' => '', 'max_length' => 255],
+		self::EMAIL_SIGNATURE_CUSTOM2_KEY => ['type' => 'string', 'default' => '', 'max_length' => 255],
 	];
 
 	public function __construct(
@@ -250,6 +264,9 @@ HTML;
 	public function getDefaults(): array {
 		$defaults = [];
 		foreach (self::DEFINITIONS as $key => $definition) {
+			if ($this->isUserOverrideOnlySetting($key)) {
+				continue;
+			}
 			$stored = $this->settings->getValue(self::DEFAULT_KEY_PREFIX . $key, null);
 			if ($stored === null) {
 				$defaults[$key] = $definition['default'];
@@ -297,6 +314,9 @@ HTML;
 	public function getDefaultModes(): array {
 		$modes = [];
 		foreach (self::DEFINITIONS as $key => $definition) {
+			if ($this->isUserOverrideOnlySetting($key)) {
+				continue;
+			}
 			$storedMode = $this->settings->getValue(self::DEFAULT_MODE_KEY_PREFIX . $key, null);
 			$modes[$key] = $storedMode === null
 				? $this->getBuiltInDefaultMode($key)
@@ -309,6 +329,7 @@ HTML;
 		$now = time();
 		foreach ($defaults as $key => $rawValue) {
 			$this->assertKnownSetting($key);
+			$this->assertDefaultSetting($key);
 			$mode = $this->getBuiltInDefaultMode($key);
 			$valueToStore = $rawValue;
 
@@ -359,6 +380,29 @@ HTML;
 		foreach (self::DEFINITIONS as $key => $definition) {
 			$defaultMode = $defaultModes[$key] ?? self::MODE_DEFAULT;
 			$override = $overrideMap[$key] ?? null;
+			if ($this->isUserOverrideOnlySetting($key)) {
+				if ($override instanceof ClientOverride && $override->getMode() === self::MODE_FORCED) {
+					$forcedValue = $this->parseStoredValue($key, (string)$override->getSettingValue());
+					$items[$key] = [
+						'mode' => self::MODE_FORCED,
+						'value' => $forcedValue,
+						'effective_value' => $forcedValue,
+						'source' => 'user',
+						'default_mode' => self::MODE_DEFAULT,
+					];
+					continue;
+				}
+
+				$items[$key] = [
+					'mode' => self::MODE_INHERIT,
+					'value' => null,
+					'effective_value' => $this->getUserOnlyFallbackValue($key, $userId),
+					'source' => 'default',
+					'default_mode' => self::MODE_DEFAULT,
+				];
+				continue;
+			}
+
 			if ($override instanceof ClientOverride && $override->getMode() === self::MODE_FORCED) {
 				$forcedValue = $this->parseStoredValue($key, (string)$override->getSettingValue());
 				$items[$key] = [
@@ -411,6 +455,9 @@ HTML;
 		$items = [];
 
 		foreach (self::DEFINITIONS as $key => $definition) {
+			if ($this->isUserOverrideOnlySetting($key)) {
+				continue;
+			}
 			$defaultMode = $defaultModes[$key] ?? self::MODE_DEFAULT;
 			$override = $overrideMap[$key] ?? null;
 			if ($override instanceof GroupOverride && $override->getMode() === self::MODE_FORCED) {
@@ -549,6 +596,7 @@ HTML;
 		$now = time();
 		foreach ($overrides as $key => $payload) {
 			$this->assertKnownSetting($key);
+			$this->assertGroupOverrideSetting($key);
 			if (!is_array($payload)) {
 				throw new \InvalidArgumentException(sprintf('Override for "%s" must be an object', $key));
 			}
@@ -598,6 +646,7 @@ HTML;
 		$this->applyTemplateLanguageDependency($settings);
 		$this->applyEmailSignaturePolicyDependency($settings);
 		$this->applyEmailSignatureProfileVariables($settings, $userId);
+		$this->removeUserOverrideOnlySettings($settings, $sources, $policies, $addonEditable);
 
 		return [
 			'settings' => $settings,
@@ -631,7 +680,10 @@ HTML;
 		if ($allGroupIds !== []) {
 			foreach ($this->groupOverrides->getForGroups(array_keys($allGroupIds)) as $groupId => $overrideMap) {
 				$hasForcedOverride = false;
-				foreach ($overrideMap as $override) {
+				foreach ($overrideMap as $settingKey => $override) {
+					if ($this->isUserOverrideOnlySetting((string)$settingKey)) {
+						continue;
+					}
 					if ($override instanceof GroupOverride && $override->getMode() === self::MODE_FORCED) {
 						$hasForcedOverride = true;
 						break;
@@ -763,6 +815,9 @@ HTML;
 		$overrideMaps = $this->groupOverrides->getForGroups($groupIds);
 		$resolved = [];
 		foreach (self::DEFINITIONS as $key => $_definition) {
+			if ($this->isUserOverrideOnlySetting($key)) {
+				continue;
+			}
 			$bestMatch = null;
 			foreach ($groupIds as $groupId) {
 				$override = $overrideMaps[$groupId][$key] ?? null;
@@ -795,6 +850,18 @@ HTML;
 	private function assertKnownSetting(string $key): void {
 		if (!array_key_exists($key, self::DEFINITIONS)) {
 			throw new \InvalidArgumentException(sprintf('Unknown setting key "%s"', $key));
+		}
+	}
+
+	private function assertDefaultSetting(string $key): void {
+		if ($this->isUserOverrideOnlySetting($key)) {
+			throw new \InvalidArgumentException(sprintf('Setting "%s" is only available as a user override', $key));
+		}
+	}
+
+	private function assertGroupOverrideSetting(string $key): void {
+		if ($this->isUserOverrideOnlySetting($key)) {
+			throw new \InvalidArgumentException(sprintf('Setting "%s" is only available as a user override', $key));
 		}
 	}
 
@@ -1026,6 +1093,7 @@ HTML;
 	private function renderEmailSignatureTemplateForPolicy(string $template, string $userId): string {
 		$variables = $this->getEmailSignatureTemplateVariables($userId);
 		$replacements = [];
+		$template = $this->removeEmptyEmailSignatureVariableLines($template, $variables);
 
 		foreach ($variables as $name => $value) {
 			$replacements['{' . $name . '}'] = $name === 'ABOUT'
@@ -1044,14 +1112,17 @@ HTML;
 			'NAME' => '',
 			'EMAIL' => '',
 			'PHONE' => '',
+			'PHONE_MOBILE' => '',
 			'ABOUT' => '',
 			'FUNCTION' => '',
 			'ORGANISATION' => '',
+			'CUSTOM1' => '',
+			'CUSTOM2' => '',
 		];
 
 		$user = $this->userManager->get($userId);
 		if (!$user instanceof IUser) {
-			return $variables;
+			return $this->applyEmailSignatureUserOverrides($variables, $userId);
 		}
 
 		$variables['NAME'] = (string)$user->getDisplayName();
@@ -1059,12 +1130,12 @@ HTML;
 
 		try {
 			$account = $this->accountManager->getAccount($user);
-		} catch (\Throwable $e) {
+		} catch (\Throwable $error) {
 			$this->logError('Email signature profile lookup failed.', [
 				'userId' => $userId,
-				'exception' => $e,
+				'exception' => $error,
 			]);
-			return $variables;
+			return $this->applyEmailSignatureUserOverrides($variables, $userId);
 		}
 
 		if ($variables['EMAIL'] === '') {
@@ -1076,7 +1147,167 @@ HTML;
 		$variables['FUNCTION'] = $this->getAccountPropertyValue($account, IAccountManager::PROPERTY_ROLE);
 		$variables['ORGANISATION'] = $this->getAccountPropertyValue($account, IAccountManager::PROPERTY_ORGANISATION);
 
+		return $this->applyEmailSignatureUserOverrides($variables, $userId);
+	}
+
+	/**
+	 * @param array<string, string> $variables
+	 * @return array<string, string>
+	 */
+	private function applyEmailSignatureUserOverrides(array $variables, string $userId): array {
+		$overrideMap = $this->overrides->getForUser($userId);
+
+		$emailAddress = $this->getForcedUserOverrideString($overrideMap, self::EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY);
+		if ($emailAddress !== null) {
+			$variables['EMAIL'] = $emailAddress;
+		}
+
+		$phoneMobile = $this->getForcedUserOverrideString($overrideMap, self::EMAIL_SIGNATURE_PHONE_MOBILE_KEY);
+		if ($phoneMobile !== null) {
+			$variables['PHONE_MOBILE'] = $phoneMobile;
+		}
+
+		$custom1 = $this->getForcedUserOverrideString($overrideMap, self::EMAIL_SIGNATURE_CUSTOM1_KEY);
+		if ($custom1 !== null) {
+			$variables['CUSTOM1'] = $custom1;
+		}
+
+		$custom2 = $this->getForcedUserOverrideString($overrideMap, self::EMAIL_SIGNATURE_CUSTOM2_KEY);
+		if ($custom2 !== null) {
+			$variables['CUSTOM2'] = $custom2;
+		}
+
 		return $variables;
+	}
+
+	/**
+	 * @param array<string, ClientOverride> $overrideMap
+	 */
+	private function getForcedUserOverrideString(array $overrideMap, string $key): ?string {
+		$override = $overrideMap[$key] ?? null;
+		if (!$override instanceof ClientOverride || $override->getMode() !== self::MODE_FORCED) {
+			return null;
+		}
+
+		return (string)$this->parseStoredValue($key, (string)$override->getSettingValue());
+	}
+
+	private function getUserOnlyFallbackValue(string $key, string $userId): string {
+		if ($key !== self::EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY) {
+			return '';
+		}
+
+		$variables = $this->getEmailSignatureTemplateVariables($userId);
+		return (string)($variables['EMAIL'] ?? '');
+	}
+
+	/**
+	 * @param array<string, string> $variables
+	 */
+	private function removeEmptyEmailSignatureVariableLines(string $template, array $variables): string {
+		$emptyNames = array_keys(array_filter(
+			$variables,
+			static fn (string $value): bool => trim($value) === ''
+		));
+		if ($emptyNames === []) {
+			return $template;
+		}
+
+		$variablePattern = $this->buildEmailSignatureVariablePattern($emptyNames);
+		$template = preg_replace_callback(
+			'~<tr\b[^>]*>.*?</tr>~is',
+			function (array $match) use ($variablePattern): string {
+				if (preg_match($variablePattern, $match[0]) !== 1) {
+					return $match[0];
+				}
+
+				$row = preg_replace_callback(
+					'~(<t[dh]\b[^>]*>)(.*?)(</t[dh]>)~is',
+					function (array $cellMatch) use ($variablePattern): string {
+						$inner = $this->removeEmptyEmailSignatureBrLines($cellMatch[2], $variablePattern);
+						return $cellMatch[1] . $inner . $cellMatch[3];
+					},
+					$match[0]
+				) ?? $match[0];
+				return trim(strip_tags($row)) === '' ? '' : $row;
+			},
+			$template
+		) ?? $template;
+		$template = preg_replace_callback(
+			'~<li\b[^>]*>.*?</li>~is',
+			static fn (array $match): string => preg_match($variablePattern, $match[0]) === 1 ? '' : $match[0],
+			$template
+		) ?? $template;
+
+		$template = preg_replace_callback(
+			'~(<(p|div)\b[^>]*>)(.*?)(</\2>)~is',
+			function (array $match) use ($variablePattern): string {
+				if (preg_match($variablePattern, $match[3]) !== 1) {
+					return $match[0];
+				}
+
+				$inner = $this->removeEmptyEmailSignatureBrLines($match[3], $variablePattern);
+				if (trim(strip_tags($inner)) === '') {
+					return '';
+				}
+				return $match[1] . $inner . $match[4];
+			},
+			$template
+		) ?? $template;
+
+		$lines = preg_split('/\n/', $template);
+		if (!is_array($lines)) {
+			return $template;
+		}
+
+		$lines = array_values(array_filter(
+			$lines,
+			static fn (string $line): bool => preg_match($variablePattern, $line) !== 1
+		));
+		return implode("\n", $lines);
+	}
+
+	/**
+	 * @param string[] $variableNames
+	 */
+	private function buildEmailSignatureVariablePattern(array $variableNames): string {
+		$escaped = array_map(
+			static fn (string $name): string => preg_quote($name, '~'),
+			$variableNames
+		);
+		return '~\{(?:' . implode('|', $escaped) . ')\}~';
+	}
+
+	private function removeEmptyEmailSignatureBrLines(string $html, string $variablePattern): string {
+		$parts = preg_split('~(<br\b[^>]*\/?>)~i', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+		if (!is_array($parts) || count($parts) <= 1) {
+			return preg_match($variablePattern, $html) === 1 ? '' : $html;
+		}
+
+		$result = [];
+		$partCount = count($parts);
+		for ($index = 0; $index < $partCount; $index++) {
+			$part = $parts[$index];
+			if ($index % 2 === 1) {
+				$result[] = $part;
+				continue;
+			}
+
+			if (preg_match($variablePattern, $part) !== 1) {
+				$result[] = $part;
+				continue;
+			}
+
+			if ($result !== [] && preg_match('~^<br\b~i', (string)end($result)) === 1) {
+				array_pop($result);
+				continue;
+			}
+			if ($index + 1 < $partCount && preg_match('~^<br\b~i', $parts[$index + 1]) === 1) {
+				$index++;
+			}
+		}
+
+		return implode('', $result);
 	}
 
 	private function getAccountPropertyValue(IAccount $account, string $property): string {
@@ -1121,7 +1352,17 @@ HTML;
 	}
 
 	private function isAddonControllableSetting(string $key): bool {
-		return !$this->isTemplateManagedSetting($key);
+		return !$this->isTemplateManagedSetting($key) && !$this->isUserOverrideOnlySetting($key);
+	}
+
+	private function isUserOverrideOnlySetting(string $key): bool {
+		return isset(self::USER_OVERRIDE_ONLY_SETTINGS[$key]);
+	}
+
+	private function removeUserOverrideOnlySettings(array &$settings, array &$sources, array &$policies, array &$addonEditable): void {
+		foreach (array_keys(self::USER_OVERRIDE_ONLY_SETTINGS) as $key) {
+			unset($settings[$key], $sources[$key], $policies[$key], $addonEditable[$key]);
+		}
 	}
 
 	private function isTemplateManagedSetting(string $key): bool {

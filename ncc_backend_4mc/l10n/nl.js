@@ -254,7 +254,17 @@ OC.L10N.register(
   "Generic Talk links in location or URL fields are ignored by the mail clients.": "Algemene Talk-links in locatie- of URL-velden worden door de mailclients genegeerd.",
   "Unsaved event cleanup remains active independently.": "Opschoning van niet-opgeslagen afspraken blijft onafhankelijk actief.",
   "Your own admin account is not shown here because administrator accounts cannot receive seats.": "Your own admin account is not shown here because administrator accounts cannot receive seats.",
-  "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks."
+  "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.",
+  "Available variables: {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.": "Beschikbare variabelen: {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.",
+  "Signature email address": "E-mailadres voor handtekening",
+  "Overrides the profile email used for {EMAIL} and sender matching.": "Overschrijft het profiel-e-mailadres voor {EMAIL} en afzenderherkenning.",
+  "Use inherit to keep the Nextcloud profile email.": "Gebruik overnemen om het Nextcloud-profiel-e-mailadres te behouden.",
+  "Mobile phone": "Mobiele telefoon",
+  "Optional value for {PHONE_MOBILE}.": "Optionele waarde voor {PHONE_MOBILE}.",
+  "Custom 1": "Aangepast 1",
+  "Optional value for {CUSTOM1}.": "Optionele waarde voor {CUSTOM1}.",
+  "Custom 2": "Aangepast 2",
+  "Optional value for {CUSTOM2}.": "Optionele waarde voor {CUSTOM2}."
 },
 "nplurals=2; plural=(n != 1);"
 );

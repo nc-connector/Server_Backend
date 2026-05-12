@@ -252,7 +252,17 @@
         "Generic Talk links in location or URL fields are ignored by the mail clients.": "Os clientes de email ignoram links Talk genéricos nos campos de local ou URL.",
         "Unsaved event cleanup remains active independently.": "A limpeza de eventos não salvos permanece ativa de forma independente.",
         "Your own admin account is not shown here because administrator accounts cannot receive seats.": "Your own admin account is not shown here because administrator accounts cannot receive seats.",
-        "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks."
+        "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.",
+        "Available variables: {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.": "Variáveis disponíveis: {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.",
+        "Signature email address": "Endereço de e-mail da assinatura",
+        "Overrides the profile email used for {EMAIL} and sender matching.": "Substitui o e-mail do perfil usado para {EMAIL} e para a correspondência do remetente.",
+        "Use inherit to keep the Nextcloud profile email.": "Use herdar para manter o e-mail do perfil do Nextcloud.",
+        "Mobile phone": "Telefone celular",
+        "Optional value for {PHONE_MOBILE}.": "Valor opcional para {PHONE_MOBILE}.",
+        "Custom 1": "Personalizado 1",
+        "Optional value for {CUSTOM1}.": "Valor opcional para {CUSTOM1}.",
+        "Custom 2": "Personalizado 2",
+        "Optional value for {CUSTOM2}.": "Valor opcional para {CUSTOM2}."
     },
     "pluralForm": "nplurals=2; plural=(n > 1);"
 }

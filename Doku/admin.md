@@ -302,20 +302,34 @@ Email signature runtime behavior:
 - If `Add signature when composing` is disabled, the reply setting, forward setting, and template are inactive and the runtime API returns `null` for each dependent value.
 - The template is rendered for the resolved Seat user before it is returned by `/api/v1/status`.
 - The built-in default signature template avoids layout tables and `<style>` tags so mail clients can sanitize it without reintroducing Thunderbird composer table guides.
-- The runtime API also returns `policy.email_signature.user_email`, the resolved Nextcloud profile email address of the Seat user. Mail clients use it to apply the central signature only to matching sender identities.
+- The runtime API also returns `policy.email_signature.user_email`. Mail clients use it to apply the central signature only to matching sender identities.
 - Signature variables are filled from the assigned Seat user's **Nextcloud user profile settings** before the template is sent to Thunderbird or Outlook.
 - Example: if the Seat belongs to `alex@example.com`, `{PHONE}`, `{ABOUT}`, `{FUNCTION}`, and `{ORGANISATION}` are read from that Nextcloud user's profile fields.
 - Profile values are HTML-escaped by the backend before placeholder replacement.
 - `{ABOUT}` is the only multiline-capable profile placeholder: line breaks are normalized and rendered as `<br>`.
-- Missing profile values are rendered as empty strings.
+- If a placeholder has no value, the backend removes that signature line or table row before returning the rendered HTML.
 
 Email signature template variables:
 - `{NAME}` → Nextcloud display name
-- `{EMAIL}` → Nextcloud user email address
+- `{EMAIL}` → Nextcloud user email address, or the user override value if one is forced
 - `{PHONE}` → Nextcloud profile phone
+- `{PHONE_MOBILE}` → Mobile phone value from user overrides
 - `{ABOUT}` → Nextcloud profile biography/about text, with line breaks preserved
 - `{FUNCTION}` → Nextcloud profile role/function
 - `{ORGANISATION}` → Nextcloud profile organisation
+- `{CUSTOM1}` → Custom value from user overrides
+- `{CUSTOM2}` → Custom value from user overrides
+
+User overrides add four signature-only fields that do not exist in defaults or group overrides:
+
+| Field | Purpose |
+|---|---|
+| `Signature email address` | Overrides `{EMAIL}` and `policy.email_signature.user_email` for this Seat user |
+| `Mobile phone` | Supplies `{PHONE_MOBILE}` |
+| `Custom 1` | Supplies `{CUSTOM1}` |
+| `Custom 2` | Supplies `{CUSTOM2}` |
+
+Use `Signature email address` when the Nextcloud profile email is not the mailbox address used in Outlook or Thunderbird, for example with Entra ID based login setups.
 
 ### 5.1.3 What “Editable in add-on” actually means
 

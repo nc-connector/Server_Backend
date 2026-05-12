@@ -254,7 +254,17 @@ OC.L10N.register(
   "Generic Talk links in location or URL fields are ignored by the mail clients.": "郵件用戶端會忽略位置或 URL 欄位中的一般 Talk 連結。",
   "Unsaved event cleanup remains active independently.": "未儲存事件的清理仍會獨立保持啟用。",
   "Your own admin account is not shown here because administrator accounts cannot receive seats.": "Your own admin account is not shown here because administrator accounts cannot receive seats.",
-  "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks."
+  "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.",
+  "Available variables: {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.": "可用變數：{NAME}、{EMAIL}、{PHONE}、{PHONE_MOBILE}、{ABOUT}、{FUNCTION}、{ORGANISATION}、{CUSTOM1}、{CUSTOM2}。",
+  "Signature email address": "簽名電子郵件地址",
+  "Overrides the profile email used for {EMAIL} and sender matching.": "覆寫用於 {EMAIL} 與寄件者比對的個人資料電子郵件。",
+  "Use inherit to keep the Nextcloud profile email.": "使用繼承以保留 Nextcloud 個人資料電子郵件。",
+  "Mobile phone": "手機",
+  "Optional value for {PHONE_MOBILE}.": "{PHONE_MOBILE} 的選填值。",
+  "Custom 1": "自訂 1",
+  "Optional value for {CUSTOM1}.": "{CUSTOM1} 的選填值。",
+  "Custom 2": "自訂 2",
+  "Optional value for {CUSTOM2}.": "{CUSTOM2} 的選填值。"
 },
 "nplurals=1; plural=0;"
 );

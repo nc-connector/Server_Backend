@@ -188,9 +188,28 @@
 			label: 'Email signature template',
 			tooltip: [
 				'HTML signature template delivered to mail clients.',
-				'Available variables: {NAME}, {EMAIL}, {PHONE}, {ABOUT}, {FUNCTION}, {ORGANISATION}.',
+				'Available variables: {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.',
 				'The {ABOUT} variable preserves line breaks.',
 			],
+		},
+		email_signature_email_address: {
+			label: 'Signature email address',
+			tooltip: [
+				'Overrides the profile email used for {EMAIL} and sender matching.',
+				'Use inherit to keep the Nextcloud profile email.',
+			],
+		},
+		email_signature_phone_mobile: {
+			label: 'Mobile phone',
+			tooltip: ['Optional value for {PHONE_MOBILE}.'],
+		},
+		email_signature_custom1: {
+			label: 'Custom 1',
+			tooltip: ['Optional value for {CUSTOM1}.'],
+		},
+		email_signature_custom2: {
+			label: 'Custom 2',
+			tooltip: ['Optional value for {CUSTOM2}.'],
 		},
 	}
 
@@ -202,6 +221,16 @@
 	const EMAIL_SIGNATURE_ON_REPLY_KEY = 'email_signature_on_reply'
 	const EMAIL_SIGNATURE_ON_FORWARD_KEY = 'email_signature_on_forward'
 	const EMAIL_SIGNATURE_TEMPLATE_KEY = 'email_signature_template'
+	const EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY = 'email_signature_email_address'
+	const EMAIL_SIGNATURE_PHONE_MOBILE_KEY = 'email_signature_phone_mobile'
+	const EMAIL_SIGNATURE_CUSTOM1_KEY = 'email_signature_custom1'
+	const EMAIL_SIGNATURE_CUSTOM2_KEY = 'email_signature_custom2'
+	const USER_OVERRIDE_ONLY_SETTING_KEYS = new Set([
+		EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY,
+		EMAIL_SIGNATURE_PHONE_MOBILE_KEY,
+		EMAIL_SIGNATURE_CUSTOM1_KEY,
+		EMAIL_SIGNATURE_CUSTOM2_KEY,
+	])
 	const TALK_TEMPLATE_FORMAT_HTML = 'html'
 	const TALK_TEMPLATE_FORMAT_PLAIN_TEXT = 'plain_text'
 	const DEFAULT_TEMPLATE_LOGO_URL = 'https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png'
@@ -217,7 +246,7 @@
 		[SHARE_HTML_TEMPLATE_KEY]: ['URL', 'PASSWORD', 'EXPIRATIONDATE', 'RIGHTS', 'NOTE'],
 		[SHARE_PASSWORD_TEMPLATE_KEY]: ['PASSWORD'],
 		[TALK_INVITATION_TEMPLATE_KEY]: ['MEETING_URL', 'PASSWORD'],
-		[EMAIL_SIGNATURE_TEMPLATE_KEY]: ['NAME', 'EMAIL', 'PHONE', 'ABOUT', 'FUNCTION', 'ORGANISATION'],
+		[EMAIL_SIGNATURE_TEMPLATE_KEY]: ['NAME', 'EMAIL', 'PHONE', 'PHONE_MOBILE', 'ABOUT', 'FUNCTION', 'ORGANISATION', 'CUSTOM1', 'CUSTOM2'],
 	}
 	const ENUM_OPTION_LABELS = {
 		talk_room_type: {
@@ -832,6 +861,10 @@
 			EMAIL_SIGNATURE_ON_REPLY_KEY,
 			EMAIL_SIGNATURE_ON_FORWARD_KEY,
 			EMAIL_SIGNATURE_TEMPLATE_KEY,
+			EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY,
+			EMAIL_SIGNATURE_PHONE_MOBILE_KEY,
+			EMAIL_SIGNATURE_CUSTOM1_KEY,
+			EMAIL_SIGNATURE_CUSTOM2_KEY,
 		]
 		const positions = new Map(order.map((key, index) => [key, index]))
 		return Object.keys(schema || {}).sort((left, right) => {
@@ -870,6 +903,10 @@
 
 	function shouldRenderStandaloneSettingRow(settingKey) {
 		return !isEmbeddedTalkTemplateSettingKey(settingKey)
+	}
+
+	function isUserOverrideOnlySettingKey(settingKey) {
+		return USER_OVERRIDE_ONLY_SETTING_KEYS.has(String(settingKey || ''))
 	}
 
 	function getTemplateModeControlKey(settingKey) {
@@ -2112,7 +2149,9 @@
 	 * @returns {void}
 	 */
 	function renderDefaultsRows(tbody, schema, defaults, defaultModes, templateAssets, defaultTemplateAssets, category) {
-		const keys = sortedSettingKeys(schema).filter((key) => settingCategory(key) === category && shouldRenderStandaloneSettingRow(key))
+		const keys = sortedSettingKeys(schema).filter((key) => settingCategory(key) === category
+			&& shouldRenderStandaloneSettingRow(key)
+			&& !isUserOverrideOnlySettingKey(key))
 		if (keys.length === 0) {
 			tbody.innerHTML = `<tr><td colspan="3" class="nccb-muted">${escapeHtml(tr('No settings found.'))}</td></tr>`
 			return
@@ -2341,7 +2380,9 @@
 	}
 
 	function renderGroupOverrideRows(tbody, schema, items, templateAssets, defaultTemplateAssets, category) {
-		const keys = sortedSettingKeys(schema).filter((key) => settingCategory(key) === category && shouldRenderStandaloneSettingRow(key))
+		const keys = sortedSettingKeys(schema).filter((key) => settingCategory(key) === category
+			&& shouldRenderStandaloneSettingRow(key)
+			&& !isUserOverrideOnlySettingKey(key))
 		if (keys.length === 0) {
 			tbody.innerHTML = `<tr><td colspan="3" class="nccb-muted">${escapeHtml(tr('No settings found.'))}</td></tr>`
 			return
@@ -2611,6 +2652,7 @@
 
 	async function buildSeatReportCsv(seats, schema, api) {
 		const policyKeys = sortedSettingKeys(schema)
+			.filter((key) => !isUserOverrideOnlySettingKey(key))
 		const statusRows = await mapWithConcurrency(seats, 5, async (seat) => {
 			const payload = await api.loadStatus(seat.user_id)
 			const policy = {
@@ -3518,6 +3560,9 @@
 		const collectDefaultPayload = () => {
 			const payload = {}
 			sortedSettingKeys(state.schema).forEach((key) => {
+				if (isUserOverrideOnlySettingKey(key)) {
+					return
+				}
 				const addonToggle = root.querySelector(`.nccb-addon-changeable[data-setting-key="${key}"]`)
 				const isAddonChangeable = !isTemplateEditorSettingKey(key) && Boolean(addonToggle?.checked)
 				const value = key === 'attachments_min_size_mb'
@@ -3555,6 +3600,9 @@
 		const collectGroupOverridePayload = () => {
 			const payload = {}
 			sortedSettingKeys(state.schema).forEach((key) => {
+				if (isUserOverrideOnlySettingKey(key)) {
+					return
+				}
 				const modeKey = getTemplateModeControlKey(key)
 				const mode = root.querySelector(`.nccb-group-mode[data-setting-key="${modeKey}"]`)?.value || 'inherit'
 				if (mode !== 'forced') {
