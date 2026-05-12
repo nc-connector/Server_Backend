@@ -4,6 +4,17 @@ All notable changes to this repository are documented in this file.
 
 The format is based on **Keep a Changelog** and uses a simple version-first structure.
 
+## [1.1.1] - 2026-05-12
+
+### Added
+- Add email signature feature details to app metadata
+- Add per-user signature values for matching email, mobile phone, and custom fields
+- Add explicit `occ` toggle for admin seat assignment
+
+### Changed
+- Vendor DOMPurify for the backend template editor
+- Sanitize custom template drafts before preview and save in the admin UI
+
 ## [1.1.0] - 2026-05-05
 
 ### Added
