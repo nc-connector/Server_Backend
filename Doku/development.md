@@ -1,6 +1,6 @@
 # Development Guide — NC Connector Backend
 
-This document is the **single source of truth** for developers maintaining or extending the **NC Connector backend** for Nextcloud.
+This document is the main maintenance reference for the **NC Connector backend** for Nextcloud.
 
 It is written to answer three practical questions:
 - where the relevant code lives
@@ -37,7 +37,7 @@ Related docs:
 - [9. Install, disable, remove, keep-data](#9-install-disable-remove-keep-data)
 - [10. Internationalization (i18n / l10n)](#10-internationalization-i18n--l10n)
 - [11. Local development and validation](#11-local-development-and-validation)
-  - [11.1 Logging and error-handling contract](#111-logging-and-error-handling-contract)
+- [11.1 Logging and error-handling rules](#111-logging-and-error-handling-rules)
 - [12. Smoke-test checklist](#12-smoke-test-checklist)
 - [13. Packaging and release notes](#13-packaging-and-release-notes)
 
@@ -48,7 +48,7 @@ Related docs:
 Goals for this backend:
 - provide a central policy source for the NC Connector mail add-ons
 - manage seat assignment and seat availability
-- resolve effective client policies through a deterministic precedence model
+- resolve effective client policies through a clear precedence model
 - expose a clean runtime API to mail clients
 - keep admin operations understandable and auditable
 
@@ -331,6 +331,8 @@ Current implementation model:
 - Stored template HTML still keeps the original source URL.
 - New image URLs inserted in the modal are refreshed into the runtime cache immediately for the current draft.
 - Saving the modal remains the only real commit path.
+- Custom Share, Talk, password-mail, and email-signature HTML is sanitized in the admin editor with bundled DOMPurify before preview and save.
+- The runtime API returns the stored template values after normal policy resolution and variable replacement.
 
 Export/report behavior:
 - Template HTML is never exported as raw HTML in the seat CSV.
@@ -377,7 +379,7 @@ Internal admin use:
 
 Important implementation detail:
 - Group override endpoints intentionally use the query-based route in `appinfo/routes.php`.
-- That path was chosen because it behaves deterministically with group identifiers and avoids the earlier path-segment routing problem.
+- That path was chosen because it handles group identifiers reliably and avoids the earlier path-segment routing problem.
 - Admin accounts are excluded from Seat search by default.
 - `GET /apps/ncc_backend_4mc/api/v1/admin/users` returns `hints.admin_self_excluded=true` when the current admin account matches the active search scope but is intentionally filtered out.
 - `php occ ncc:admin-seat-assignment enable` intentionally disables that safety behavior; admin accounts then appear in Seat search and can receive Seats.
@@ -491,9 +493,9 @@ Environment note from this workspace:
 - `php` is not available in the local PATH here.
 - Real PHP linting and `occ`-based verification must therefore happen on the Nextcloud instance.
 
-### 11.1 Logging and error-handling contract
+### 11.1 Logging and error-handling rules
 
-Current logging contract:
+Current logging rules:
 - do not silently swallow backend exceptions
 - do not use suppressed filesystem operators such as `@unlink`
 - do not keep silent JSON/API parse failures in app-owned JavaScript

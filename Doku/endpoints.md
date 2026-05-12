@@ -37,6 +37,7 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
   - If a user override is removed and the setting falls back to a group override or the default again, `policy_editable` follows that lower layer again.
   - `policy.share.attachments_min_size_mb` is `null` when `policy.share.attachments_always_via_ncconnector=true`.
   - `policy.share.share_html_block_template` and `policy.share.share_password_template` are `null` when `policy.share.language_share_html_block != "custom"`.
+  - Custom Share, Talk, password-mail, and email-signature HTML is sanitized by the admin editor with bundled DOMPurify before it is saved.
   - `policy.talk.talk_invitation_template` and `policy.talk.talk_invitation_template_format` are `null` when `policy.talk.language_talk_description != "custom"`.
   - `policy.talk.event_description_type` is always either `"html"` or `"plain_text"`.
   - `policy_editable` does not contain `event_description_type`, because it is derived from the effective talk template mode and is not directly editable in mail clients.
@@ -169,5 +170,3 @@ curl -u "alice:APP_PASSWORD" \
 - **Field names:** `snake_case`
 - **Paging:** not required for the exposed mail-client endpoint
 - **Seat state values:** `seat_state` is `none`, `active`, or `suspended_overlimit`
-
-

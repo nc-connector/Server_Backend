@@ -925,6 +925,9 @@ HTML;
 		if ($maxLength !== null && strlen($normalized) > $maxLength) {
 			throw new \InvalidArgumentException(sprintf('Setting "%s" is too long', $key));
 		}
+		if ($key === 'share_html_block_template' || $key === 'share_password_template') {
+			$normalized = $this->normalizeTemplateBranding($normalized);
+		}
 
 		return $normalized;
 	}
@@ -1016,7 +1019,6 @@ HTML;
 
 		return $template;
 	}
-
 	/**
 	 * @param array<string, mixed> $settings
 	 */

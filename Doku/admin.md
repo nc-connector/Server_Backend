@@ -247,6 +247,7 @@ Template details:
 - The **Languages** dropdown rewrites the built-in text fragments to supported locales.
 - Variables and links stay untouched during translation.
 - Runtime image rendering inside the editor uses locally mirrored app files, while the stored template still keeps the original image URL.
+- The admin template editor sanitizes custom HTML with bundled DOMPurify before preview and save. Scripts, inline event handlers, unsafe URL protocols, and unsupported form/embed elements are removed there.
 
 Template variables used by Share templates:
 - `{URL}`
@@ -298,6 +299,7 @@ Important dependency:
 Email signature runtime behavior:
 - The backend delivers **HTML only** for the signature.
 - Mail clients may derive plain text from that HTML when needed.
+- The admin template editor sanitizes the signature HTML with bundled DOMPurify before it is saved.
 - There is intentionally **no language selector** for email signatures, including the template editor modal.
 - If `Add signature when composing` is disabled, the reply setting, forward setting, and template are inactive and the runtime API returns `null` for each dependent value.
 - The template is rendered for the resolved Seat user before it is returned by `/api/v1/status`.
@@ -372,7 +374,7 @@ Why this is necessary:
   - **Check for missing attachments**
   - **Upload for files larger than ...**
 - Per reviewer constraints and the add-on’s limited experiment scope, **NC Connector must not change these Thunderbird-wide compose settings itself**.
-- Therefore, if you want a deterministic admin-managed rollout, disable and lock these Thunderbird settings via `policies.json`.
+- Therefore, if you want a clear admin-managed rollout, disable and lock these Thunderbird settings via `policies.json`.
 
 Relevant Thunderbird preferences:
 - `mail.compose.attachment_reminder`
@@ -526,7 +528,7 @@ Additional group-level field:
 
 Why priority exists:
 - A user can belong to multiple Nextcloud groups.
-- If multiple groups define overrides, the backend needs a deterministic winner.
+- If multiple groups define overrides, the backend needs a clear winner.
 
 Rule:
 - **Lower priority number wins.**

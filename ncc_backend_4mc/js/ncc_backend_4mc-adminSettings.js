@@ -1222,7 +1222,7 @@
 		if (editor) {
 			control.value = fromEditorTemplateHtml(editor.getContent())
 		} else if (templateEditorModalState.textarea instanceof HTMLTextAreaElement) {
-			control.value = String(templateEditorModalState.textarea.value || '')
+			control.value = fromEditorTemplateHtml(templateEditorModalState.textarea.value || '')
 		}
 
 		const prefix = String(wrapper.dataset.prefix || 'default')
@@ -1548,27 +1548,37 @@
 		}
 	}
 
+	function sanitizeTemplateHtml(rawHtml) {
+		if (typeof window.NCCBTemplateSanitizer?.sanitizeHtml !== 'function') {
+			throw new Error('template_sanitizer_unavailable')
+		}
+		return window.NCCBTemplateSanitizer.sanitizeHtml(rawHtml)
+	}
+
 	function toEditorTemplateHtml(rawHtml, assetMap = {}) {
+		const sanitizedHtml = sanitizeTemplateHtml(rawHtml)
 		const parser = new DOMParser()
-		const doc = parser.parseFromString(String(rawHtml || ''), 'text/html')
+		const doc = parser.parseFromString(sanitizedHtml, 'text/html')
 		rewriteImageSources(doc, 'editor', assetMap)
-		return doc.body ? doc.body.innerHTML : String(rawHtml || '')
+		return doc.body ? doc.body.innerHTML : sanitizedHtml
 	}
 
 	function toPreviewTemplateHtml(rawHtml) {
+		const sanitizedHtml = sanitizeTemplateHtml(rawHtml)
 		const parser = new DOMParser()
-		const doc = parser.parseFromString(String(rawHtml || ''), 'text/html')
+		const doc = parser.parseFromString(sanitizedHtml, 'text/html')
 		doc.querySelectorAll('img').forEach((img) => {
 			img.removeAttribute('data-nccb-original-src')
 		})
-		return doc.body ? doc.body.innerHTML : String(rawHtml || '')
+		return doc.body ? doc.body.innerHTML : sanitizedHtml
 	}
 
 	function fromEditorTemplateHtml(editorHtml) {
+		const rawHtml = String(editorHtml || '')
 		const parser = new DOMParser()
-		const doc = parser.parseFromString(String(editorHtml || ''), 'text/html')
+		const doc = parser.parseFromString(rawHtml, 'text/html')
 		rewriteImageSources(doc, 'storage')
-		return doc.body ? doc.body.innerHTML : String(editorHtml || '')
+		return sanitizeTemplateHtml(doc.body ? doc.body.innerHTML : rawHtml)
 	}
 
 	function getTemplateControl(wrapper) {
