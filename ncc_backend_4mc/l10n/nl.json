@@ -277,7 +277,14 @@
         "No recommended apps found.": "Geen aanbevolen apps gevonden.",
         "Installed and active": "Geinstalleerd en actief",
         "Not installed or disabled": "Niet geinstalleerd of uitgeschakeld",
-        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Maakt het mogelijk om afzonderlijke deelwachtwoorden als vervallende Nextcloud Secrets-links te verzenden in plaats van platte wachtwoordmails."
+        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Maakt het mogelijk om afzonderlijke deelwachtwoorden als vervallende Nextcloud Secrets-links te verzenden in plaats van platte wachtwoordmails.",
+        "Activate Pro for teams": "Pro activeren voor teams",
+        "NC Connector currently runs in Community mode with one free Seat.": "NC Connector draait momenteel in Community-modus met een gratis Seat.",
+        "Pro is selected, but no valid license is active yet.": "Pro is geselecteerd, maar er is nog geen geldige licentie actief.",
+        "For teams, central policies and more Seats, activate Pro.": "Activeer Pro voor teams, centraal beleid en meer Seats.",
+        "Buy Pro license": "Pro-licentie kopen",
+        "Request 30-day trial key": "30 dagen proefsleutel aanvragen",
+        "You can keep using Community mode for tests and single-user setups.": "Voor tests en installaties met een gebruiker kunt u de Community-modus blijven gebruiken."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }

@@ -133,6 +133,26 @@
 	margin-top: 8px;
 }
 
+.nccb-pro-funnel {
+	margin: 14px 0;
+	padding: 14px 16px;
+	border: 1px solid var(--color-border, #ddd);
+	border-left: 4px solid var(--color-primary-element, #0082c9);
+	border-radius: 6px;
+	background: var(--color-background-hover, #f7f7f7);
+}
+
+.nccb-pro-funnel h3 {
+	margin-top: 0;
+}
+
+.nccb-pro-funnel-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 10px 0;
+}
+
 #nccb-license-hint {
 	margin-top: 6px;
 }

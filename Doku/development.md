@@ -158,6 +158,7 @@ Important UI behaviors currently implemented there:
 - clickable tooltip links from seat overview to group/user overrides
 - CSV export for assigned seats
 - language dropdown in the editor modal for built-in Share/Talk template translation
+- Pro checkout/trial hint is shown until Pro has an active or grace license state
 
 ### 4.2 Controller layer
 

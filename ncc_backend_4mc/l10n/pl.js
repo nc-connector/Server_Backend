@@ -279,7 +279,14 @@ OC.L10N.register(
   "No recommended apps found.": "Nie znaleziono polecanych aplikacji.",
   "Installed and active": "Zainstalowana i aktywna",
   "Not installed or disabled": "Nie zainstalowana albo wylaczona",
-  "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Pozwala wysylac osobne hasla do udostepnien jako wygasajace linki Nextcloud Secrets zamiast jawnych e-maili z haslem."
+  "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Pozwala wysylac osobne hasla do udostepnien jako wygasajace linki Nextcloud Secrets zamiast jawnych e-maili z haslem.",
+  "Activate Pro for teams": "Aktywuj Pro dla zespolow",
+  "NC Connector currently runs in Community mode with one free Seat.": "NC Connector dziala obecnie w trybie Community z jednym darmowym Seatem.",
+  "Pro is selected, but no valid license is active yet.": "Wybrano Pro, ale nie ma jeszcze aktywnej waznej licencji.",
+  "For teams, central policies and more Seats, activate Pro.": "Dla zespolow, centralnych zasad i wiekszej liczby Seatow aktywuj Pro.",
+  "Buy Pro license": "Kup licencje Pro",
+  "Request 30-day trial key": "Popros o 30-dniowy klucz testowy",
+  "You can keep using Community mode for tests and single-user setups.": "Do testow i konfiguracji dla jednego uzytkownika mozesz nadal uzywac trybu Community."
 },
 "nplurals=3; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4 && (n%100<12 || n%100>14)) ? 1 : 2);"
 );

@@ -279,7 +279,14 @@ OC.L10N.register(
   "No recommended apps found.": "找不到建議的應用程式。",
   "Installed and active": "已安裝並啟用",
   "Not installed or disabled": "未安裝或已停用",
-  "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "可將個別分享密碼以會過期的 Nextcloud Secrets 連結傳送，而不是明文密碼郵件。"
+  "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "可將個別分享密碼以會過期的 Nextcloud Secrets 連結傳送，而不是明文密碼郵件。",
+  "Activate Pro for teams": "為團隊啟用 Pro",
+  "NC Connector currently runs in Community mode with one free Seat.": "NC Connector 目前以 Community 模式執行，包含一個免費 Seat。",
+  "Pro is selected, but no valid license is active yet.": "已選取 Pro，但尚未啟用有效授權。",
+  "For teams, central policies and more Seats, activate Pro.": "如需團隊、集中政策和更多 Seat，請啟用 Pro。",
+  "Buy Pro license": "購買 Pro 授權",
+  "Request 30-day trial key": "申請 30 天試用金鑰",
+  "You can keep using Community mode for tests and single-user setups.": "測試和單一使用者設定可以繼續使用 Community 模式。"
 },
 "nplurals=1; plural=0;"
 );

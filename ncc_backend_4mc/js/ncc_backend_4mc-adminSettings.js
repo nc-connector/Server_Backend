@@ -2993,6 +2993,8 @@
 					<div id="nccb-license-message" class="nccb-muted" role="status"></div>
 				</div>
 
+				<div id="nccb-pro-funnel" class="nccb-pro-funnel" hidden></div>
+
 				<div class="nccb-section">
 					<h3>${escapeHtml(tr('Recommended Nextcloud apps'))}</h3>
 					<div class="nccb-muted">${escapeHtml(tr('Optional apps that unlock extra NC Connector features.'))}</div>
@@ -3300,6 +3302,7 @@
 			licenseStatus: root.querySelector('#nccb-license-status'),
 			licenseHint: root.querySelector('#nccb-license-hint'),
 			licenseMessage: root.querySelector('#nccb-license-message'),
+			proFunnel: root.querySelector('#nccb-pro-funnel'),
 			recommendedApps: root.querySelector('#nccb-recommended-apps'),
 			defaultMessage: root.querySelector('#nccb-default-message'),
 			defaultTableShare: root.querySelector('#nccb-default-tbody-share'),
@@ -3515,6 +3518,37 @@
 			].join(' | ')
 		}
 
+		const renderProFunnel = (snapshot) => {
+			if (!(refs.proFunnel instanceof HTMLElement)) {
+				return
+			}
+			const mode = snapshot?.mode === 'pro' ? 'pro' : 'community'
+			const status = String(snapshot?.status_effective || '').toUpperCase()
+			const hasValidLicense = mode === 'pro'
+				&& Boolean(snapshot?.has_credentials)
+				&& (status === 'ACTIVE' || status === 'GRACE')
+
+			refs.proFunnel.hidden = hasValidLicense
+			if (hasValidLicense) {
+				refs.proFunnel.innerHTML = ''
+				return
+			}
+
+			const intro = mode === 'pro'
+				? 'Pro is selected, but no valid license is active yet.'
+				: 'NC Connector currently runs in Community mode with one free Seat.'
+			refs.proFunnel.innerHTML = `
+				<h3>${escapeHtml(tr('Activate Pro for teams'))}</h3>
+				<p>${escapeHtml(tr(intro))}</p>
+				<p>${escapeHtml(tr('For teams, central policies and more Seats, activate Pro.'))}</p>
+				<div class="nccb-pro-funnel-actions">
+					<a class="button primary" href="https://nc-connector.de/preise-lizenzierung/#pro-checkout" target="_blank" rel="noopener">${escapeHtml(tr('Buy Pro license'))}</a>
+					<a class="button" href="mailto:info@nc-connector.de">${escapeHtml(tr('Request 30-day trial key'))}</a>
+				</div>
+				<p class="nccb-muted">${escapeHtml(tr('You can keep using Community mode for tests and single-user setups.'))}</p>
+			`
+		}
+
 		const renderRecommendedApps = (apps) => {
 			if (!(refs.recommendedApps instanceof HTMLElement)) {
 				return
@@ -3624,6 +3658,7 @@
 			}
 			updateModeUi(licenseSnapshot)
 			renderLicenseStatus(licenseSnapshot)
+			renderProFunnel(licenseSnapshot)
 			setMessage(refs.licenseMessage, '', '')
 		}
 
@@ -3872,6 +3907,7 @@
 				licenseSnapshot = await api.saveMode(radio.value)
 				updateModeUi(licenseSnapshot)
 				renderLicenseStatus(licenseSnapshot)
+				renderProFunnel(licenseSnapshot)
 				await refreshSeatsAndUsers(false)
 				setMessage(refs.licenseMessage, tr('Operating mode saved.'), 'success')
 			} catch (error) {

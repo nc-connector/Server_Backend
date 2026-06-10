@@ -277,7 +277,14 @@
         "No recommended apps found.": "未找到推荐应用。",
         "Installed and active": "已安装并启用",
         "Not installed or disabled": "未安装或已禁用",
-        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "允许将单独共享密码作为会过期的 Nextcloud Secrets 链接发送，而不是明文密码邮件。"
+        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "允许将单独共享密码作为会过期的 Nextcloud Secrets 链接发送，而不是明文密码邮件。",
+        "Activate Pro for teams": "为团队启用 Pro",
+        "NC Connector currently runs in Community mode with one free Seat.": "NC Connector 当前以 Community 模式运行，包含一个免费 Seat。",
+        "Pro is selected, but no valid license is active yet.": "已选择 Pro，但尚未激活有效许可证。",
+        "For teams, central policies and more Seats, activate Pro.": "如需团队、集中策略和更多 Seat，请启用 Pro。",
+        "Buy Pro license": "购买 Pro 许可证",
+        "Request 30-day trial key": "申请 30 天试用密钥",
+        "You can keep using Community mode for tests and single-user setups.": "测试和单用户环境可以继续使用 Community 模式。"
     },
     "pluralForm": "nplurals=1; plural=0;"
 }

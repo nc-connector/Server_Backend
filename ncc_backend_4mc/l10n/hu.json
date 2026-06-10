@@ -277,7 +277,14 @@
         "No recommended apps found.": "Nem talalhatok ajanlott alkalmazasok.",
         "Installed and active": "Telepitve es aktiv",
         "Not installed or disabled": "Nincs telepitve vagy ki van kapcsolva",
-        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Lehetove teszi a kulon megosztasi jelszavak lejaratos Nextcloud Secrets hivatkozaskent kuldeset egyszeru szoveges jelszo e-mail helyett."
+        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Lehetove teszi a kulon megosztasi jelszavak lejaratos Nextcloud Secrets hivatkozaskent kuldeset egyszeru szoveges jelszo e-mail helyett.",
+        "Activate Pro for teams": "Pro aktivalasa csapatoknak",
+        "NC Connector currently runs in Community mode with one free Seat.": "Az NC Connector jelenleg Community modban fut egy ingyenes Seattel.",
+        "Pro is selected, but no valid license is active yet.": "A Pro van kivalasztva, de meg nincs aktiv ervenyes licenc.",
+        "For teams, central policies and more Seats, activate Pro.": "Csapatokhoz, kozponti szabalyokhoz es tobb Seathoz aktivalja a Pro verziot.",
+        "Buy Pro license": "Pro licenc vasarlasa",
+        "Request 30-day trial key": "30 napos probakulcs kerese",
+        "You can keep using Community mode for tests and single-user setups.": "Tesztekhez es egyfelhasznalos beallitasokhoz tovabbra is hasznalhatja a Community modot."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }

@@ -27,6 +27,7 @@ Related docs:
   - [4.1 Operating mode](#41-operating-mode)
   - [4.2 License fields and sync](#42-license-fields-and-sync)
   - [4.3 Reading the status block](#43-reading-the-status-block)
+  - [4.4 Recommended Nextcloud apps](#44-recommended-nextcloud-apps)
 - [5. Group Settings section](#5-group-settings-section)
   - [5.1 Default Settings](#51-default-settings)
     - [5.1.1 Share settings reference](#511-share-settings-reference)
@@ -200,6 +201,24 @@ Use this section when the support question is:
 - “Why is a seat paused?”
 - “Did the last Pro sync succeed?”
 
+### 4.4 Recommended Nextcloud apps
+
+The `General` section also shows optional Nextcloud apps that improve NC Connector behavior.
+
+Currently listed:
+
+| App | Purpose |
+|---|---|
+| `Nextcloud Secrets` | Allows separate share passwords to be sent as expiring Secrets links instead of plain password mails |
+
+If the app is enabled, the list shows it with a green status mark.
+If it is missing or disabled, the list shows a red status mark.
+
+Important:
+- NC Connector still works without the Secrets app.
+- If Secrets is unavailable, password delivery falls back to the existing plain password mail behavior.
+- The Share setting `Password mode` disables the Secrets option while the app is unavailable.
+
 ---
 
 ## 5. Group Settings section
@@ -234,6 +253,8 @@ then the default values are the effective policy delivered to the mail add-on.
 | `Delete` | Default delete permission | Controls whether recipients may remove content |
 | `Set password` | Default password toggle for shares | Does not force a password unless the value is forced downstream |
 | `Send password separately` | Sends the password in a separate follow-up mail | Built-in default is **enabled** |
+| `Password mode` | Selects how separate share passwords are delivered | `Plaintext` uses the existing password mail; `Nextcloud Secret Link` requires the Nextcloud Secrets app |
+| `Nextcloud Secrets link expiry (days)` | Lifetime for generated Secrets links | Default is **7 days**; only active when separate password delivery and Secrets mode are active |
 | `Expiration (days)` | Default share lifetime | Interpreted in days |
 | `Always share attachments via NC Connector` | Forces attachment handling into the NC Connector flow | If active, the size-threshold setting becomes operationally irrelevant |
 | `Offer upload for files larger than (MB)` | Threshold that prompts the add-on to offer NC Connector sharing | Comes with its own enable/disable checkbox; when disabled, the field is greyed out and the API value becomes `null` |
@@ -257,6 +278,9 @@ Template variables used by Share templates:
 - `{NOTE}`
 
 Important dependency:
+- If `Send password separately` is disabled, `Password mode` and `Nextcloud Secrets link expiry (days)` are inactive.
+- If the Nextcloud Secrets app is missing or disabled, Secrets mode and the expiry field are inactive.
+- In that case, the runtime API returns `null` for `share_send_password_mode` and `share_secrets_expire_days`, and mail clients use the existing plain password mail behavior.
 - If `Language in share HTML block` is **not** `custom`, the template rows stay visibly inactive.
 - In that state, the UI hides the override-mode selector for those rows because the template content is not the active source.
 

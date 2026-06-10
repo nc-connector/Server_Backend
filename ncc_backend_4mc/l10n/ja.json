@@ -277,7 +277,14 @@
         "No recommended apps found.": "推奨アプリは見つかりませんでした。",
         "Installed and active": "インストール済みで有効",
         "Not installed or disabled": "未インストールまたは無効",
-        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "別送する共有パスワードを、平文のパスワードメールではなく有効期限付きのNextcloud Secretsリンクとして送信できます。"
+        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "別送する共有パスワードを、平文のパスワードメールではなく有効期限付きのNextcloud Secretsリンクとして送信できます。",
+        "Activate Pro for teams": "チーム向けProを有効化",
+        "NC Connector currently runs in Community mode with one free Seat.": "NC Connectorは現在、無料Seat 1件のCommunityモードで動作しています。",
+        "Pro is selected, but no valid license is active yet.": "Proが選択されていますが、有効なライセンスはまだありません。",
+        "For teams, central policies and more Seats, activate Pro.": "チーム、中央ポリシー、追加SeatにはProを有効化してください。",
+        "Buy Pro license": "Proライセンスを購入",
+        "Request 30-day trial key": "30日間の試用キーを依頼",
+        "You can keep using Community mode for tests and single-user setups.": "テストや単一ユーザー構成ではCommunityモードを引き続き利用できます。"
     },
     "pluralForm": "nplurals=1; plural=0;"
 }
