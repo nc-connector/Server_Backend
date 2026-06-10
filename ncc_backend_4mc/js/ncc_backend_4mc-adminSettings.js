@@ -57,6 +57,14 @@
 			label: 'Send password separately',
 			tooltip: ['Send password in a separate follow-up email.'],
 		},
+		share_send_password_mode: {
+			label: 'Password mode',
+			tooltip: ['Controls how separate share passwords are delivered.'],
+		},
+		share_secrets_expire_days: {
+			label: 'Nextcloud Secrets link expiry (days)',
+			tooltip: ['Defines how long generated Secrets links stay valid.'],
+		},
 		share_expire_days: {
 			label: 'Expiration (days)',
 			tooltip: ['Defines the default lifetime in days for new shares.'],
@@ -215,6 +223,10 @@
 
 	const SHARE_HTML_TEMPLATE_KEY = 'share_html_block_template'
 	const SHARE_PASSWORD_TEMPLATE_KEY = 'share_password_template'
+	const SHARE_SEND_PASSWORD_SEPARATELY_KEY = 'share_send_password_separately'
+	const SHARE_SEND_PASSWORD_MODE_KEY = 'share_send_password_mode'
+	const SHARE_SEND_PASSWORD_MODE_SECRETS = 'secrets'
+	const SHARE_SECRETS_EXPIRE_DAYS_KEY = 'share_secrets_expire_days'
 	const TALK_INVITATION_TEMPLATE_KEY = 'talk_invitation_template'
 	const TALK_INVITATION_TEMPLATE_FORMAT_KEY = 'talk_invitation_template_format'
 	const EMAIL_SIGNATURE_ON_COMPOSE_KEY = 'email_signature_on_compose'
@@ -249,6 +261,10 @@
 		[EMAIL_SIGNATURE_TEMPLATE_KEY]: ['NAME', 'EMAIL', 'PHONE', 'PHONE_MOBILE', 'ABOUT', 'FUNCTION', 'ORGANISATION', 'CUSTOM1', 'CUSTOM2'],
 	}
 	const ENUM_OPTION_LABELS = {
+		share_send_password_mode: {
+			plain: 'Plaintext',
+			secrets: 'Nextcloud Secret Link',
+		},
 		talk_room_type: {
 			event: 'Event conversation',
 			group: 'Group conversation',
@@ -839,6 +855,8 @@
 			'share_permission_delete',
 			'share_set_password',
 			'share_send_password_separately',
+			SHARE_SEND_PASSWORD_MODE_KEY,
+			SHARE_SECRETS_EXPIRE_DAYS_KEY,
 			'share_expire_days',
 			'attachments_always_via_ncconnector',
 			'attachments_min_size_mb',
@@ -895,6 +913,30 @@
 		return String(settingKey || '') === EMAIL_SIGNATURE_TEMPLATE_KEY
 			? 'Only active when signatures for new messages are enabled.'
 			: 'Only active when language is set to Custom.'
+	}
+
+	function renderSettingDependencyNotes(prefix, settingKey, definition) {
+		const key = String(settingKey || '')
+		const notes = []
+		if (key === SHARE_SEND_PASSWORD_MODE_KEY) {
+			notes.push(['separate-password-disabled', 'Only relevant when separate password delivery is enabled.'])
+			if (definition?.disabled_note) {
+				notes.push(['secrets-unavailable', definition.disabled_note])
+			}
+		}
+		if (key === SHARE_SECRETS_EXPIRE_DAYS_KEY) {
+			notes.push(['separate-password-disabled', 'Only relevant when separate password delivery is enabled.'])
+			notes.push(['secrets-mode-required', 'Only relevant when Nextcloud Secret Link mode is selected.'])
+			if (definition?.disabled_note) {
+				notes.push(['secrets-unavailable', definition.disabled_note])
+			}
+		}
+		if (notes.length === 0) {
+			return ''
+		}
+		return notes.map(([reason, text]) => `
+			<div class="nccb-muted nccb-setting-note" data-prefix="${escapeHtml(prefix)}" data-setting-key="${escapeHtml(key)}" data-note-reason="${escapeHtml(reason)}" hidden>${escapeHtml(tr(text))}</div>
+		`).join('')
 	}
 
 	function isEmbeddedTalkTemplateSettingKey(settingKey) {
@@ -1783,6 +1825,73 @@
 		minSizeWrapper?.classList.toggle('nccb-threshold-control--disabled', minSizeControl.disabled)
 	}
 
+	function setSettingDependencyNote(container, prefix, key, reason, visible) {
+		container.querySelectorAll(`.nccb-setting-note[data-prefix="${prefix}"][data-setting-key="${key}"][data-note-reason="${reason}"]`).forEach((note) => {
+			if (note instanceof HTMLElement) {
+				note.hidden = !visible
+			}
+		})
+	}
+
+	function setPolicyDependencyDisabled(container, prefix, key, disabled) {
+		const control = container.querySelector(`.nccb-setting-control[data-prefix="${prefix}"][data-setting-key="${key}"]`)
+		if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement || control instanceof HTMLTextAreaElement)) {
+			return
+		}
+
+		const disabledByMode = control.dataset.disabledByMode === '1'
+		control.disabled = disabledByMode || disabled
+		const row = control.closest('tr')
+		if (row instanceof HTMLElement) {
+			row.classList.toggle('nccb-default-value-cell--disabled', disabled)
+		}
+
+		if (prefix === 'default') {
+			const addonToggle = container.querySelector(`.nccb-addon-changeable[data-setting-key="${key}"]`)
+			if (addonToggle instanceof HTMLInputElement) {
+				addonToggle.disabled = disabled
+			}
+			return
+		}
+
+		const modeSelect = container.querySelector(`.${prefix === 'group-override' ? 'nccb-group-mode' : 'nccb-user-mode'}[data-setting-key="${key}"]`)
+		if (modeSelect instanceof HTMLSelectElement) {
+			modeSelect.disabled = disabled
+		}
+	}
+
+	function isSharePasswordSeparateEnabled(container, prefix) {
+		const control = container.querySelector(`.nccb-setting-control[data-prefix="${prefix}"][data-setting-key="${SHARE_SEND_PASSWORD_SEPARATELY_KEY}"]`)
+		return control instanceof HTMLInputElement ? control.checked : true
+	}
+
+	function isSecretsOptionAvailable(modeControl) {
+		if (!(modeControl instanceof HTMLSelectElement)) {
+			return true
+		}
+		const option = modeControl.querySelector(`option[value="${SHARE_SEND_PASSWORD_MODE_SECRETS}"]`)
+		return !(option instanceof HTMLOptionElement) || !option.disabled
+	}
+
+	function applySharePasswordDependency(container, prefix) {
+		const separateEnabled = isSharePasswordSeparateEnabled(container, prefix)
+		const modeControl = container.querySelector(`.nccb-setting-control[data-prefix="${prefix}"][data-setting-key="${SHARE_SEND_PASSWORD_MODE_KEY}"]`)
+		const modeSelected = modeControl instanceof HTMLSelectElement
+			? String(modeControl.value || '')
+			: ''
+		const secretsAvailable = isSecretsOptionAvailable(modeControl)
+		const secretsSelected = modeSelected === SHARE_SEND_PASSWORD_MODE_SECRETS
+
+		setPolicyDependencyDisabled(container, prefix, SHARE_SEND_PASSWORD_MODE_KEY, !separateEnabled)
+		setPolicyDependencyDisabled(container, prefix, SHARE_SECRETS_EXPIRE_DAYS_KEY, !separateEnabled || !secretsSelected || !secretsAvailable)
+
+		setSettingDependencyNote(container, prefix, SHARE_SEND_PASSWORD_MODE_KEY, 'separate-password-disabled', !separateEnabled)
+		setSettingDependencyNote(container, prefix, SHARE_SEND_PASSWORD_MODE_KEY, 'secrets-unavailable', separateEnabled && !secretsAvailable)
+		setSettingDependencyNote(container, prefix, SHARE_SECRETS_EXPIRE_DAYS_KEY, 'separate-password-disabled', !separateEnabled)
+		setSettingDependencyNote(container, prefix, SHARE_SECRETS_EXPIRE_DAYS_KEY, 'secrets-mode-required', separateEnabled && secretsAvailable && !secretsSelected)
+		setSettingDependencyNote(container, prefix, SHARE_SECRETS_EXPIRE_DAYS_KEY, 'secrets-unavailable', separateEnabled && !secretsAvailable)
+	}
+
 	function applyTemplateLanguageDependency(container, prefix) {
 		const shareLanguageControl = container.querySelector(`.nccb-setting-control[data-prefix="${prefix}"][data-setting-key="language_share_html_block"]`)
 		const talkLanguageControl = container.querySelector(`.nccb-setting-control[data-prefix="${prefix}"][data-setting-key="language_talk_description"]`)
@@ -1956,6 +2065,20 @@
 		})
 	}
 
+	function attachSharePasswordDependencyHandlers(root) {
+		root.querySelectorAll(`.nccb-setting-control[data-setting-key="${SHARE_SEND_PASSWORD_SEPARATELY_KEY}"], .nccb-setting-control[data-setting-key="${SHARE_SEND_PASSWORD_MODE_KEY}"]`).forEach((control) => {
+			if (control.dataset.nccbSharePasswordDependencyBound === '1') {
+				return
+			}
+			control.dataset.nccbSharePasswordDependencyBound = '1'
+			control.addEventListener('change', () => {
+				syncDefaultControlState(root)
+				syncOverrideControlState(root)
+				syncGroupOverrideControlState(root)
+			})
+		})
+	}
+
 	function isWriteMethod(method) {
 		const m = String(method).toUpperCase()
 		return m === 'POST' || m === 'PUT' || m === 'PATCH' || m === 'DELETE'
@@ -2062,6 +2185,7 @@
 			const min = Number.isInteger(definition?.min) ? `min="${definition.min}"` : ''
 			const max = Number.isInteger(definition?.max) ? `max="${definition.max}"` : ''
 			const numeric = Number.isInteger(value) ? value : Number.parseInt(String(value ?? 0), 10) || 0
+			const notes = renderSettingDependencyNotes(prefix, key, definition)
 			if (key === 'attachments_min_size_mb') {
 				const enabled = value !== null && typeof value !== 'undefined'
 				return `
@@ -2074,17 +2198,21 @@
 					</div>
 				`
 			}
-			return `<input id="${escapeHtml(id)}" type="number" ${common} value="${numeric}" ${min} ${max}>`
+			return `<input id="${escapeHtml(id)}" type="number" ${common} value="${numeric}" ${min} ${max}>${notes}`
 		}
 
 		if (type === 'enum') {
 			const options = Array.isArray(definition?.options) ? definition.options : []
+			const disabledOptions = definition?.disabled_options && typeof definition.disabled_options === 'object'
+				? definition.disabled_options
+				: {}
 			const selected = String(value ?? '')
 			const html = options.map((option) => {
 				const raw = String(option)
-				return `<option value="${escapeHtml(raw)}" ${raw === selected ? 'selected' : ''}>${escapeHtml(enumOptionLabel(key, raw))}</option>`
+				const disabledOption = disabledOptions?.[raw] ? 'disabled' : ''
+				return `<option value="${escapeHtml(raw)}" ${raw === selected ? 'selected' : ''} ${disabledOption}>${escapeHtml(enumOptionLabel(key, raw))}</option>`
 			}).join('')
-			return `<select id="${escapeHtml(id)}" ${common}>${html}</select>`
+			return `<select id="${escapeHtml(id)}" ${common}>${html}</select>${renderSettingDependencyNotes(prefix, key, definition)}`
 		}
 
 		const maxLength = Number.isInteger(definition?.max_length) ? definition.max_length : null
@@ -2170,7 +2298,8 @@
 		tbody.innerHTML = keys.map((key) => {
 			const definition = schema[key] || {}
 			const value = Object.prototype.hasOwnProperty.call(defaults || {}, key) ? defaults[key] : definition.default
-			const addonChangeable = defaultModes?.[key] === 'user_choice' && !isTemplateEditorSettingKey(key)
+			const addonEditableSupported = definition?.addon_editable_supported !== false && !isTemplateEditorSettingKey(key)
+			const addonChangeable = addonEditableSupported && defaultModes?.[key] === 'user_choice'
 			const controlDisabled = false
 
 			if (isTemplateEditorSettingKey(key)) {
@@ -2209,10 +2338,12 @@
 						</div>
 					</td>
 					<td>
-						<label class="nccb-inline-option">
-							<input type="checkbox" class="nccb-addon-changeable" data-setting-key="${escapeHtml(key)}" ${addonChangeable ? 'checked' : ''}>
-							${escapeHtml(tr('Editable in add-on'))}
-						</label>
+						${addonEditableSupported
+							? `<label class="nccb-inline-option">
+								<input type="checkbox" class="nccb-addon-changeable" data-setting-key="${escapeHtml(key)}" ${addonChangeable ? 'checked' : ''}>
+								${escapeHtml(tr('Editable in add-on'))}
+							</label>`
+							: '<span class="nccb-muted">—</span>'}
 					</td>
 					<td class="nccb-default-value-cell ${addonChangeable ? 'nccb-default-value-cell--disabled' : ''}">${renderSettingControl('default', key, definition, value, controlDisabled || addonChangeable, templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}</td>
 				</tr>
@@ -2241,6 +2372,7 @@
 			}
 		}
 		syncAttachmentMinSizeDependency(root, 'default')
+		applySharePasswordDependency(root, 'default')
 		applyTemplateLanguageDependency(root, 'default')
 		applyEmailSignatureDependency(root, 'default')
 		syncTemplateEditorState(root, 'default')
@@ -2348,6 +2480,7 @@
 		syncOverrideControlState(root)
 		attachOverrideModeHandlers(root)
 		attachAttachmentDependencyHandlers(root)
+		attachSharePasswordDependencyHandlers(root)
 		attachTemplateLanguageDependencyHandlers(root, 'override')
 		attachEmailSignatureDependencyHandlers(root, 'override')
 		attachTemplateEditorHandlers(root)
@@ -2377,6 +2510,7 @@
 			}
 		}
 		syncAttachmentMinSizeDependency(tbody, 'override')
+		applySharePasswordDependency(tbody, 'override')
 		applyTemplateLanguageDependency(tbody, 'override')
 		applyEmailSignatureDependency(tbody, 'override')
 		syncTemplateEditorState(tbody, 'override')
@@ -2478,6 +2612,7 @@
 		syncGroupOverrideControlState(root)
 		attachGroupOverrideModeHandlers(root)
 		attachAttachmentDependencyHandlers(root, 'group-override')
+		attachSharePasswordDependencyHandlers(root)
 		attachTemplateLanguageDependencyHandlers(root, 'group-override')
 		attachEmailSignatureDependencyHandlers(root, 'group-override')
 		attachTemplateEditorHandlers(root)
@@ -2507,6 +2642,7 @@
 			}
 		}
 		syncAttachmentMinSizeDependency(tbody, 'group-override')
+		applySharePasswordDependency(tbody, 'group-override')
 		applyTemplateLanguageDependency(tbody, 'group-override')
 		applyEmailSignatureDependency(tbody, 'group-override')
 		syncTemplateEditorState(tbody, 'group-override')
@@ -2856,6 +2992,12 @@
 					<div id="nccb-license-hint" class="nccb-muted" hidden></div>
 					<div id="nccb-license-message" class="nccb-muted" role="status"></div>
 				</div>
+
+				<div class="nccb-section">
+					<h3>${escapeHtml(tr('Recommended Nextcloud apps'))}</h3>
+					<div class="nccb-muted">${escapeHtml(tr('Optional apps that unlock extra NC Connector features.'))}</div>
+					<div id="nccb-recommended-apps" class="nccb-recommended-apps"></div>
+				</div>
 			</section>
 
 			<section class="nccb-main-panel" data-main-tab-panel="group" hidden>
@@ -3134,6 +3276,7 @@
 			overrideTemplateAssets: {},
 			groupOverrideTemplateAssets: {},
 			schemaTemplateAssets: {},
+			recommendedApps: [],
 			assignedSeats: [],
 			userPaging: {
 				limit: 20,
@@ -3157,6 +3300,7 @@
 			licenseStatus: root.querySelector('#nccb-license-status'),
 			licenseHint: root.querySelector('#nccb-license-hint'),
 			licenseMessage: root.querySelector('#nccb-license-message'),
+			recommendedApps: root.querySelector('#nccb-recommended-apps'),
 			defaultMessage: root.querySelector('#nccb-default-message'),
 			defaultTableShare: root.querySelector('#nccb-default-tbody-share'),
 			defaultTableTalk: root.querySelector('#nccb-default-tbody-talk'),
@@ -3371,6 +3515,37 @@
 			].join(' | ')
 		}
 
+		const renderRecommendedApps = (apps) => {
+			if (!(refs.recommendedApps instanceof HTMLElement)) {
+				return
+			}
+			const items = Array.isArray(apps) ? apps : []
+			if (items.length === 0) {
+				refs.recommendedApps.innerHTML = `<div class="nccb-muted">${escapeHtml(tr('No recommended apps found.'))}</div>`
+				return
+			}
+
+			refs.recommendedApps.innerHTML = items.map((app) => {
+				const enabled = Boolean(app?.enabled)
+				const statusText = enabled ? 'Installed and active' : 'Not installed or disabled'
+				const statusClass = enabled ? 'nccb-recommended-app-status--ok' : 'nccb-recommended-app-status--missing'
+				const statusIcon = enabled ? '&#10003;' : '&#10005;'
+				const purpose = String(app?.purpose || '')
+				return `
+					<div class="nccb-recommended-app">
+						<span class="nccb-recommended-app-status ${statusClass}" aria-hidden="true">${statusIcon}</span>
+						<div>
+							<div class="nccb-recommended-app-name">
+								${escapeHtml(String(app?.name || app?.id || ''))}
+								${purpose ? renderInlineHelp(String(app?.name || app?.id || ''), [purpose]) : ''}
+							</div>
+							<div class="nccb-muted">${escapeHtml(tr(statusText))}</div>
+						</div>
+					</div>
+				`
+			}).join('')
+		}
+
 		const renderSeatUsage = (seatStatus) => {
 			const seats = seatStatus || { total: 0, assigned: 0, active_assigned: 0, suspended_assigned: 0, free: 0, overlicensed: false, overlicensed_by: 0 }
 			let text = `${tr('Seats available')}: ${seats.total} | ${tr('Active used')}: ${seats.active_assigned ?? seats.assigned} | ${tr('Paused')}: ${seats.suspended_assigned ?? 0} | ${tr('Free')}: ${seats.free}`
@@ -3515,12 +3690,15 @@
 			state.defaultModes = response.default_modes || {}
 			state.defaultTemplateAssets = response.template_assets || {}
 			state.schemaTemplateAssets = response.schema_template_assets || {}
+			state.recommendedApps = response.recommended_apps || []
+			renderRecommendedApps(state.recommendedApps)
 			renderDefaultsRows(refs.defaultTableShare, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'share')
 			renderDefaultsRows(refs.defaultTableTalk, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'talk')
 			renderDefaultsRows(refs.defaultTableEmailSignature, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'email_signature')
 			syncDefaultControlState(root)
 			attachDefaultModeHandlers(root)
 			attachAttachmentDependencyHandlers(root)
+			attachSharePasswordDependencyHandlers(root)
 			attachTemplateLanguageDependencyHandlers(root, 'default')
 			attachEmailSignatureDependencyHandlers(root, 'default')
 			attachTemplateEditorHandlers(root)
@@ -3848,6 +4026,8 @@
 				state.defaultModes = response.default_modes || state.defaultModes
 				state.defaultTemplateAssets = response.template_assets || {}
 				state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
+				state.recommendedApps = response.recommended_apps || state.recommendedApps
+				renderRecommendedApps(state.recommendedApps)
 				removeTemplateEditorsByPrefix('default')
 				renderDefaultsRows(refs.defaultTableShare, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'share')
 				renderDefaultsRows(refs.defaultTableTalk, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'talk')
@@ -3855,6 +4035,7 @@
 				syncDefaultControlState(root)
 				attachDefaultModeHandlers(root)
 				attachAttachmentDependencyHandlers(root)
+				attachSharePasswordDependencyHandlers(root)
 				attachTemplateLanguageDependencyHandlers(root, 'default')
 				attachEmailSignatureDependencyHandlers(root, 'default')
 				attachTemplateEditorHandlers(root)

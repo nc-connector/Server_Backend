@@ -37,6 +37,8 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
   - If a user override is removed and the setting falls back to a group override or the default again, `policy_editable` follows that lower layer again.
   - `policy.share.attachments_min_size_mb` is `null` when `policy.share.attachments_always_via_ncconnector=true`.
   - `policy.share.share_html_block_template` and `policy.share.share_password_template` are `null` when `policy.share.language_share_html_block != "custom"`.
+  - `policy.share.share_send_password_mode` is `"plain"` or `"secrets"`. Missing, empty, or `null` means clients must use the existing plain password mail behavior.
+  - `policy.share.share_send_password_mode` and `policy.share.share_secrets_expire_days` are `null` when the Nextcloud Secrets app is not installed or disabled.
   - Custom Share, Talk, password-mail, and email-signature HTML is sanitized by the admin editor with bundled DOMPurify before it is saved.
   - `policy.talk.talk_invitation_template` and `policy.talk.talk_invitation_template_format` are `null` when `policy.talk.language_talk_description != "custom"`.
   - `policy.talk.event_description_type` is always either `"html"` or `"plain_text"`.
@@ -82,6 +84,8 @@ curl -u "alice:APP_PASSWORD" \
       "share_permission_delete": true,
       "share_set_password": true,
       "share_send_password_separately": true,
+      "share_send_password_mode": "plain",
+      "share_secrets_expire_days": 7,
       "share_expire_days": 8,
       "attachments_always_via_ncconnector": false,
       "attachments_min_size_mb": 5,
@@ -121,6 +125,8 @@ curl -u "alice:APP_PASSWORD" \
       "share_permission_delete": true,
       "share_set_password": true,
       "share_send_password_separately": true,
+      "share_send_password_mode": true,
+      "share_secrets_expire_days": false,
       "share_expire_days": true,
       "attachments_always_via_ncconnector": true,
       "attachments_min_size_mb": true,

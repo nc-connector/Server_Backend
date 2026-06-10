@@ -264,7 +264,22 @@ OC.L10N.register(
   "Custom 1": "Niestandardowe 1",
   "Optional value for {CUSTOM1}.": "Opcjonalna wartość dla {CUSTOM1}.",
   "Custom 2": "Niestandardowe 2",
-  "Optional value for {CUSTOM2}.": "Opcjonalna wartość dla {CUSTOM2}."
+  "Optional value for {CUSTOM2}.": "Opcjonalna wartość dla {CUSTOM2}.",
+  "Password mode": "Tryb hasla",
+  "Controls how separate share passwords are delivered.": "Okresla sposob dostarczania osobnych hasel do udostepnien.",
+  "Nextcloud Secrets link expiry (days)": "Wygasanie linku Nextcloud Secrets (dni)",
+  "Defines how long generated Secrets links stay valid.": "Okresla, jak dlugo wygenerowane linki Secrets pozostaja wazne.",
+  "Plaintext": "Tekst jawny",
+  "Nextcloud Secret Link": "Link sekretu Nextcloud",
+  "Only relevant when separate password delivery is enabled.": "Dotyczy tylko wlaczonej osobnej wysylki hasla.",
+  "Only relevant when Nextcloud Secret Link mode is selected.": "Dotyczy tylko wybranego trybu Link sekretu Nextcloud.",
+  "The Nextcloud Secrets app is not installed or disabled.": "Aplikacja Nextcloud Secrets nie jest zainstalowana albo jest wylaczona.",
+  "Recommended Nextcloud apps": "Polecane aplikacje Nextcloud",
+  "Optional apps that unlock extra NC Connector features.": "Opcjonalne aplikacje wlaczajace dodatkowe funkcje NC Connector.",
+  "No recommended apps found.": "Nie znaleziono polecanych aplikacji.",
+  "Installed and active": "Zainstalowana i aktywna",
+  "Not installed or disabled": "Nie zainstalowana albo wylaczona",
+  "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Pozwala wysylac osobne hasla do udostepnien jako wygasajace linki Nextcloud Secrets zamiast jawnych e-maili z haslem."
 },
 "nplurals=3; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4 && (n%100<12 || n%100>14)) ? 1 : 2);"
 );

@@ -378,6 +378,7 @@ Internal admin use:
 | `PUT` | `/apps/ncc_backend_4mc/api/v1/admin/client-settings/groups` | Save group overrides |
 
 Important implementation detail:
+- The schema/defaults response includes `recommended_apps` for optional Nextcloud apps that unlock extra admin-configurable behavior.
 - Group override endpoints intentionally use the query-based route in `appinfo/routes.php`.
 - That path was chosen because it handles group identifiers reliably and avoids the earlier path-segment routing problem.
 - Admin accounts are excluded from Seat search by default.
@@ -456,6 +457,8 @@ Important distinction:
 
 Current template-language rules:
 - `share_html_block_template` and `share_password_template` are relevant only when `language_share_html_block = custom`
+- `share_send_password_mode = null` means plain password mail fallback because the Secrets app is unavailable
+- `share_secrets_expire_days = null` means no Secrets link expiry can be used
 - `talk_invitation_template` is relevant only when `language_talk_description = custom`
 - `talk_invitation_template_format` is relevant only when `language_talk_description = custom`
 - `talk_invitation_template_format = html` returns stored editor HTML to the runtime API

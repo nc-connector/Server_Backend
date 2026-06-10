@@ -264,7 +264,22 @@ OC.L10N.register(
   "Custom 1": "自訂 1",
   "Optional value for {CUSTOM1}.": "{CUSTOM1} 的選填值。",
   "Custom 2": "自訂 2",
-  "Optional value for {CUSTOM2}.": "{CUSTOM2} 的選填值。"
+  "Optional value for {CUSTOM2}.": "{CUSTOM2} 的選填值。",
+  "Password mode": "密碼模式",
+  "Controls how separate share passwords are delivered.": "控制個別分享密碼的傳送方式。",
+  "Nextcloud Secrets link expiry (days)": "Nextcloud Secrets 連結有效期限（天）",
+  "Defines how long generated Secrets links stay valid.": "定義產生的 Secrets 連結保持有效的時間。",
+  "Plaintext": "純文字",
+  "Nextcloud Secret Link": "Nextcloud Secret 連結",
+  "Only relevant when separate password delivery is enabled.": "僅在啟用個別密碼傳送時適用。",
+  "Only relevant when Nextcloud Secret Link mode is selected.": "僅在選取 Nextcloud Secret 連結模式時適用。",
+  "The Nextcloud Secrets app is not installed or disabled.": "Nextcloud Secrets 應用程式未安裝或已停用。",
+  "Recommended Nextcloud apps": "建議的 Nextcloud 應用程式",
+  "Optional apps that unlock extra NC Connector features.": "可選應用程式，可啟用 NC Connector 的額外功能。",
+  "No recommended apps found.": "找不到建議的應用程式。",
+  "Installed and active": "已安裝並啟用",
+  "Not installed or disabled": "未安裝或已停用",
+  "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "可將個別分享密碼以會過期的 Nextcloud Secrets 連結傳送，而不是明文密碼郵件。"
 },
 "nplurals=1; plural=0;"
 );

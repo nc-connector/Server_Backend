@@ -264,7 +264,22 @@ OC.L10N.register(
   "Custom 1": "Personalizado 1",
   "Optional value for {CUSTOM1}.": "Valor opcional para {CUSTOM1}.",
   "Custom 2": "Personalizado 2",
-  "Optional value for {CUSTOM2}.": "Valor opcional para {CUSTOM2}."
+  "Optional value for {CUSTOM2}.": "Valor opcional para {CUSTOM2}.",
+  "Password mode": "Modo de palavra-passe",
+  "Controls how separate share passwords are delivered.": "Controla como sao entregues as palavras-passe de partilha separadas.",
+  "Nextcloud Secrets link expiry (days)": "Expiracao da ligacao Nextcloud Secrets (dias)",
+  "Defines how long generated Secrets links stay valid.": "Define durante quanto tempo as ligacoes Secrets geradas continuam validas.",
+  "Plaintext": "Texto simples",
+  "Nextcloud Secret Link": "Ligacao secreta Nextcloud",
+  "Only relevant when separate password delivery is enabled.": "Relevante apenas quando o envio separado da palavra-passe esta ativado.",
+  "Only relevant when Nextcloud Secret Link mode is selected.": "Relevante apenas quando o modo Ligacao secreta Nextcloud esta selecionado.",
+  "The Nextcloud Secrets app is not installed or disabled.": "A app Nextcloud Secrets nao esta instalada ou esta desativada.",
+  "Recommended Nextcloud apps": "Apps Nextcloud recomendadas",
+  "Optional apps that unlock extra NC Connector features.": "Apps opcionais que ativam funcoes extra do NC Connector.",
+  "No recommended apps found.": "Nenhuma app recomendada encontrada.",
+  "Installed and active": "Instalada e ativa",
+  "Not installed or disabled": "Nao instalada ou desativada",
+  "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Permite enviar palavras-passe de partilha separadas como ligacoes Nextcloud Secrets com expiracao em vez de e-mails de palavra-passe em texto simples."
 },
 "nplurals=2; plural=(n != 1);"
 );

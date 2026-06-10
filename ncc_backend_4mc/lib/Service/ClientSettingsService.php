@@ -19,6 +19,7 @@ use OCA\NcConnector\Db\SettingMapper;
 use OCP\Accounts\IAccount;
 use OCP\Accounts\IAccountManager;
 use OCP\Accounts\PropertyDoesNotExistException;
+use OCP\App\IAppManager;
 use OCP\Http\Client\IClientService;
 use OCP\IGroup;
 use OCP\IGroupManager;
@@ -38,6 +39,11 @@ class ClientSettingsService {
 	private const MODE_USER_CHOICE = 'user_choice';
 	private const MODE_DEFAULT = 'default';
 	private const GROUP_OVERRIDE_PRIORITY_DEFAULT = 100;
+	private const SECRETS_APP_ID = 'secrets';
+	private const SHARE_SEND_PASSWORD_MODE_KEY = 'share_send_password_mode';
+	private const SHARE_SEND_PASSWORD_MODE_PLAIN = 'plain';
+	private const SHARE_SEND_PASSWORD_MODE_SECRETS = 'secrets';
+	private const SHARE_SECRETS_EXPIRE_DAYS_KEY = 'share_secrets_expire_days';
 	private const TALK_TEMPLATE_FORMAT_HTML = 'html';
 	private const TALK_TEMPLATE_FORMAT_PLAIN_TEXT = 'plain_text';
 	private const EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY = 'email_signature_email_address';
@@ -49,6 +55,9 @@ class ClientSettingsService {
 		self::EMAIL_SIGNATURE_PHONE_MOBILE_KEY => true,
 		self::EMAIL_SIGNATURE_CUSTOM1_KEY => true,
 		self::EMAIL_SIGNATURE_CUSTOM2_KEY => true,
+	];
+	private const BACKEND_ONLY_SETTINGS = [
+		self::SHARE_SECRETS_EXPIRE_DAYS_KEY => true,
 	];
 	private const DEFAULT_SHARE_HTML_BLOCK_TEMPLATE = <<<'HTML'
 <!DOCTYPE html>
@@ -202,6 +211,10 @@ HTML;
 		'share_permission_delete' => ['type' => 'bool', 'default' => true],
 		'share_set_password' => ['type' => 'bool', 'default' => true],
 		'share_send_password_separately' => ['type' => 'bool', 'default' => true],
+		self::SHARE_SEND_PASSWORD_MODE_KEY => ['type' => 'enum', 'default' => self::SHARE_SEND_PASSWORD_MODE_PLAIN, 'options' => [
+			self::SHARE_SEND_PASSWORD_MODE_PLAIN, self::SHARE_SEND_PASSWORD_MODE_SECRETS,
+		]],
+		self::SHARE_SECRETS_EXPIRE_DAYS_KEY => ['type' => 'int', 'default' => 7, 'min' => 1, 'max' => 365],
 		'share_expire_days' => ['type' => 'int', 'default' => 8, 'min' => 0, 'max' => 3650],
 
 		'attachments_always_via_ncconnector' => ['type' => 'bool', 'default' => false],
@@ -247,6 +260,7 @@ HTML;
 		private IGroupManager $groupManager,
 		private IUserManager $userManager,
 		private IAccountManager $accountManager,
+		private IAppManager $appManager,
 		private IClientService $clientService,
 		private IURLGenerator $urlGenerator,
 		private LoggerInterface $logger,
@@ -255,8 +269,20 @@ HTML;
 
 	public function getSchema(): array {
 		$result = [];
+		$secretsAvailable = $this->isSecretsAppAvailable();
 		foreach (self::DEFINITIONS as $key => $definition) {
+			if (!$this->isAddonControllableSetting($key)) {
+				$definition['addon_editable_supported'] = false;
+			}
 			$result[$key] = $definition;
+		}
+		if (!$secretsAvailable) {
+			$result[self::SHARE_SEND_PASSWORD_MODE_KEY]['disabled_options'] = [
+				self::SHARE_SEND_PASSWORD_MODE_SECRETS => true,
+			];
+			$result[self::SHARE_SEND_PASSWORD_MODE_KEY]['disabled_note'] = 'The Nextcloud Secrets app is not installed or disabled.';
+			$result[self::SHARE_SECRETS_EXPIRE_DAYS_KEY]['disabled'] = true;
+			$result[self::SHARE_SECRETS_EXPIRE_DAYS_KEY]['disabled_note'] = 'The Nextcloud Secrets app is not installed or disabled.';
 		}
 		return $result;
 	}
@@ -275,6 +301,20 @@ HTML;
 			$defaults[$key] = $this->parseStoredValue($key, $stored);
 		}
 		return $defaults;
+	}
+
+	/**
+	 * @return list<array{id:string, name:string, enabled:bool, purpose:string}>
+	 */
+	public function getRecommendedApps(): array {
+		return [
+			[
+				'id' => self::SECRETS_APP_ID,
+				'name' => 'Nextcloud Secrets',
+				'enabled' => $this->isSecretsAppAvailable(),
+				'purpose' => 'Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.',
+			],
+		];
 	}
 
 	/**
@@ -643,6 +683,7 @@ HTML;
 			$sources[$key] = $item['source'];
 		}
 		$this->applyAttachmentPolicyDependency($settings);
+		$this->applyShareSecretsPolicyDependency($settings, $addonEditable, $policies);
 		$this->applyTemplateLanguageDependency($settings);
 		$this->applyEmailSignaturePolicyDependency($settings);
 		$this->applyEmailSignatureProfileVariables($settings, $userId);
@@ -1031,6 +1072,24 @@ HTML;
 
 	/**
 	 * @param array<string, mixed> $settings
+	 * @param array<string, bool> $addonEditable
+	 * @param array<string, string> $policies
+	 */
+	private function applyShareSecretsPolicyDependency(array &$settings, array &$addonEditable, array &$policies): void {
+		if ($this->isSecretsAppAvailable()) {
+			return;
+		}
+
+		$settings[self::SHARE_SEND_PASSWORD_MODE_KEY] = null;
+		$settings[self::SHARE_SECRETS_EXPIRE_DAYS_KEY] = null;
+		$addonEditable[self::SHARE_SEND_PASSWORD_MODE_KEY] = false;
+		$addonEditable[self::SHARE_SECRETS_EXPIRE_DAYS_KEY] = false;
+		$policies[self::SHARE_SEND_PASSWORD_MODE_KEY] = 'managed';
+		$policies[self::SHARE_SECRETS_EXPIRE_DAYS_KEY] = 'managed';
+	}
+
+	/**
+	 * @param array<string, mixed> $settings
 	 */
 	private function applyTemplateLanguageDependency(array &$settings): void {
 		$shareLanguage = (string)($settings['language_share_html_block'] ?? '');
@@ -1354,7 +1413,21 @@ HTML;
 	}
 
 	private function isAddonControllableSetting(string $key): bool {
-		return !$this->isTemplateManagedSetting($key) && !$this->isUserOverrideOnlySetting($key);
+		return !$this->isTemplateManagedSetting($key)
+			&& !$this->isUserOverrideOnlySetting($key)
+			&& !isset(self::BACKEND_ONLY_SETTINGS[$key]);
+	}
+
+	private function isSecretsAppAvailable(): bool {
+		try {
+			return $this->appManager->isEnabledForUser(self::SECRETS_APP_ID);
+		} catch (\Throwable $e) {
+			$this->logger->warning('Unable to check Nextcloud Secrets app state.', [
+				'app' => Application::APP_ID,
+				'exception' => $e,
+			]);
+			return false;
+		}
 	}
 
 	private function isUserOverrideOnlySetting(string $key): bool {

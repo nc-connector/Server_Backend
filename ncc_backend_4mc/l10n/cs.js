@@ -264,7 +264,22 @@ OC.L10N.register(
   "Custom 1": "Vlastní 1",
   "Optional value for {CUSTOM1}.": "Volitelná hodnota pro {CUSTOM1}.",
   "Custom 2": "Vlastní 2",
-  "Optional value for {CUSTOM2}.": "Volitelná hodnota pro {CUSTOM2}."
+  "Optional value for {CUSTOM2}.": "Volitelná hodnota pro {CUSTOM2}.",
+  "Password mode": "Rezim hesla",
+  "Controls how separate share passwords are delivered.": "Ridi zpusob doruceni samostatnych hesel ke sdileni.",
+  "Nextcloud Secrets link expiry (days)": "Platnost odkazu Nextcloud Secrets (dny)",
+  "Defines how long generated Secrets links stay valid.": "Určuje, jak dlouho zustanou vygenerovane odkazy Secrets platne.",
+  "Plaintext": "Prosty text",
+  "Nextcloud Secret Link": "Odkaz Nextcloud Secret",
+  "Only relevant when separate password delivery is enabled.": "Relevantni pouze pri zapnutem samostatnem odesilani hesla.",
+  "Only relevant when Nextcloud Secret Link mode is selected.": "Relevantni pouze pri vybranem rezimu Nextcloud Secret Link.",
+  "The Nextcloud Secrets app is not installed or disabled.": "Aplikace Nextcloud Secrets neni nainstalovana nebo je vypnuta.",
+  "Recommended Nextcloud apps": "Doporučene aplikace Nextcloud",
+  "Optional apps that unlock extra NC Connector features.": "Volitelne aplikace, ktere odemykaji dalsi funkce NC Connectoru.",
+  "No recommended apps found.": "Nebyly nalezeny zadne doporucene aplikace.",
+  "Installed and active": "Nainstalovano a aktivni",
+  "Not installed or disabled": "Neni nainstalovano nebo je vypnuto",
+  "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Umoznuje odesilat samostatna hesla ke sdileni jako casove omezene odkazy Nextcloud Secrets misto e-mailu s heslem v prostem textu."
 },
 "nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;"
 );

@@ -262,7 +262,22 @@
         "Custom 1": "Benutzerdefiniert 1",
         "Optional value for {CUSTOM1}.": "Optionaler Wert fuer {CUSTOM1}.",
         "Custom 2": "Benutzerdefiniert 2",
-        "Optional value for {CUSTOM2}.": "Optionaler Wert fuer {CUSTOM2}."
+        "Optional value for {CUSTOM2}.": "Optionaler Wert fuer {CUSTOM2}.",
+        "Password mode": "Passwortmodus",
+        "Controls how separate share passwords are delivered.": "Legt fest, wie separat gesendete Freigabepasswoerter zugestellt werden.",
+        "Nextcloud Secrets link expiry (days)": "Nextcloud-Secrets-Link-Ablauf (Tage)",
+        "Defines how long generated Secrets links stay valid.": "Legt fest, wie lange erzeugte Secrets-Links gueltig bleiben.",
+        "Plaintext": "Klartext",
+        "Nextcloud Secret Link": "Nextcloud-Secret-Link",
+        "Only relevant when separate password delivery is enabled.": "Nur relevant, wenn die separate Passwortzustellung aktiviert ist.",
+        "Only relevant when Nextcloud Secret Link mode is selected.": "Nur relevant, wenn der Modus Nextcloud-Secret-Link ausgewählt ist.",
+        "The Nextcloud Secrets app is not installed or disabled.": "Die Nextcloud-Secrets-App ist nicht installiert oder deaktiviert.",
+        "Recommended Nextcloud apps": "Empfohlene Nextcloud-Apps",
+        "Optional apps that unlock extra NC Connector features.": "Optionale Apps, die zusätzliche NC-Connector-Funktionen freischalten.",
+        "No recommended apps found.": "Keine empfohlenen Apps gefunden.",
+        "Installed and active": "Installiert und aktiv",
+        "Not installed or disabled": "Nicht installiert oder deaktiviert",
+        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Ermöglicht separat gesendete Freigabepasswörter als ablaufende Nextcloud-Secrets-Links statt Klartext-Passwortmails."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }

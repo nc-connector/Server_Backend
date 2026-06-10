@@ -137,6 +137,38 @@
 	margin-top: 6px;
 }
 
+.nccb-recommended-apps {
+	margin-top: 10px;
+	display: grid;
+	gap: 8px;
+}
+
+.nccb-recommended-app {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 10px 12px;
+	border: 1px solid var(--color-border, #ddd);
+	border-radius: 6px;
+}
+
+.nccb-recommended-app-status {
+	font-weight: 700;
+	line-height: 1.4;
+}
+
+.nccb-recommended-app-status--ok {
+	color: var(--color-success, #2ea043);
+}
+
+.nccb-recommended-app-status--missing {
+	color: var(--color-error, #e9322d);
+}
+
+.nccb-recommended-app-name {
+	font-weight: 600;
+}
+
 .nccb-muted {
 	opacity: 0.85;
 }

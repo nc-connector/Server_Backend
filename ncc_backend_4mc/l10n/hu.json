@@ -262,7 +262,22 @@
         "Custom 1": "Egyedi 1",
         "Optional value for {CUSTOM1}.": "Opcionális érték ehhez: {CUSTOM1}.",
         "Custom 2": "Egyedi 2",
-        "Optional value for {CUSTOM2}.": "Opcionális érték ehhez: {CUSTOM2}."
+        "Optional value for {CUSTOM2}.": "Opcionális érték ehhez: {CUSTOM2}.",
+        "Password mode": "Jelszomod",
+        "Controls how separate share passwords are delivered.": "Meghatarozza, hogyan kerulnek kezbesitesre a kulon megosztasi jelszavak.",
+        "Nextcloud Secrets link expiry (days)": "Nextcloud Secrets hivatkozas lejarata (nap)",
+        "Defines how long generated Secrets links stay valid.": "Megadja, meddig maradnak ervenyesek a letrehozott Secrets hivatkozasok.",
+        "Plaintext": "Egyszeru szoveg",
+        "Nextcloud Secret Link": "Nextcloud Secret hivatkozas",
+        "Only relevant when separate password delivery is enabled.": "Csak akkor ervenyes, ha a kulon jelszokuldes be van kapcsolva.",
+        "Only relevant when Nextcloud Secret Link mode is selected.": "Csak akkor ervenyes, ha a Nextcloud Secret hivatkozas mod van kivalasztva.",
+        "The Nextcloud Secrets app is not installed or disabled.": "A Nextcloud Secrets alkalmazas nincs telepitve vagy ki van kapcsolva.",
+        "Recommended Nextcloud apps": "Ajanlott Nextcloud alkalmazasok",
+        "Optional apps that unlock extra NC Connector features.": "Valaszthato alkalmazasok, amelyek tovabbi NC Connector funkciokat kapcsolnak be.",
+        "No recommended apps found.": "Nem talalhatok ajanlott alkalmazasok.",
+        "Installed and active": "Telepitve es aktiv",
+        "Not installed or disabled": "Nincs telepitve vagy ki van kapcsolva",
+        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Lehetove teszi a kulon megosztasi jelszavak lejaratos Nextcloud Secrets hivatkozaskent kuldeset egyszeru szoveges jelszo e-mail helyett."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }

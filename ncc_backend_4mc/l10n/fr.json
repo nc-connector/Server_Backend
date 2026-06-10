@@ -262,7 +262,22 @@
         "Custom 1": "Personnalisé 1",
         "Optional value for {CUSTOM1}.": "Valeur facultative pour {CUSTOM1}.",
         "Custom 2": "Personnalisé 2",
-        "Optional value for {CUSTOM2}.": "Valeur facultative pour {CUSTOM2}."
+        "Optional value for {CUSTOM2}.": "Valeur facultative pour {CUSTOM2}.",
+        "Password mode": "Mode du mot de passe",
+        "Controls how separate share passwords are delivered.": "Controle la facon dont les mots de passe de partage separes sont envoyes.",
+        "Nextcloud Secrets link expiry (days)": "Expiration du lien Nextcloud Secrets (jours)",
+        "Defines how long generated Secrets links stay valid.": "Definit la duree de validite des liens Secrets generes.",
+        "Plaintext": "Texte brut",
+        "Nextcloud Secret Link": "Lien secret Nextcloud",
+        "Only relevant when separate password delivery is enabled.": "Pertinent uniquement si l envoi separe du mot de passe est active.",
+        "Only relevant when Nextcloud Secret Link mode is selected.": "Pertinent uniquement si le mode Lien secret Nextcloud est selectionne.",
+        "The Nextcloud Secrets app is not installed or disabled.": "L application Nextcloud Secrets n est pas installee ou est desactivee.",
+        "Recommended Nextcloud apps": "Applications Nextcloud recommandees",
+        "Optional apps that unlock extra NC Connector features.": "Applications facultatives qui activent des fonctions supplementaires de NC Connector.",
+        "No recommended apps found.": "Aucune application recommandee trouvee.",
+        "Installed and active": "Installee et active",
+        "Not installed or disabled": "Non installee ou desactivee",
+        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Permet d envoyer les mots de passe de partage separes sous forme de liens Nextcloud Secrets expirables au lieu d e-mails en texte brut."
     },
     "pluralForm": "nplurals=2; plural=(n > 1);"
 }

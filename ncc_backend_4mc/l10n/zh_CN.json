@@ -262,7 +262,22 @@
         "Custom 1": "自定义 1",
         "Optional value for {CUSTOM1}.": "{CUSTOM1} 的可选值。",
         "Custom 2": "自定义 2",
-        "Optional value for {CUSTOM2}.": "{CUSTOM2} 的可选值。"
+        "Optional value for {CUSTOM2}.": "{CUSTOM2} 的可选值。",
+        "Password mode": "密码模式",
+        "Controls how separate share passwords are delivered.": "控制单独共享密码的发送方式。",
+        "Nextcloud Secrets link expiry (days)": "Nextcloud Secrets 链接有效期（天）",
+        "Defines how long generated Secrets links stay valid.": "定义生成的 Secrets 链接保持有效的时间。",
+        "Plaintext": "明文",
+        "Nextcloud Secret Link": "Nextcloud Secret 链接",
+        "Only relevant when separate password delivery is enabled.": "仅在启用单独密码发送时相关。",
+        "Only relevant when Nextcloud Secret Link mode is selected.": "仅在选择 Nextcloud Secret 链接模式时相关。",
+        "The Nextcloud Secrets app is not installed or disabled.": "Nextcloud Secrets 应用未安装或已禁用。",
+        "Recommended Nextcloud apps": "推荐的 Nextcloud 应用",
+        "Optional apps that unlock extra NC Connector features.": "可选应用，可启用 NC Connector 的额外功能。",
+        "No recommended apps found.": "未找到推荐应用。",
+        "Installed and active": "已安装并启用",
+        "Not installed or disabled": "未安装或已禁用",
+        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "允许将单独共享密码作为会过期的 Nextcloud Secrets 链接发送，而不是明文密码邮件。"
     },
     "pluralForm": "nplurals=1; plural=0;"
 }

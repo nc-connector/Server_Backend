@@ -262,7 +262,22 @@
         "Custom 1": "Personalizado 1",
         "Optional value for {CUSTOM1}.": "Valor opcional para {CUSTOM1}.",
         "Custom 2": "Personalizado 2",
-        "Optional value for {CUSTOM2}.": "Valor opcional para {CUSTOM2}."
+        "Optional value for {CUSTOM2}.": "Valor opcional para {CUSTOM2}.",
+        "Password mode": "Modo de senha",
+        "Controls how separate share passwords are delivered.": "Controla como as senhas de compartilhamento separadas sao entregues.",
+        "Nextcloud Secrets link expiry (days)": "Expiracao do link Nextcloud Secrets (dias)",
+        "Defines how long generated Secrets links stay valid.": "Define por quanto tempo os links Secrets gerados continuam validos.",
+        "Plaintext": "Texto simples",
+        "Nextcloud Secret Link": "Link secreto do Nextcloud",
+        "Only relevant when separate password delivery is enabled.": "Relevante apenas quando o envio separado da senha esta ativado.",
+        "Only relevant when Nextcloud Secret Link mode is selected.": "Relevante apenas quando o modo Link secreto do Nextcloud esta selecionado.",
+        "The Nextcloud Secrets app is not installed or disabled.": "O app Nextcloud Secrets nao esta instalado ou esta desativado.",
+        "Recommended Nextcloud apps": "Apps Nextcloud recomendados",
+        "Optional apps that unlock extra NC Connector features.": "Apps opcionais que ativam recursos extras do NC Connector.",
+        "No recommended apps found.": "Nenhum app recomendado encontrado.",
+        "Installed and active": "Instalado e ativo",
+        "Not installed or disabled": "Nao instalado ou desativado",
+        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Permite enviar senhas de compartilhamento separadas como links Nextcloud Secrets com expiracao em vez de e-mails de senha em texto simples."
     },
     "pluralForm": "nplurals=2; plural=(n > 1);"
 }

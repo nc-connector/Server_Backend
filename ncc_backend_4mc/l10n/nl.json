@@ -262,7 +262,22 @@
         "Custom 1": "Aangepast 1",
         "Optional value for {CUSTOM1}.": "Optionele waarde voor {CUSTOM1}.",
         "Custom 2": "Aangepast 2",
-        "Optional value for {CUSTOM2}.": "Optionele waarde voor {CUSTOM2}."
+        "Optional value for {CUSTOM2}.": "Optionele waarde voor {CUSTOM2}.",
+        "Password mode": "Wachtwoordmodus",
+        "Controls how separate share passwords are delivered.": "Bepaalt hoe afzonderlijke deelwachtwoorden worden bezorgd.",
+        "Nextcloud Secrets link expiry (days)": "Vervaldatum Nextcloud Secrets-link (dagen)",
+        "Defines how long generated Secrets links stay valid.": "Bepaalt hoe lang gegenereerde Secrets-links geldig blijven.",
+        "Plaintext": "Platte tekst",
+        "Nextcloud Secret Link": "Nextcloud Secret-link",
+        "Only relevant when separate password delivery is enabled.": "Alleen relevant wanneer afzonderlijke wachtwoordbezorging is ingeschakeld.",
+        "Only relevant when Nextcloud Secret Link mode is selected.": "Alleen relevant wanneer de modus Nextcloud Secret-link is geselecteerd.",
+        "The Nextcloud Secrets app is not installed or disabled.": "De Nextcloud Secrets-app is niet geinstalleerd of uitgeschakeld.",
+        "Recommended Nextcloud apps": "Aanbevolen Nextcloud-apps",
+        "Optional apps that unlock extra NC Connector features.": "Optionele apps die extra NC Connector-functies activeren.",
+        "No recommended apps found.": "Geen aanbevolen apps gevonden.",
+        "Installed and active": "Geinstalleerd en actief",
+        "Not installed or disabled": "Niet geinstalleerd of uitgeschakeld",
+        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Maakt het mogelijk om afzonderlijke deelwachtwoorden als vervallende Nextcloud Secrets-links te verzenden in plaats van platte wachtwoordmails."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }

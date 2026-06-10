@@ -56,6 +56,7 @@ class AdminClientSettingsController extends Controller {
 			'default_modes' => $this->clientSettings->getDefaultModes(),
 			'template_assets' => $this->clientSettings->getEditorTemplateAssetsForDefaults(),
 			'schema_template_assets' => $this->clientSettings->getEditorTemplateAssetsForSchemaDefaults(),
+			'recommended_apps' => $this->clientSettings->getRecommendedApps(),
 		]);
 	}
 
@@ -100,6 +101,7 @@ class AdminClientSettingsController extends Controller {
 			'default_modes' => $stored['default_modes'] ?? [],
 			'template_assets' => $this->clientSettings->getEditorTemplateAssetsForDefaults($stored['defaults'] ?? [], $templateAssetPreview),
 			'schema_template_assets' => $this->clientSettings->getEditorTemplateAssetsForSchemaDefaults(),
+			'recommended_apps' => $this->clientSettings->getRecommendedApps(),
 		]);
 	}
 

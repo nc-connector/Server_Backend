@@ -262,7 +262,22 @@
         "Custom 1": "Пользовательское 1",
         "Optional value for {CUSTOM1}.": "Необязательное значение для {CUSTOM1}.",
         "Custom 2": "Пользовательское 2",
-        "Optional value for {CUSTOM2}.": "Необязательное значение для {CUSTOM2}."
+        "Optional value for {CUSTOM2}.": "Необязательное значение для {CUSTOM2}.",
+        "Password mode": "Режим пароля",
+        "Controls how separate share passwords are delivered.": "Определяет способ доставки отдельных паролей к общим ссылкам.",
+        "Nextcloud Secrets link expiry (days)": "Срок действия ссылки Nextcloud Secrets (дни)",
+        "Defines how long generated Secrets links stay valid.": "Задает срок действия созданных ссылок Secrets.",
+        "Plaintext": "Открытый текст",
+        "Nextcloud Secret Link": "Секретная ссылка Nextcloud",
+        "Only relevant when separate password delivery is enabled.": "Используется только при включенной отдельной доставке пароля.",
+        "Only relevant when Nextcloud Secret Link mode is selected.": "Используется только при выбранном режиме секретной ссылки Nextcloud.",
+        "The Nextcloud Secrets app is not installed or disabled.": "Приложение Nextcloud Secrets не установлено или отключено.",
+        "Recommended Nextcloud apps": "Рекомендуемые приложения Nextcloud",
+        "Optional apps that unlock extra NC Connector features.": "Дополнительные приложения, которые включают функции NC Connector.",
+        "No recommended apps found.": "Рекомендуемые приложения не найдены.",
+        "Installed and active": "Установлено и активно",
+        "Not installed or disabled": "Не установлено или отключено",
+        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Позволяет отправлять отдельные пароли к общим ссылкам как временные ссылки Nextcloud Secrets вместо писем с паролем в открытом виде."
     },
     "pluralForm": "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2));"
 }

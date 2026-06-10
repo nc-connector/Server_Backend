@@ -262,7 +262,22 @@
         "Custom 1": "Custom 1",
         "Optional value for {CUSTOM1}.": "Optional value for {CUSTOM1}.",
         "Custom 2": "Custom 2",
-        "Optional value for {CUSTOM2}.": "Optional value for {CUSTOM2}."
+        "Optional value for {CUSTOM2}.": "Optional value for {CUSTOM2}.",
+        "Password mode": "Password mode",
+        "Controls how separate share passwords are delivered.": "Controls how separate share passwords are delivered.",
+        "Nextcloud Secrets link expiry (days)": "Nextcloud Secrets link expiry (days)",
+        "Defines how long generated Secrets links stay valid.": "Defines how long generated Secrets links stay valid.",
+        "Plaintext": "Plaintext",
+        "Nextcloud Secret Link": "Nextcloud Secret Link",
+        "Only relevant when separate password delivery is enabled.": "Only relevant when separate password delivery is enabled.",
+        "Only relevant when Nextcloud Secret Link mode is selected.": "Only relevant when Nextcloud Secret Link mode is selected.",
+        "The Nextcloud Secrets app is not installed or disabled.": "The Nextcloud Secrets app is not installed or disabled.",
+        "Recommended Nextcloud apps": "Recommended Nextcloud apps",
+        "Optional apps that unlock extra NC Connector features.": "Optional apps that unlock extra NC Connector features.",
+        "No recommended apps found.": "No recommended apps found.",
+        "Installed and active": "Installed and active",
+        "Not installed or disabled": "Not installed or disabled",
+        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }

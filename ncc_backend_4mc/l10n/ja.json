@@ -262,7 +262,22 @@
         "Custom 1": "カスタム 1",
         "Optional value for {CUSTOM1}.": "{CUSTOM1} の任意の値です。",
         "Custom 2": "カスタム 2",
-        "Optional value for {CUSTOM2}.": "{CUSTOM2} の任意の値です。"
+        "Optional value for {CUSTOM2}.": "{CUSTOM2} の任意の値です。",
+        "Password mode": "パスワードモード",
+        "Controls how separate share passwords are delivered.": "別送する共有パスワードの配信方法を制御します。",
+        "Nextcloud Secrets link expiry (days)": "Nextcloud Secretsリンクの有効期限（日）",
+        "Defines how long generated Secrets links stay valid.": "生成されたSecretsリンクの有効期間を指定します。",
+        "Plaintext": "平文",
+        "Nextcloud Secret Link": "Nextcloud Secretリンク",
+        "Only relevant when separate password delivery is enabled.": "パスワードの別送が有効な場合のみ関係します。",
+        "Only relevant when Nextcloud Secret Link mode is selected.": "Nextcloud Secretリンクモードが選択されている場合のみ関係します。",
+        "The Nextcloud Secrets app is not installed or disabled.": "Nextcloud Secretsアプリがインストールされていないか無効です。",
+        "Recommended Nextcloud apps": "推奨Nextcloudアプリ",
+        "Optional apps that unlock extra NC Connector features.": "NC Connectorの追加機能を有効にする任意のアプリです。",
+        "No recommended apps found.": "推奨アプリは見つかりませんでした。",
+        "Installed and active": "インストール済みで有効",
+        "Not installed or disabled": "未インストールまたは無効",
+        "Enables separate share passwords as expiring Nextcloud Secrets links instead of plain password emails.": "別送する共有パスワードを、平文のパスワードメールではなく有効期限付きのNextcloud Secretsリンクとして送信できます。"
     },
     "pluralForm": "nplurals=1; plural=0;"
 }
