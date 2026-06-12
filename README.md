@@ -1,173 +1,152 @@
-# NC Connector Backend
+<p align="center">
+  <img
+    src="https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png"
+    alt="NC Connector header"
+    width="1280"
+  />
+</p>
 
-This repository contains the **Nextcloud backend** for NC Connector.
+<p align="center">
+  <b>Central policy and template backend for NC Connector.</b><br/>
+  Seats, policies, templates, signatures, and password delivery for Thunderbird and Outlook Classic.
+</p>
 
-It is the central control layer for the mail add-ons.  
-The add-ons run in the mail client, but this backend decides:
+# NC Connector Server Backend
 
-- who is allowed to use NC Connector
-- which settings the add-on receives
-- which values users may change locally
-- which templates and texts are delivered centrally
+NC Connector Server Backend is the optional Nextcloud app for organizations that want central control over NC Connector clients.
 
-## What this backend is good for
+The mail add-ons can work directly with a Nextcloud account. The backend is used when admins need shared defaults, locked settings, seat assignment, templates, managed signatures, or separate password delivery rules.
 
-If you want NC Connector to behave consistently across a team, this backend is the relevant part.
+## What The Backend Does
 
-It gives admins a central place to manage:
+- assign seats to Nextcloud users
+- deliver effective Share, Talk, and email-signature policies to the clients
+- define which settings users may still change in the add-on
+- manage Share, password-mail, Talk invitation, and email-signature templates
+- provide user and group overrides for teams with different rules
+- control separate password delivery as plaintext mail or Nextcloud Secret link
+- expose setup state so Thunderbird and Outlook can explain backend problems clearly
 
-- **seats** for individual Nextcloud users
-- **license mode** (`Community` / `Pro`)
-- **default policies** for mail clients
-- **group overrides** for teams or departments
-- **user overrides** for individual exceptions
-- **Share, Talk, and email signature templates**, including visual editors and preview
+## Backend Or No Backend
 
-In short:
-
-- without backend = users work directly in the add-on
-- with backend = admins control rollout, policies, templates, and seat access centrally
-
-## Backend comparison
-
-| Capability | Without backend | With backend |
+| Use case | Without backend | With backend |
 |---|---|---|
-| Start directly in the mail client | ✅ | ✅ |
-| Seat assignment and central policy control | ❌ | ✅ |
-| Separate password delivery workflow | ❌ | ✅ |
-| Group-based policy overrides | ❌ | ✅ |
-| User-specific policy overrides | ❌ | ✅ |
-| Custom Share, Talk, and email signature templates | ❌ | ✅ |
-| Visual template editor with preview | ❌ | ✅ |
-| Central reporting for assigned seats | ❌ | ✅ |
+| Local file sharing from the mail client | Yes | Yes |
+| Talk rooms from calendar events | Yes | Yes |
+| Central seat assignment | No | Yes |
+| Admin-locked Share/Talk defaults | No | Yes |
+| Central email signatures | No | Yes |
+| Custom templates for Share, Talk, and password mails | No | Yes |
+| Separate password delivery policies | No | Yes |
+| Nextcloud Secret links for password delivery | No | Yes, with the Secrets app |
 
-## What the backend can do
+## Policy Model
 
-### 1) Seat-based access
+The backend resolves settings in this order:
 
-One seat maps to one Nextcloud user.
+1. user override
+2. group override
+3. default settings
 
-Admins can:
+Clients receive the resolved values plus editable flags. That lets admins lock selected options while still showing users which values are active.
 
-- assign and remove seats
-- filter users by group
-- bulk-assign seats
-- see which users currently have a seat
-- export a CSV report for documentation
+Policy areas:
 
-### 2) Central mail-client policies
-
-The backend provides effective settings to the mail add-ons, for example:
-
-- share permissions
-- password defaults
-- expiry defaults
-- attachment handling
+- Share defaults and permissions
+- password behavior and expiration days
+- separate password delivery mode
 - Talk room defaults
-- central email signature defaults
-- language and template selection
+- email-signature behavior for compose, reply, and forward
+- template language and custom template usage
 
-This means the add-on does not have to guess how it should behave.  
-It gets a clear policy payload from Nextcloud.
+## Seats And License Modes
 
-### 3) Group and user overrides
+Community mode includes one local seat and does not require a license lookup.
 
-Policy resolution follows a clear order:
+Pro mode uses the NC Connector license backend and supports team use with more seats. Seats map to Nextcloud users and can be reassigned by admins.
 
-- **user override**
-- **group override**
-- **default**
+Admin accounts are not assigned by default. If an organization deliberately wants that, a server admin can enable it with the documented `occ ncc:admin-seat-assignment` command.
 
-That allows a practical setup:
+## Templates And Signatures
 
-- one clean global default
-- team-specific deviations via group overrides
-- one-off exceptions via user overrides
+Admins can manage central HTML templates for:
 
-### 4) Central templates
+- Share blocks
+- separate password mails
+- Talk invitations
+- email signatures
 
-Admins can centrally manage:
+Templates are edited in the backend UI and sanitized before they are stored. Email signatures can use Nextcloud profile values and per-user override fields for matching email address, mobile phone, and custom values.
 
-- Share HTML template
-- Share password email template
-- Talk invitation template
-- Email signature template
+If a signature placeholder has no value, the backend removes the empty line or table row before returning the rendered HTML to Thunderbird or Outlook.
 
-The backend includes:
+## Password Delivery And Secrets
 
-- visual editor modal
-- live preview
-- template variables
-- language helper for supported Share/Talk locales
-- local runtime image handling for editor rendering
+Separate password delivery is a backend feature.
 
-### 5) Auditable operation
+Supported modes:
 
-The backend is meant to be supportable in production.
+- `plain`: send the password in a separate mail
+- `secrets`: send an expiring Nextcloud Secrets link
 
-That means:
+If the Nextcloud Secrets app is missing or disabled, the runtime policy returns `null` for the Secrets mode values. Clients then fall back to the existing plaintext password mail behavior instead of blocking the user.
 
-- server-side warnings and errors are logged consistently
-- denied admin actions and invalid payloads leave traces in the Nextcloud log
-- unexpected backend failures include exception context in the server log
-- admin UI and user-page failures are visible in the browser console
+The default Secrets link lifetime is 7 days.
 
-## Community vs. Pro
+## Requirements
 
-The backend supports two operating modes:
+- Nextcloud 31 through 34
+- PHP 8.1 or newer
+- NC Connector for Thunderbird or NC Connector for Outlook Classic
+- Nextcloud Files Sharing
+- optional: Nextcloud Talk
+- optional: Nextcloud Secrets for Secret-link password delivery
 
-- **Community**
-  - 1 included seat
-  - no license lookup
-- **Pro**
-  - seat entitlement comes from the license backend
-  - license email and license key are managed in Nextcloud
+## Installation
 
-## What the add-ons get from this backend
+1. Install the app from the [Nextcloud App Store](https://apps.nextcloud.com/apps/ncc_backend_4mc) or from a release archive.
+2. Enable the app in Nextcloud.
+3. Open **Administration settings -> NC Connector**.
+4. Choose Community or Pro mode.
+5. Assign seats.
+6. Configure Share, Talk, signatures, templates, and password delivery.
+7. Save the settings and test from Thunderbird or Outlook.
 
-Mail clients use the backend mainly as a **read-only policy source**.
+## Client Repositories
 
-They receive:
-
-- current seat/license state
-- effective Share policies
-- effective Talk policies
-- effective email signature policies
-- information about which settings are still editable in the add-on
-
-This keeps the client implementation simpler and makes support cases easier to reason about.
-
-## Typical use case
-
-A company wants:
-
-- centrally managed Share defaults
-- separate password delivery
-- controlled Talk defaults
-- centrally managed email signatures
-- templates in corporate wording/design
-- different rules for departments
-- a clear list of licensed users
-
-That is exactly what this backend is for.
-
-**Get it**
-- [Nextcloud App Store](https://apps.nextcloud.com/apps/ncc_backend_4mc)
-
-**Requirements**
-- Mail Cliend Addon Version >=3.0.0
-  
-## Repository structure
-
-- `ncc_backend_4mc/` – the actual Nextcloud app
-- `Doku/` – project documentation
-- `release/` – signing and packaging helpers
+- [NC Connector for Thunderbird](https://github.com/nc-connector/NC_Connector_for_Thunderbird)
+- [NC Connector for Outlook Classic](https://github.com/nc-connector/NC_Connector_for_Outlook)
 
 ## Documentation
 
-Further details:
+- [Admin documentation](Doku/admin.md)
+- [Development notes](Doku/development.md)
+- [Changelog](CHANGELOG.md)
+- [Translations](Translations.md)
+- [Third-party licenses](VENDOR.md)
 
-- `Doku/admin.md`
-- `Doku/endpoints.md`
-- `Doku/development.md`
-- `Translations.md`
+## Screenshots
+
+<details open>
+<summary><strong>Backend settings</strong></summary>
+
+| <a href="screenshots/appsettings.png"><img src="screenshots/appsettings.png" alt="Backend settings" width="420"></a> |
+| --- |
+
+</details>
+
+<details>
+<summary><strong>Template editor</strong></summary>
+
+| <a href="https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/screenshots/TemplateEditor.png"><img src="https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/screenshots/TemplateEditor.png" alt="Template editor" width="420"></a> |
+| --- |
+
+</details>
+
+<details>
+<summary><strong>Email signatures</strong></summary>
+
+| <a href="https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/screenshots/email_sig.png"><img src="https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/screenshots/email_sig.png" alt="Email signature settings" width="420"></a> |
+| --- |
+
+</details>
