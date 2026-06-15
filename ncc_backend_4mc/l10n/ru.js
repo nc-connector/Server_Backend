@@ -286,7 +286,14 @@ OC.L10N.register(
   "For teams, central policies and more Seats, activate Pro.": "Для команд, центральных политик и большего числа Seat включите Pro.",
   "Buy Pro license": "Купить лицензию Pro",
   "Request 30-day trial key": "Запросить пробный ключ на 30 дней",
-  "You can keep using Community mode for tests and single-user setups.": "Для тестов и установки для одного пользователя можно продолжать использовать режим Community."
+  "You can keep using Community mode for tests and single-user setups.": "Для тестов и установки для одного пользователя можно продолжать использовать режим Community.",
+  "Backend version": "Версия бэкенда",
+  "Installed version": "Установленная версия",
+  "Available version": "Доступная версия",
+  "Current": "Актуально",
+  "Update available": "Доступно обновление",
+  "Update status unavailable.": "Статус обновления недоступен.",
+  "Checking backend version...": "Проверяется версия бэкенда..."
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2));"
 );

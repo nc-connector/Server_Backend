@@ -286,7 +286,14 @@ OC.L10N.register(
   "For teams, central policies and more Seats, activate Pro.": "Para equipes, politicas centrais e mais Seats, ative o Pro.",
   "Buy Pro license": "Comprar licenca Pro",
   "Request 30-day trial key": "Solicitar chave de teste de 30 dias",
-  "You can keep using Community mode for tests and single-user setups.": "Voce pode continuar usando o modo Community para testes e configuracoes de usuario unico."
+  "You can keep using Community mode for tests and single-user setups.": "Voce pode continuar usando o modo Community para testes e configuracoes de usuario unico.",
+  "Backend version": "Versao do backend",
+  "Installed version": "Versao instalada",
+  "Available version": "Versao disponivel",
+  "Current": "Atual",
+  "Update available": "Atualizacao disponivel",
+  "Update status unavailable.": "Status de atualizacao indisponivel.",
+  "Checking backend version...": "Verificando versao do backend..."
 },
 "nplurals=2; plural=(n > 1);"
 );

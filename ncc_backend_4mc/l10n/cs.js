@@ -286,7 +286,14 @@ OC.L10N.register(
   "For teams, central policies and more Seats, activate Pro.": "Pro tymy, centralni pravidla a vice Seatu aktivujte Pro.",
   "Buy Pro license": "Koupit licenci Pro",
   "Request 30-day trial key": "Vyžadat 30denni zkusebni klic",
-  "You can keep using Community mode for tests and single-user setups.": "Pro testy a instalace pro jednoho uzivatele muzete dal pouzivat rezim Community."
+  "You can keep using Community mode for tests and single-user setups.": "Pro testy a instalace pro jednoho uzivatele muzete dal pouzivat rezim Community.",
+  "Backend version": "Verze backendu",
+  "Installed version": "Nainstalovana verze",
+  "Available version": "Dostupna verze",
+  "Current": "Aktualni",
+  "Update available": "Aktualizace je k dispozici",
+  "Update status unavailable.": "Stav aktualizace neni k dispozici.",
+  "Checking backend version...": "Kontrola verze backendu..."
 },
 "nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;"
 );

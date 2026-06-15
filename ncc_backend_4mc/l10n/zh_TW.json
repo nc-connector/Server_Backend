@@ -284,7 +284,14 @@
         "For teams, central policies and more Seats, activate Pro.": "如需團隊、集中政策和更多 Seat，請啟用 Pro。",
         "Buy Pro license": "購買 Pro 授權",
         "Request 30-day trial key": "申請 30 天試用金鑰",
-        "You can keep using Community mode for tests and single-user setups.": "測試和單一使用者設定可以繼續使用 Community 模式。"
+        "You can keep using Community mode for tests and single-user setups.": "測試和單一使用者設定可以繼續使用 Community 模式。",
+        "Backend version": "後端版本",
+        "Installed version": "已安裝版本",
+        "Available version": "可用版本",
+        "Current": "已是最新",
+        "Update available": "有可用更新",
+        "Update status unavailable.": "無法取得更新狀態。",
+        "Checking backend version...": "正在檢查後端版本..."
     },
     "pluralForm": "nplurals=1; plural=0;"
 }

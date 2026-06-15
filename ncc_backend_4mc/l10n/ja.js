@@ -286,7 +286,14 @@ OC.L10N.register(
   "For teams, central policies and more Seats, activate Pro.": "チーム、中央ポリシー、追加SeatにはProを有効化してください。",
   "Buy Pro license": "Proライセンスを購入",
   "Request 30-day trial key": "30日間の試用キーを依頼",
-  "You can keep using Community mode for tests and single-user setups.": "テストや単一ユーザー構成ではCommunityモードを引き続き利用できます。"
+  "You can keep using Community mode for tests and single-user setups.": "テストや単一ユーザー構成ではCommunityモードを引き続き利用できます。",
+  "Backend version": "バックエンドバージョン",
+  "Installed version": "インストール済みバージョン",
+  "Available version": "利用可能なバージョン",
+  "Current": "最新",
+  "Update available": "更新があります",
+  "Update status unavailable.": "更新状態を取得できません。",
+  "Checking backend version...": "バックエンドバージョンを確認中..."
 },
 "nplurals=1; plural=0;"
 );

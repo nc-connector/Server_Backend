@@ -286,7 +286,14 @@ OC.L10N.register(
   "For teams, central policies and more Seats, activate Pro.": "Activeer Pro voor teams, centraal beleid en meer Seats.",
   "Buy Pro license": "Pro-licentie kopen",
   "Request 30-day trial key": "30 dagen proefsleutel aanvragen",
-  "You can keep using Community mode for tests and single-user setups.": "Voor tests en installaties met een gebruiker kunt u de Community-modus blijven gebruiken."
+  "You can keep using Community mode for tests and single-user setups.": "Voor tests en installaties met een gebruiker kunt u de Community-modus blijven gebruiken.",
+  "Backend version": "Backendversie",
+  "Installed version": "Geinstalleerde versie",
+  "Available version": "Beschikbare versie",
+  "Current": "Actueel",
+  "Update available": "Update beschikbaar",
+  "Update status unavailable.": "Updatestatus niet beschikbaar.",
+  "Checking backend version...": "Backendversie controleren..."
 },
 "nplurals=2; plural=(n != 1);"
 );

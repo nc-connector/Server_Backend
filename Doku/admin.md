@@ -201,6 +201,12 @@ Use this section when the support question is:
 - “Why is a seat paused?”
 - “Did the last Pro sync succeed?”
 
+The `General` section also shows the installed backend version and the latest backend version known to `nc-connector.de`.
+If both versions match, the row shows a check mark.
+No download link is shown there.
+The check runs through Nextcloud background jobs and does not require Pro mode or license credentials.
+If no check has run yet, the admin page performs the first check once and stores the result.
+
 ### 4.4 Recommended Nextcloud apps
 
 The `General` section also shows optional Nextcloud apps that improve NC Connector behavior.

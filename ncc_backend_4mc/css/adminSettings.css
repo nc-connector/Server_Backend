@@ -153,6 +153,16 @@
 	margin: 10px 0;
 }
 
+.nccb-backend-update {
+	margin: 12px 0;
+}
+
+.nccb-update-status-ok {
+	color: var(--color-success, #2ea043);
+	font-weight: 700;
+	margin-right: 4px;
+}
+
 #nccb-license-hint {
 	margin-top: 6px;
 }

@@ -163,6 +163,20 @@ curl -u "alice:APP_PASSWORD" \
 - There are **no** write endpoints for mail clients.
 - Admin write operations remain internal to the admin UI and are not part of this client specification.
 
+## Admin-only update status
+
+- **HTTP method:** `GET`
+- **Path:** `/apps/ncc_backend_4mc/api/v1/admin/update-check`
+- **Purpose:** Returns installed backend version, latest known backend version, and whether an update is available.
+- **Auth / permissions:** Nextcloud administrator
+- **Notes:**
+  - `UpdateCheckJob` asks `https://nc-connector.de/wp-json/ncc/v1/update-check` at most once per day.
+  - The job runs independently of Pro mode and license credentials.
+  - The admin UI reads the stored status.
+  - If no successful check exists yet, opening the admin UI performs the first check through the same service.
+  - The request contains only product name, installed version, channel, and a daily anonymous client ID.
+  - License email, license key, Nextcloud URL, username, and tenant data are not sent.
+
 ## Runtime status codes
 
 - `200 OK`: request accepted, response body contains `status`, `policy`, and `policy_editable`

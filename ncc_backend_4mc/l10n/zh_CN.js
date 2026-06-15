@@ -286,7 +286,14 @@ OC.L10N.register(
   "For teams, central policies and more Seats, activate Pro.": "如需团队、集中策略和更多 Seat，请启用 Pro。",
   "Buy Pro license": "购买 Pro 许可证",
   "Request 30-day trial key": "申请 30 天试用密钥",
-  "You can keep using Community mode for tests and single-user setups.": "测试和单用户环境可以继续使用 Community 模式。"
+  "You can keep using Community mode for tests and single-user setups.": "测试和单用户环境可以继续使用 Community 模式。",
+  "Backend version": "后端版本",
+  "Installed version": "已安装版本",
+  "Available version": "可用版本",
+  "Current": "已是最新",
+  "Update available": "有可用更新",
+  "Update status unavailable.": "无法获取更新状态。",
+  "Checking backend version...": "正在检查后端版本..."
 },
 "nplurals=1; plural=0;"
 );

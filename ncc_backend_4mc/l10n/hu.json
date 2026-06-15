@@ -284,7 +284,14 @@
         "For teams, central policies and more Seats, activate Pro.": "Csapatokhoz, kozponti szabalyokhoz es tobb Seathoz aktivalja a Pro verziot.",
         "Buy Pro license": "Pro licenc vasarlasa",
         "Request 30-day trial key": "30 napos probakulcs kerese",
-        "You can keep using Community mode for tests and single-user setups.": "Tesztekhez es egyfelhasznalos beallitasokhoz tovabbra is hasznalhatja a Community modot."
+        "You can keep using Community mode for tests and single-user setups.": "Tesztekhez es egyfelhasznalos beallitasokhoz tovabbra is hasznalhatja a Community modot.",
+        "Backend version": "Backend verzioja",
+        "Installed version": "Telepitett verzio",
+        "Available version": "Elerheto verzio",
+        "Current": "Naprakesz",
+        "Update available": "Frissites elerheto",
+        "Update status unavailable.": "A frissitesi allapot nem erheto el.",
+        "Checking backend version...": "Backend verzio ellenorzese..."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }

@@ -284,7 +284,14 @@
         "For teams, central policies and more Seats, activate Pro.": "Dla zespolow, centralnych zasad i wiekszej liczby Seatow aktywuj Pro.",
         "Buy Pro license": "Kup licencje Pro",
         "Request 30-day trial key": "Popros o 30-dniowy klucz testowy",
-        "You can keep using Community mode for tests and single-user setups.": "Do testow i konfiguracji dla jednego uzytkownika mozesz nadal uzywac trybu Community."
+        "You can keep using Community mode for tests and single-user setups.": "Do testow i konfiguracji dla jednego uzytkownika mozesz nadal uzywac trybu Community.",
+        "Backend version": "Wersja backendu",
+        "Installed version": "Zainstalowana wersja",
+        "Available version": "Dostepna wersja",
+        "Current": "Aktualna",
+        "Update available": "Dostepna aktualizacja",
+        "Update status unavailable.": "Stan aktualizacji niedostepny.",
+        "Checking backend version...": "Sprawdzanie wersji backendu..."
     },
     "pluralForm": "nplurals=3; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4 && (n%100<12 || n%100>14)) ? 1 : 2);"
 }

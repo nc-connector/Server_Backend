@@ -12,6 +12,7 @@ namespace OCA\NcConnector\Setup;
 
 use OCA\NcConnector\AppInfo\Application;
 use OCA\NcConnector\Cron\LicenseSyncJob;
+use OCA\NcConnector\Cron\UpdateCheckJob;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\Migration\IOutput;
@@ -116,11 +117,13 @@ class UninstallCleanup implements IRepairStep {
 	}
 
 	private function deleteBackgroundJobs(): void {
-		$queryBuilder = $this->db->getQueryBuilder();
-		$queryBuilder
-			->delete('jobs')
-			->where($queryBuilder->expr()->eq('class', $queryBuilder->createNamedParameter(LicenseSyncJob::class)));
-		$queryBuilder->executeStatement();
+		foreach ([LicenseSyncJob::class, UpdateCheckJob::class] as $jobClass) {
+			$queryBuilder = $this->db->getQueryBuilder();
+			$queryBuilder
+				->delete('jobs')
+				->where($queryBuilder->expr()->eq('class', $queryBuilder->createNamedParameter($jobClass)));
+			$queryBuilder->executeStatement();
+		}
 	}
 
 	private function logError(string $message, array $context = []): void {

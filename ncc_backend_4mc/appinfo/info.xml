@@ -2,57 +2,55 @@
 <info>
 	<id>ncc_backend_4mc</id>
 	<name>NC Connector for mail integration</name>
-	<summary lang="en">Secure file sharing, Talk meetings and intelligent attachment handling directly in your familiar email client.</summary>
-	<summary lang="de">Sicheres Teilen, Talk-Meetings und intelligente Anhangsverarbeitung direkt im gewohnten Mail-Client.</summary>
+	<summary lang="en">Central policies, templates, signatures and password delivery for NC Connector mail add-ons.</summary>
+	<summary lang="de">Zentrale Richtlinien, Vorlagen, Signaturen und Passwortzustellung für NC Connector Mail-Add-ons.</summary>
 	<description lang="en"><![CDATA[
 # NC Connector for mail integration
 
-NC Connector brings secure sharing, Talk meetings, and intelligent attachment handling directly into Thunderbird and Outlook Classic. This keeps daily work inside the familiar mail and calendar workflow instead of constantly moving back to the browser.
+NC Connector Backend is the central policy and template app for NC Connector mail add-ons.
 
-## What NC Connector simplifies
+The Thunderbird and Outlook Classic add-ons can run without this backend. This app adds central policy control, Seat assignment, managed email signatures, custom templates and password delivery rules for organizations.
 
-- Share files securely directly from the email workflow
-- Create and maintain Talk rooms directly from calendar events
-- Move attachments above a defined size into Nextcloud when appropriate
-- Manage central email signatures for Thunderbird and Outlook Classic
-- Insert links, passwords, and expiry dates in a clean and consistent way
+## What the backend adds
 
-## Feature set
+- Central Share, Talk and email-signature policies for Thunderbird and Outlook Classic
+- Seat assignment for Nextcloud users
+- Group and user overrides for teams with different rules
+- Managed HTML templates for Share blocks, password mails, Talk invitations and email signatures
+- Separate password delivery as plaintext mail or Nextcloud Secret Link
+- Optional Secrets app integration for expiring password links
+- Setup diagnostics for mail clients when backend access is not available
 
-### Share files securely
+## Share policies
 
-- Guided share dialog with expiry date, permissions, and note
-- Password-protected shares
-- Formatted share block with link, password, rights, and expiry date
-- Optional separate password delivery
+Admins can define default share folders, share names, permissions, password behavior and expiry days.
 
-### Handle attachments intelligently
+Large attachments can be routed into Nextcloud based on central rules. The mail clients insert clean Share blocks with link, password information, rights and expiry date.
 
-- Optionally route files through NC Connector by default
-- Offer uploads above a configurable file-size threshold
-- Clear user decision instead of uncontrolled automation
-- ZIP-download and download-link workflows for external recipients
+## Password delivery
 
-### Manage email signatures centrally
+Separate password delivery can use two modes:
 
-- Provide one central HTML signature template from Nextcloud
-- Fill signature variables from Nextcloud user profiles
-- Add per-user override values for matching email addresses, mobile numbers, and custom fields
-- Apply signatures only to matching Thunderbird and Outlook sender identities
+- Plaintext: send the password in a separate follow-up mail
+- Nextcloud Secret Link: send an expiring Secrets link instead of the raw password
 
-### Create Talk meetings from the calendar
+If the Nextcloud Secrets app is missing or disabled, clients fall back to the existing plaintext password mail behavior.
 
-- Create and update Talk rooms from events
-- Manage room type, lobby, password, and moderation
-- Keep title and meeting link synchronized with the event
-- Clean up data for moved or deleted appointments
+## Email signatures
 
-## Backend note
+The backend can provide one central HTML signature template for Thunderbird and Outlook Classic.
 
-NC Connector also works directly in the mail client.  
-With the optional Nextcloud backend, administrators additionally get central policies, Seat assignment, separate password delivery, and custom templates and branding for shares and Talk invitations.
+Signature values can come from Nextcloud user profiles and per-user override fields. Empty placeholders remove their surrounding line or table row before the signature is sent to the mail client.
 
-That makes NC Connector suitable both for individual users and for organizations that want to manage mail and calendar workflows centrally.
+## Talk meetings
+
+Admins can define Talk defaults for calendar-based meeting creation, including room type, lobby, visibility, password behavior and invitation templates.
+
+## When this backend is useful
+
+Use this backend when an organization needs central defaults, locked settings, Seat assignment, managed templates, managed signatures or password delivery rules.
+
+Single users can still use the mail add-ons without this backend.
 
 ## Mail clients
 
@@ -67,52 +65,50 @@ That makes NC Connector suitable both for individual users and for organizations
 	<description lang="de"><![CDATA[
 # NC Connector für Mail-Integration
 
-NC Connector bringt sicheres Teilen, Talk-Meetings und intelligente Anhangsverarbeitung direkt in Thunderbird und Outlook Classic. So bleibt die Arbeit im gewohnten Mail- und Kalender-Workflow, ohne ständig in den Browser wechseln zu müssen.
+NC Connector Backend ist die zentrale Richtlinien- und Vorlagen-App für die NC Connector Mail-Add-ons.
 
-## Was NC Connector erleichtert
+Die Thunderbird- und Outlook-Classic-Add-ons können auch ohne dieses Backend genutzt werden. Diese App ergänzt zentrale Richtlinien, Seat-Zuweisung, verwaltete E-Mail-Signaturen, eigene Vorlagen und Passwortzustellregeln für Organisationen.
 
-- Dateien sicher direkt aus dem E-Mail-Workflow heraus teilen
-- Talk-Räume direkt aus Kalendereinträgen erstellen und pflegen
-- Anhänge ab einer definierten Größe gezielt in Nextcloud auslagern
-- Zentrale E-Mail-Signaturen für Thunderbird und Outlook Classic verwalten
-- Links, Passwörter und Ablaufdaten sauber und einheitlich einfügen
+## Was das Backend ergänzt
 
-## Funktionsumfang
+- Zentrale Freigabe-, Talk- und E-Mail-Signatur-Richtlinien für Thunderbird und Outlook Classic
+- Seat-Zuweisung für Nextcloud-Benutzer
+- Gruppen- und Benutzerüberschreibungen für Teams mit unterschiedlichen Regeln
+- Verwaltete HTML-Vorlagen für Freigabeblöcke, Passwort-Mails, Talk-Einladungen und E-Mail-Signaturen
+- Separate Passwortzustellung als Klartext-Mail oder Nextcloud Secret-Link
+- Optionale Secrets-App-Integration für ablaufende Passwort-Links
+- Setup-Diagnosen für Mail-Clients, wenn der Backend-Zugriff nicht verfügbar ist
 
-### Dateien sicher teilen
+## Freigabe-Richtlinien
 
-- Geführter Freigabe-Dialog mit Ablaufdatum, Berechtigungen und Notiz
-- Passwortgeschützte Freigaben
-- Formatierter Freigabeblock mit Link, Passwort, Rechten und Ablaufdatum
-- Optionaler separater Passwortversand
+Admins können Standardordner, Freigabenamen, Berechtigungen, Passwortverhalten und Ablaufdauer zentral festlegen.
 
-### Anhänge intelligent verarbeiten
+Große Anhänge können nach zentralen Regeln in Nextcloud ausgelagert werden. Die Mail-Clients fügen saubere Freigabeblöcke mit Link, Passwortinformation, Rechten und Ablaufdatum ein.
 
-- Dateien auf Wunsch immer über NC Connector teilen
-- Upload-Angebot ab konfigurierbarer Dateigröße
-- Klare Entscheidung statt unkontrollierter Automatik
-- ZIP-Downloads und Download-Link-Workflows für externe Empfänger
+## Passwortzustellung
 
-### E-Mail-Signaturen zentral verwalten
+Separate Passwortzustellung kann zwei Modi nutzen:
 
-- Eine zentrale HTML-Signaturvorlage aus Nextcloud bereitstellen
-- Signaturvariablen aus Nextcloud-Benutzerprofilen füllen
-- Benutzerbezogene Zusatzwerte für Absenderadresse, Mobilnummern und eigene Felder setzen
-- Signaturen nur bei passenden Thunderbird- und Outlook-Absenderidentitäten anwenden
+- Klartext: Passwort in einer separaten Folge-Mail senden
+- Nextcloud Secret-Link: ablaufenden Secrets-Link statt Rohpasswort senden
 
-### Talk direkt aus dem Kalender
+Wenn die Nextcloud Secrets App fehlt oder deaktiviert ist, nutzen die Clients weiter die bestehende Klartext-Passwort-Mail.
 
-- Talk-Räume aus Terminen erstellen und aktualisieren
-- Raumtyp, Lobby, Passwort und Moderation verwalten
-- Titel und Besprechungslink mit dem Termin synchron halten
-- Aufräumen bei verschobenen oder gelöschten Terminen
+## E-Mail-Signaturen
 
-## Hinweis zum Backend
+Das Backend kann eine zentrale HTML-Signaturvorlage für Thunderbird und Outlook Classic bereitstellen.
 
-NC Connector funktioniert auch direkt im Mail-Client.  
-Mit dem optionalen Nextcloud-Backend kommen zusätzlich zentrale Richtlinien, Seat-Zuweisung, separate Passwortzustellung sowie eigene Vorlagen und Designs für Freigaben und Talk-Einladungen hinzu.
+Signaturwerte können aus Nextcloud-Benutzerprofilen und benutzerbezogenen Zusatzfeldern kommen. Leere Platzhalter entfernen ihre umgebende Zeile oder Tabellenzeile, bevor die Signatur an den Mail-Client gesendet wird.
 
-Damit eignet sich NC Connector sowohl für einzelne Nutzer als auch für Organisationen, die Mail- und Kalenderprozesse zentral steuern möchten.
+## Talk-Meetings
+
+Admins können Talk-Defaults für kalenderbasierte Besprechungen festlegen, inklusive Raumtyp, Lobby, Sichtbarkeit, Passwortverhalten und Einladungsvorlagen.
+
+## Wann dieses Backend sinnvoll ist
+
+Dieses Backend ist sinnvoll, wenn eine Organisation zentrale Defaults, gesperrte Einstellungen, Seat-Zuweisung, verwaltete Vorlagen, verwaltete Signaturen oder Passwortzustellregeln braucht.
+
+Einzelne Nutzer können die Mail-Add-ons weiterhin ohne dieses Backend verwenden.
 
 ## Mail-Clients
 
@@ -134,8 +130,8 @@ Damit eignet sich NC Connector sowohl für einzelne Nutzer als auch für Organis
 	<bugs>https://nc-connector.de/kontakt/</bugs>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/appsettings.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/screenshots/TemplateEditor.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/screenshots/email_sig.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/TemplateEditor.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/email_sig.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/NC_Connector_for_Thunderbird/main/screenshots/talk_wizzard1.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/NC_Connector_for_Thunderbird/main/screenshots/filelink_wizzard1.png</screenshot>
 
@@ -146,6 +142,7 @@ Damit eignet sich NC Connector sowohl für einzelne Nutzer als auch für Organis
 
 	<background-jobs>
 		<job>OCA\NcConnector\Cron\LicenseSyncJob</job>
+		<job>OCA\NcConnector\Cron\UpdateCheckJob</job>
 	</background-jobs>
 
 	<commands>

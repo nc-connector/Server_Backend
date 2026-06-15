@@ -2120,6 +2120,7 @@
 
 	const api = {
 		loadLicense: () => apiRequest('GET', '/api/v1/admin/license'),
+		loadBackendUpdate: () => apiRequest('GET', '/api/v1/admin/update-check'),
 		saveMode: (mode) => apiRequest('PUT', '/api/v1/admin/license/mode', { mode }),
 		saveCredentials: (email, licenseKey) => apiRequest('PUT', '/api/v1/admin/license/credentials', { email, license_key: licenseKey }),
 		syncLicense: () => apiRequest('POST', '/api/v1/admin/license/sync'),
@@ -2995,6 +2996,10 @@
 
 				<div id="nccb-pro-funnel" class="nccb-pro-funnel" hidden></div>
 
+				<div class="nccb-backend-update">
+					<div id="nccb-backend-update-status" class="nccb-muted" role="status">${escapeHtml(tr('Checking backend version...'))}</div>
+				</div>
+
 				<div class="nccb-section">
 					<h3>${escapeHtml(tr('Recommended Nextcloud apps'))}</h3>
 					<div class="nccb-muted">${escapeHtml(tr('Optional apps that unlock extra NC Connector features.'))}</div>
@@ -3303,6 +3308,7 @@
 			licenseHint: root.querySelector('#nccb-license-hint'),
 			licenseMessage: root.querySelector('#nccb-license-message'),
 			proFunnel: root.querySelector('#nccb-pro-funnel'),
+			backendUpdateStatus: root.querySelector('#nccb-backend-update-status'),
 			recommendedApps: root.querySelector('#nccb-recommended-apps'),
 			defaultMessage: root.querySelector('#nccb-default-message'),
 			defaultTableShare: root.querySelector('#nccb-default-tbody-share'),
@@ -3549,6 +3555,42 @@
 			`
 		}
 
+		const renderBackendUpdateStatus = (status) => {
+			if (!(refs.backendUpdateStatus instanceof HTMLElement)) {
+				return
+			}
+
+			if (!status) {
+				refs.backendUpdateStatus.textContent = tr('Update status unavailable.')
+				return
+			}
+
+			const currentVersion = String(status.current_version || tr('Unknown'))
+			const latestVersion = String(status.latest_version || tr('Unknown'))
+			if (status.is_current) {
+				refs.backendUpdateStatus.innerHTML = `
+					<span class="nccb-update-status-ok" aria-hidden="true">&#10003;</span>
+					${escapeHtml(tr('Backend version'))}:
+					${escapeHtml(tr('Installed version'))} ${escapeHtml(currentVersion)} |
+					${escapeHtml(tr('Available version'))} ${escapeHtml(latestVersion)} |
+					${escapeHtml(tr('Current'))}
+				`
+				return
+			}
+
+			if (status.update_available) {
+				refs.backendUpdateStatus.innerHTML = `
+					${escapeHtml(tr('Backend version'))}:
+					${escapeHtml(tr('Installed version'))} ${escapeHtml(currentVersion)} |
+					${escapeHtml(tr('Available version'))} ${escapeHtml(latestVersion)} |
+					${escapeHtml(tr('Update available'))}
+				`
+				return
+			}
+
+			refs.backendUpdateStatus.textContent = `${tr('Backend version')}: ${tr('Installed version')} ${currentVersion} | ${tr('Available version')} ${latestVersion} | ${tr('Update status unavailable.')}`
+		}
+
 		const renderRecommendedApps = (apps) => {
 			if (!(refs.recommendedApps instanceof HTMLElement)) {
 				return
@@ -3660,6 +3702,11 @@
 			renderLicenseStatus(licenseSnapshot)
 			renderProFunnel(licenseSnapshot)
 			setMessage(refs.licenseMessage, '', '')
+		}
+
+		const refreshBackendUpdateStatus = async () => {
+			const status = await api.loadBackendUpdate()
+			renderBackendUpdateStatus(status)
 		}
 
 		const refreshGroups = async () => {
@@ -4147,6 +4194,12 @@
 			await refreshLicense()
 		} catch (error) {
 			console.error('nccb license init failed', error)
+		}
+		try {
+			await refreshBackendUpdateStatus()
+		} catch (error) {
+			console.error('nccb backend update status init failed', error)
+			renderBackendUpdateStatus(null)
 		}
 		try {
 			await refreshGroups()

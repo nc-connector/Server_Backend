@@ -77,6 +77,7 @@ PHP:
 
 Background job:
 - `OCA\NcConnector\Cron\LicenseSyncJob`
+- `OCA\NcConnector\Cron\UpdateCheckJob`
 
 App registration:
 - metadata, dependencies, repair steps, and admin settings registration live in:
@@ -159,6 +160,7 @@ Important UI behaviors currently implemented there:
 - CSV export for assigned seats
 - language dropdown in the editor modal for built-in Share/Talk template translation
 - Pro checkout/trial hint is shown until Pro has an active or grace license state
+- compact backend update status in the `General` tab
 
 ### 4.2 Controller layer
 
@@ -167,6 +169,7 @@ Main controllers:
 | Controller | Responsibility |
 |---|---|
 | `AdminLicenseController` | License mode, credentials, sync |
+| `AdminUpdateController` | Backend update status for the admin UI |
 | `AdminDirectoryController` | Group and user lookup for admin UI |
 | `AdminSeatController` | Seat assignment and assigned-seat overview |
 | `AdminClientSettingsController` | Defaults, user overrides, group overrides |
@@ -187,6 +190,7 @@ Core services:
 | `SeatService` | Seat assignment, seat-limit enforcement, and the explicit admin-seat override |
 | `ClientSettingsService` | Default values, group/user overrides, effective policy resolution, template normalization, email signature profile rendering, runtime image cache |
 | `AccessService` | Access checks for direct page visibility and user-facing runtime state |
+| `UpdateCheckService` | Daily backend version check against `nc-connector.de`; runs independently of license mode |
 
 Most important service in day-to-day maintenance:
 - `ClientSettingsService.php`
@@ -367,6 +371,7 @@ Internal admin use:
 | `PUT` | `/apps/ncc_backend_4mc/api/v1/admin/license/credentials` | Store license credentials |
 | `PUT` | `/apps/ncc_backend_4mc/api/v1/admin/license/mode` | Switch `Community` / `Pro` |
 | `POST` | `/apps/ncc_backend_4mc/api/v1/admin/license/sync` | Trigger manual sync |
+| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/update-check` | Read backend update status for the admin UI |
 | `GET` | `/apps/ncc_backend_4mc/api/v1/admin/groups` | Read available Nextcloud groups |
 | `GET` | `/apps/ncc_backend_4mc/api/v1/admin/users` | Read users, optionally filtered |
 | `GET` | `/apps/ncc_backend_4mc/api/v1/admin/seats` | Read assigned seats overview |
@@ -380,6 +385,7 @@ Internal admin use:
 
 Important implementation detail:
 - The schema/defaults response includes `recommended_apps` for optional Nextcloud apps that unlock extra admin-configurable behavior.
+- The backend update check runs through `UpdateCheckJob` and does not require Pro mode or license credentials.
 - Group override endpoints intentionally use the query-based route in `appinfo/routes.php`.
 - That path was chosen because it handles group identifiers reliably and avoids the earlier path-segment routing problem.
 - Admin accounts are excluded from Seat search by default.
