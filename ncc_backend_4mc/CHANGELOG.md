@@ -4,6 +4,17 @@ All notable changes to this repository are documented in this file.
 
 The format is based on **Keep a Changelog** and uses a simple version-first structure.
 
+## [1.2.0] - 2026-06-15
+
+### Added
+- Add Nextcloud Secrets mode for separate password delivery
+- Add a Pro prompt for Community mode and installations without a valid license
+- Add backend update check and version status in the admin UI
+
+### Changed
+- Update README and app metadata for the current backend feature set
+- Document Secrets password mode in the admin guide
+
 ## [1.1.1] - 2026-05-12
 
 ### Added
