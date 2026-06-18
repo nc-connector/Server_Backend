@@ -13,6 +13,7 @@ namespace OCA\NcConnector\Controller;
 use OCA\NcConnector\Db\ClientOverrideMapper;
 use OCA\NcConnector\Db\SeatMapper;
 use OCA\NcConnector\Service\AccessService;
+use OCA\NcConnector\Service\AdminPermissionService;
 use OCA\NcConnector\Service\ClientSettingsService;
 use OCA\NcConnector\Service\SeatLimitExceededException;
 use OCA\NcConnector\Service\SeatService;
@@ -31,6 +32,7 @@ class AdminSeatController extends Controller {
 		string $appName,
 		IRequest $request,
 		private AccessService $access,
+		private AdminPermissionService $adminPermissions,
 		private IUserManager $userManager,
 		private SeatService $seats,
 		private SeatMapper $seatMapper,
@@ -46,7 +48,7 @@ class AdminSeatController extends Controller {
 	#[NoCSRFRequired]
 	#[FrontpageRoute(verb: 'GET', url: '/api/v1/admin/seats')]
 	public function listAssignedSeats(int $limit = 50, int $offset = 0): DataResponse {
-		if (!$this->access->isAdmin($this->userId)) {
+		if (!$this->canReadAssignedSeats()) {
 			return $this->warningResponse('Admin required', Http::STATUS_FORBIDDEN, [
 				'actor_user_id' => $this->userId,
 				'endpoint' => 'seats/list',
@@ -153,5 +155,18 @@ class AdminSeatController extends Controller {
 	private function warningResponse(string $message, int $status, array $context = []): DataResponse {
 		$this->logger->warning($message, $context);
 		return new DataResponse(['error' => $message], $status);
+	}
+
+	private function canReadAssignedSeats(): bool {
+		return $this->access->isAdmin($this->userId)
+			|| $this->adminPermissions->hasAnyScope($this->userId, [
+				'share.group_overrides',
+				'share.user_overrides',
+				'talk.group_overrides',
+				'talk.user_overrides',
+				'signature.group_overrides',
+				'signature.user_overrides',
+				'signature.templates',
+			]);
 	}
 }

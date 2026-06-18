@@ -12,6 +12,7 @@ namespace OCA\NcConnector\Controller;
 
 use OCA\NcConnector\Db\SeatMapper;
 use OCA\NcConnector\Service\AccessService;
+use OCA\NcConnector\Service\AdminPermissionService;
 use OCA\NcConnector\Service\SeatService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
@@ -31,6 +32,7 @@ class AdminDirectoryController extends Controller {
 		string $appName,
 		IRequest $request,
 		private AccessService $access,
+		private AdminPermissionService $adminPermissions,
 		private IGroupManager $groupManager,
 		private IUserManager $userManager,
 		private SeatService $seats,
@@ -45,7 +47,11 @@ class AdminDirectoryController extends Controller {
 	#[NoCSRFRequired]
 	#[FrontpageRoute(verb: 'GET', url: '/api/v1/admin/groups')]
 	public function listGroups(string $search = '', int $limit = 100, int $offset = 0): DataResponse {
-		if (!$this->access->isAdmin($this->userId)) {
+		if (!$this->access->isAdmin($this->userId) && !$this->adminPermissions->hasAnyScope($this->userId, [
+			'share.group_overrides',
+			'talk.group_overrides',
+			'signature.group_overrides',
+		])) {
 			return $this->warningResponse('Admin required', Http::STATUS_FORBIDDEN, [
 				'actor_user_id' => $this->userId,
 				'endpoint' => 'groups/list',
@@ -82,7 +88,13 @@ class AdminDirectoryController extends Controller {
 		int $limit = 50,
 		int $offset = 0,
 	): DataResponse {
-		if (!$this->access->isAdmin($this->userId)) {
+		$isFullAdmin = $this->access->isAdmin($this->userId);
+		if (!$isFullAdmin && !$this->adminPermissions->hasAnyScope($this->userId, [
+			'share.user_overrides',
+			'talk.user_overrides',
+			'signature.user_overrides',
+			'signature.templates',
+		])) {
 			return $this->warningResponse('Admin required', Http::STATUS_FORBIDDEN, [
 				'actor_user_id' => $this->userId,
 				'endpoint' => 'users/list',
@@ -108,6 +120,13 @@ class AdminDirectoryController extends Controller {
 		}
 
 		$filteredUsers = $this->filterUsers($this->toUsers($users), trim($search));
+		if (!$isFullAdmin) {
+			$seatMap = $this->seatMapper->getSeatsForUsers(array_map(static fn (IUser $user): string => $user->getUID(), $filteredUsers));
+			$filteredUsers = array_values(array_filter(
+				$filteredUsers,
+				static fn (IUser $user): bool => isset($seatMap[$user->getUID()])
+			));
+		}
 		$adminSeatAssignmentAllowed = $this->seats->adminSeatAssignmentAllowed();
 		$adminSelfExcluded = false;
 		if (!$adminSeatAssignmentAllowed) {
@@ -139,6 +158,7 @@ class AdminDirectoryController extends Controller {
 				'user_id' => $uid,
 				'display_name' => $user->getDisplayName(),
 				'has_seat' => $hasSeat,
+				'is_nextcloud_admin' => $this->access->isAdmin($uid),
 			];
 		}
 

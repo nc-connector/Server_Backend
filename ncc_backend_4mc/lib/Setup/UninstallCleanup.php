@@ -42,6 +42,7 @@ class UninstallCleanup implements IRepairStep {
 				$this->tableName('nccb_seats'),
 				$this->tableName('nccb_client_overrides'),
 				$this->tableName('nccb_group_overrides'),
+				$this->tableName('nccb_admin_delegations'),
 			] as $tableName) {
 				$this->dropTableIfExists($tableName);
 			}

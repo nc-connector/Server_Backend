@@ -17,6 +17,7 @@ class AccessService {
 		private IGroupManager $groupManager,
 		private SeatService $seatService,
 		private LicenseService $licenseService,
+		private AdminDelegationService $delegations,
 	) {
 	}
 
@@ -25,6 +26,17 @@ class AccessService {
 			return false;
 		}
 		return $this->groupManager->isAdmin($userId);
+	}
+
+	public function isDelegatedAdmin(?string $userId): bool {
+		if ($userId === null || $userId === '' || $this->isAdmin($userId)) {
+			return false;
+		}
+		return $this->delegations->hasAnyActivePermission($userId);
+	}
+
+	public function canAccessAdminArea(?string $userId): bool {
+		return $this->isAdmin($userId) || $this->isDelegatedAdmin($userId);
 	}
 
 	public function canAccessUserPage(?string $userId): bool {

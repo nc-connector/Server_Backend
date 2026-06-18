@@ -12,6 +12,7 @@ namespace OCA\NcConnector\Controller;
 
 use OCA\NcConnector\AppInfo\Application;
 use OCA\NcConnector\Service\AccessService;
+use OCA\NcConnector\Service\AdminSettingsResponseFactory;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\FrontpageRoute;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -25,6 +26,7 @@ class PageController extends Controller {
 		string $appName,
 		IRequest $request,
 		private AccessService $access,
+		private AdminSettingsResponseFactory $responseFactory,
 		private LoggerInterface $logger,
 		private ?string $userId,
 	) {
@@ -35,6 +37,10 @@ class PageController extends Controller {
 	#[NoCSRFRequired]
 	#[FrontpageRoute(verb: 'GET', url: '/')]
 	public function index(): TemplateResponse {
+		if ($this->access->canAccessAdminArea($this->userId)) {
+			return $this->responseFactory->create(false);
+		}
+
 		if (!$this->access->canAccessUserPage($this->userId)) {
 			$this->logger->warning('Denying NC Connector page access because the user has no seat', [
 				'actor_user_id' => $this->userId,

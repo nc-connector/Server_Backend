@@ -22,6 +22,7 @@ class InstallSchema implements IRepairStep {
 	private const TABLE_SEATS = 'nccb_seats';
 	private const TABLE_CLIENT_OVERRIDES = 'nccb_client_overrides';
 	private const TABLE_GROUP_OVERRIDES = 'nccb_group_overrides';
+	private const TABLE_ADMIN_DELEGATIONS = 'nccb_admin_delegations';
 
 	public function __construct(
 		private IDBConnection $db,
@@ -41,6 +42,7 @@ class InstallSchema implements IRepairStep {
 		$changed = $this->ensureSeatsTable($schema) || $changed;
 		$changed = $this->ensureClientOverridesTable($schema) || $changed;
 		$changed = $this->ensureGroupOverridesTable($schema) || $changed;
+		$changed = $this->ensureAdminDelegationsTable($schema) || $changed;
 
 		if (!$changed) {
 			return;
@@ -198,6 +200,52 @@ class InstallSchema implements IRepairStep {
 		$table->setPrimaryKey(['id']);
 		$table->addUniqueIndex(['group_id', 'setting_key'], 'nccb_group_override_uq');
 		$table->addIndex(['group_id'], 'nccb_group_override_group_idx');
+
+		return true;
+	}
+
+	private function ensureAdminDelegationsTable(Schema $schema): bool {
+		$tableName = $this->tableName(self::TABLE_ADMIN_DELEGATIONS);
+		if ($schema->hasTable($tableName)) {
+			return false;
+		}
+
+		$table = $schema->createTable($tableName);
+		$table->addColumn('id', Types::INTEGER, [
+			'autoincrement' => true,
+			'notnull' => true,
+			'unsigned' => true,
+		]);
+		$table->addColumn('user_id', Types::STRING, [
+			'length' => 64,
+			'notnull' => true,
+		]);
+		$table->addColumn('enabled', Types::INTEGER, [
+			'notnull' => true,
+			'unsigned' => true,
+			'default' => 1,
+		]);
+		$table->addColumn('permissions', Types::TEXT, [
+			'notnull' => true,
+		]);
+		$table->addColumn('created_at', Types::INTEGER, [
+			'notnull' => true,
+			'unsigned' => true,
+		]);
+		$table->addColumn('created_by', Types::STRING, [
+			'length' => 64,
+			'notnull' => false,
+		]);
+		$table->addColumn('updated_at', Types::INTEGER, [
+			'notnull' => true,
+			'unsigned' => true,
+		]);
+		$table->addColumn('updated_by', Types::STRING, [
+			'length' => 64,
+			'notnull' => false,
+		]);
+		$table->setPrimaryKey(['id']);
+		$table->addUniqueIndex(['user_id'], 'nccb_admin_deleg_user_uq');
 
 		return true;
 	}

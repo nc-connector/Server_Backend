@@ -10,10 +10,15 @@ declare(strict_types=1);
 
 namespace OCA\NcConnector\AppInfo;
 
+use OCA\NcConnector\Service\AccessService;
+use OCA\NcConnector\Settings\AdminSection;
+use OCA\NcConnector\Settings\DelegatedAdmin;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\IUserSession;
+use OCP\Settings\IManager as ISettingsManager;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'ncc_backend_4mc';
@@ -27,6 +32,21 @@ class Application extends App implements IBootstrap {
 	}
 
 	public function boot(IBootContext $context): void {
-		// No app navigation entry for now.
+		$server = $context->getServerContainer();
+		$userSession = $server->get(IUserSession::class);
+		$user = $userSession->getUser();
+		if ($user === null) {
+			return;
+		}
+
+		$access = $server->get(AccessService::class);
+		$userId = $user->getUID();
+		if (!$access->isDelegatedAdmin($userId)) {
+			return;
+		}
+
+		$settingsManager = $server->get(ISettingsManager::class);
+		$settingsManager->registerSection('personal', AdminSection::class);
+		$settingsManager->registerSetting('personal', DelegatedAdmin::class);
 	}
 }
