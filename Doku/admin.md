@@ -39,10 +39,13 @@ Related docs:
   - [5.3 Assigned seats](#53-assigned-seats)
   - [5.4 Group overrides](#54-group-overrides)
   - [5.5 User overrides](#55-user-overrides)
-- [6. Effective precedence model](#6-effective-precedence-model)
-- [7. What mail clients read from the backend](#7-what-mail-clients-read-from-the-backend)
-- [8. Install, disable, remove, keep-data](#8-install-disable-remove-keep-data)
-- [9. Operational recommendations](#9-operational-recommendations)
+- [6. Advanced section](#6-advanced-section)
+  - [6.1 NC Connector admin delegation](#61-nc-connector-admin-delegation)
+  - [6.2 Delegation overview](#62-delegation-overview)
+- [7. Effective precedence model](#7-effective-precedence-model)
+- [8. What mail clients read from the backend](#8-what-mail-clients-read-from-the-backend)
+- [9. Install, disable, remove, keep-data](#9-install-disable-remove-keep-data)
+- [10. Operational recommendations](#10-operational-recommendations)
 
 ---
 
@@ -134,18 +137,19 @@ That order keeps the rollout understandable and avoids unnecessary exception han
 Path in Nextcloud:
 - **Settings → Administration → NC Connector Backend**
 
-The interface is intentionally split into two main areas:
+The interface is intentionally split into three main areas:
 
 | Area | Purpose |
 |---|---|
 | `General` | License mode, license credentials, license sync, and seat entitlement state |
 | `Group Settings` | Default policies, seat assignment, assigned-seat overview, group overrides, and user overrides |
+| `Advanced` | NC Connector admin delegation |
 
 Important UI note:
 - In the Nextcloud app list, the app is named **NC Connector for mail integration**.
 - In the Administration settings, the section label is **NC Connector Backend**.
-- There is currently **no NC Connector app-bar entry** in Nextcloud.
-- Administration happens only through the **Administration settings** page.
+- Full Nextcloud administrators use the **Administration settings** page.
+- Delegated NC Connector admins use their personal **Settings** page and open **NC Connector Backend** there.
 
 ---
 
@@ -602,7 +606,51 @@ Do not use user overrides as a substitute for missing group structure. That beco
 
 ---
 
-## 6. Effective precedence model
+## 6. Advanced section
+
+The **Advanced** section contains settings that affect backend administration itself.
+
+### 6.1 NC Connector admin delegation
+
+NC Connector admin delegation lets a Nextcloud administrator give selected users access to parts of the NC Connector admin UI without making them full Nextcloud administrators.
+
+Only full Nextcloud administrators can create, change, or remove delegations.
+
+Delegated admins can receive permissions for these areas:
+
+| Area | Policy | Templates | Group overrides | User overrides |
+|---|---|---|---|---|
+| Share | Share defaults and lock state | Share and password templates | Share group overrides | Share user overrides |
+| Talk | Talk defaults and lock state | Talk invitation templates | Talk group overrides | Talk user overrides |
+| Signature | Signature defaults and lock state, including compose/reply/forward activation | Signature template and signature user values (`Mobile phone`, `Custom 1`, `Custom 2`) | Signature group overrides | Signature user overrides such as `Signature email address` |
+
+Behavior:
+- Delegated admins see **NC Connector Backend** in their personal Nextcloud settings.
+- The direct route `/apps/ncc_backend_4mc/` remains available for deep links, but it is not shown as a main app-bar entry.
+- They only see tabs and rows for permissions they have.
+- They can see the **Assigned seats** overview when they may edit group/user overrides or signature template user values, because that table shows whether overrides exist for a Seat user.
+- They cannot assign Seats.
+- They cannot change license settings.
+- They cannot create or edit delegations.
+- They can only save settings that match their delegated permissions.
+
+Important security rule:
+- UI hiding is only a convenience.
+- The backend also checks the required permission for every save request.
+
+### 6.2 Delegation overview
+
+The delegation overview lists:
+- delegated user
+- active/inactive state
+- assigned permission areas
+- creation and update metadata
+
+Use it for audits and support before checking individual override tables.
+
+---
+
+## 7. Effective precedence model
 
 The backend resolves policies in this order:
 
@@ -626,7 +674,7 @@ This same precedence model is reflected in:
 
 ---
 
-## 7. What mail clients read from the backend
+## 8. What mail clients read from the backend
 
 Mail clients read the effective runtime state from:
 - `GET /apps/ncc_backend_4mc/api/v1/status`
@@ -648,7 +696,7 @@ For the detailed schema, see:
 
 ---
 
-## 8. Install, disable, remove, keep-data
+## 9. Install, disable, remove, keep-data
 
 The backend lifecycle is intentionally split into destructive and non-destructive paths.
 
@@ -667,6 +715,7 @@ Deletion on full remove includes:
 - seats table
 - user overrides table
 - group overrides table
+- admin delegation table
 - local runtime image cache
 - background job entry for license sync
 
@@ -677,7 +726,7 @@ This distinction matters for real-world operations:
 
 ---
 
-## 9. Operational recommendations
+## 10. Operational recommendations
 
 Recommended order for a fresh setup:
 1. Enable the app.

@@ -82,6 +82,7 @@ Background job:
 App registration:
 - metadata, dependencies, repair steps, and admin settings registration live in:
   - `ncc_backend_4mc/appinfo/info.xml`
+- delegated admin personal settings are registered dynamically in `Application.php` only for users with NC Connector delegation
 
 Important practical point:
 - The repository root is **not** the app root.
@@ -111,13 +112,13 @@ Key paths inside the app folder:
 |---|---|
 | `ncc_backend_4mc/appinfo/info.xml` | App metadata, dependencies, repair steps, background jobs |
 | `ncc_backend_4mc/lib/Setup/InstallSchema.php` | Install-time schema creation for all NC Connector tables |
-| `ncc_backend_4mc/appinfo/routes.php` | Explicit route registration for the query-based group-override endpoints |
+| `ncc_backend_4mc/appinfo/routes.php` | Explicit route registration for group override and admin delegation endpoints |
 | `ncc_backend_4mc/lib/AppInfo/Application.php` | App bootstrapping and registration |
 | `ncc_backend_4mc/lib/Controller/*` | Admin and runtime HTTP controllers |
 | `ncc_backend_4mc/lib/Service/*` | Business logic, policy resolution, license logic, seat logic |
 | `ncc_backend_4mc/lib/Db/*` | Entity and mapper classes |
 | `ncc_backend_4mc/lib/Setup/*` | Install and uninstall repair steps |
-| `ncc_backend_4mc/lib/Settings/*` | Nextcloud admin-settings integration |
+| `ncc_backend_4mc/lib/Settings/*` | Nextcloud admin and delegated personal settings integration |
 | `ncc_backend_4mc/js/ncc_backend_4mc-adminSettings.js` | Main admin UI logic |
 | `ncc_backend_4mc/js/ncc_backend_4mc-main.js` | Direct page UI under `/apps/ncc_backend_4mc` |
 | `ncc_backend_4mc/css/*` | Admin and direct-page styling |
@@ -161,6 +162,7 @@ Important UI behaviors currently implemented there:
 - language dropdown in the editor modal for built-in Share/Talk template translation
 - Pro checkout/trial hint is shown until Pro has an active or grace license state
 - compact backend update status in the `General` tab
+- delegated admins only see tabs and rows covered by their NC Connector permissions
 
 ### 4.2 Controller layer
 
@@ -173,6 +175,7 @@ Main controllers:
 | `AdminDirectoryController` | Group and user lookup for admin UI |
 | `AdminSeatController` | Seat assignment and assigned-seat overview |
 | `AdminClientSettingsController` | Defaults, user overrides, group overrides |
+| `AdminDelegationController` | NC Connector admin delegation |
 | `StatusController` | Effective runtime API for mail clients |
 | `PageController` | Direct page under `/apps/ncc_backend_4mc` |
 
@@ -190,6 +193,8 @@ Core services:
 | `SeatService` | Seat assignment, seat-limit enforcement, and the explicit admin-seat override |
 | `ClientSettingsService` | Default values, group/user overrides, effective policy resolution, template normalization, email signature profile rendering, runtime image cache |
 | `AccessService` | Access checks for direct page visibility and user-facing runtime state |
+| `AdminPermissionService` | Maps admin actions to delegated NC Connector permission scopes |
+| `AdminDelegationService` | Stores and normalizes delegated admin permissions |
 | `UpdateCheckService` | Daily backend version check against `nc-connector.de`; runs independently of license mode |
 
 Most important service in day-to-day maintenance:
@@ -215,6 +220,7 @@ Entity / mapper pairs exist for:
 - seats
 - user overrides
 - group overrides
+- admin delegations
 
 Files:
 - `ncc_backend_4mc/lib/Db/Setting.php`
@@ -225,6 +231,8 @@ Files:
 - `ncc_backend_4mc/lib/Db/ClientOverrideMapper.php`
 - `ncc_backend_4mc/lib/Db/GroupOverride.php`
 - `ncc_backend_4mc/lib/Db/GroupOverrideMapper.php`
+- `ncc_backend_4mc/lib/Db/AdminDelegation.php`
+- `ncc_backend_4mc/lib/Db/AdminDelegationMapper.php`
 
 These classes map the Nextcloud database rows into the service layer.
 
@@ -240,12 +248,14 @@ Current schema objects:
 | `*dbprefix*nccb_seats` | Assigned seats per user |
 | `*dbprefix*nccb_client_overrides` | User-specific override rows |
 | `*dbprefix*nccb_group_overrides` | Group-specific override rows including priority |
+| `*dbprefix*nccb_admin_delegations` | Delegated NC Connector admin permissions per user |
 
 Important schema characteristics:
 - settings are keyed by `config_key`
 - seats are unique per `user_id`
 - overrides are unique per `(target, setting_key)`
 - group overrides additionally carry a numeric `priority`
+- admin delegations are unique per `user_id` and store normalized permission keys as JSON
 
 Schema source of truth:
 - `OCA\NcConnector\Setup\InstallSchema`
@@ -372,6 +382,10 @@ Internal admin use:
 | `PUT` | `/apps/ncc_backend_4mc/api/v1/admin/license/mode` | Switch `Community` / `Pro` |
 | `POST` | `/apps/ncc_backend_4mc/api/v1/admin/license/sync` | Trigger manual sync |
 | `GET` | `/apps/ncc_backend_4mc/api/v1/admin/update-check` | Read backend update status for the admin UI |
+| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/me` | Read the current admin/delegation permission payload |
+| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/delegations` | List delegated NC Connector admins |
+| `PUT` | `/apps/ncc_backend_4mc/api/v1/admin/delegations/{targetUserId}` | Save a user delegation |
+| `DELETE` | `/apps/ncc_backend_4mc/api/v1/admin/delegations/{targetUserId}` | Remove a user delegation |
 | `GET` | `/apps/ncc_backend_4mc/api/v1/admin/groups` | Read available Nextcloud groups |
 | `GET` | `/apps/ncc_backend_4mc/api/v1/admin/users` | Read users, optionally filtered |
 | `GET` | `/apps/ncc_backend_4mc/api/v1/admin/seats` | Read assigned seats overview |
@@ -384,8 +398,17 @@ Internal admin use:
 | `PUT` | `/apps/ncc_backend_4mc/api/v1/admin/client-settings/groups` | Save group overrides |
 
 Important implementation detail:
+- Full Nextcloud admins can use every admin endpoint.
+- Delegated NC Connector admins can only use endpoints and settings covered by their delegated scopes.
+- Delegation management itself is restricted to full Nextcloud admins.
+- Delegation user selection reuses `/api/v1/admin/users`; do not add a second user endpoint for the same data.
+- `email_signature_template`, `email_signature_phone_mobile`, `email_signature_custom1`, and `email_signature_custom2` are user override rows with delegated scope `signature.templates` because they provide the signature body and template variables.
+- `email_signature_on_compose`, `email_signature_on_reply`, and `email_signature_on_forward` keep delegated scope `signature.policy`, including in the user override view.
+- Delegated admins with group/user override scopes or `signature.templates` may read the assigned-seat overview, but only full Nextcloud admins may assign or remove Seats.
 - The schema/defaults response includes `recommended_apps` for optional Nextcloud apps that unlock extra admin-configurable behavior.
 - The backend update check runs through `UpdateCheckJob` and does not require Pro mode or license credentials.
+- Admin delegation endpoints intentionally use `appinfo/routes.php`.
+- Keep them there unless every supported Nextcloud version resolves the controller through attribute routing reliably.
 - Group override endpoints intentionally use the query-based route in `appinfo/routes.php`.
 - That path was chosen because it handles group identifiers reliably and avoids the earlier path-segment routing problem.
 - Admin accounts are excluded from Seat search by default.
@@ -403,7 +426,9 @@ Purpose:
 
 Status:
 - The route still exists.
-- The app-bar icon was intentionally removed.
+- Full Nextcloud admins use the Nextcloud administration settings entry.
+- Delegated NC Connector admins use the personal settings entry registered by `Application.php`.
+- The direct route remains a fallback/deep-link path and must not be registered in the main app bar.
 
 ---
 

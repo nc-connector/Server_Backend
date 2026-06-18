@@ -177,6 +177,28 @@ curl -u "alice:APP_PASSWORD" \
   - The request contains only product name, installed version, channel, and a daily anonymous client ID.
   - License email, license key, Nextcloud URL, username, and tenant data are not sent.
 
+## Admin delegation endpoints
+
+These endpoints are used only by the NC Connector admin UI.
+
+| Method | Path | Auth / permissions |
+|---|---|---|
+| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/me` | Nextcloud admin or delegated NC Connector admin |
+| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/delegations` | Nextcloud admin |
+| `PUT` | `/apps/ncc_backend_4mc/api/v1/admin/delegations/{targetUserId}` | Nextcloud admin |
+| `DELETE` | `/apps/ncc_backend_4mc/api/v1/admin/delegations/{targetUserId}` | Nextcloud admin |
+
+Delegated admins cannot manage delegations. They only receive the current permission payload through `/api/v1/admin/me`; setting reads and writes are then restricted by the controller for each requested scope.
+
+Delegation user search reuses the existing admin user endpoint:
+
+| Method | Path | Auth / permissions |
+|---|---|---|
+| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/users?search=...` | Nextcloud admin |
+
+Implementation note:
+- These routes are explicitly registered in `appinfo/routes.php` so they resolve consistently across supported Nextcloud versions.
+
 ## Runtime status codes
 
 - `200 OK`: request accepted, response body contains `status`, `policy`, and `policy_editable`
