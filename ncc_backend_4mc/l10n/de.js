@@ -293,7 +293,29 @@ OC.L10N.register(
   "Current": "Aktuell",
   "Update available": "Update verfuegbar",
   "Update status unavailable.": "Update-Status nicht verfuegbar.",
-  "Checking backend version...": "Backend-Version wird geprueft..."
+  "Checking backend version...": "Backend-Version wird geprueft...",
+  "Advanced": "Erweitert",
+  "Area": "Bereich",
+  "Delegate NC Connector administration to selected users. Nextcloud administrators always keep full access.": "Delegieren Sie die NC-Connector-Administration an ausgewählte Benutzer. Nextcloud-Administratoren behalten immer vollen Zugriff.",
+  "Delegated admin": "Delegierter Admin",
+  "Delegation overview": "Delegationsübersicht",
+  "Delegation removed.": "Delegation entfernt.",
+  "Delegation saved.": "Delegation gespeichert.",
+  "Delegation user": "Delegationsbenutzer",
+  "Failed to load delegations.": "Delegationen konnten nicht geladen werden.",
+  "Failed to remove delegation.": "Delegation konnte nicht entfernt werden.",
+  "Failed to save delegation.": "Delegation konnte nicht gespeichert werden.",
+  "Failed to search delegation users.": "Delegationsbenutzer konnten nicht gesucht werden.",
+  "NCC Admin Delegation": "NCC-Admin-Delegation",
+  "No delegated admins configured.": "Keine delegierten Admins konfiguriert.",
+  "No permissions": "Keine Berechtigungen",
+  "Permissions": "Berechtigungen",
+  "Remove delegation": "Delegation entfernen",
+  "Save delegation": "Delegation speichern",
+  "Search user": "Benutzer suchen",
+  "Select a user to edit delegation.": "Wählen Sie einen Benutzer aus, um die Delegation zu bearbeiten.",
+  "Select user": "Benutzer auswählen",
+  "Shows which users can administer NC Connector and which areas they can edit.": "Zeigt, welche Benutzer NC Connector administrieren können und welche Bereiche sie bearbeiten dürfen."
 },
-"nplurals=2; plural=(n != 1);"
+    'nplurals=2; plural=(n != 1);'
 );

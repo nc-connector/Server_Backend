@@ -293,7 +293,29 @@ OC.L10N.register(
   "Current": "已是最新",
   "Update available": "有可用更新",
   "Update status unavailable.": "无法获取更新状态。",
-  "Checking backend version...": "正在检查后端版本..."
+  "Checking backend version...": "正在检查后端版本...",
+  "Advanced": "高级",
+  "Area": "区域",
+  "Delegate NC Connector administration to selected users. Nextcloud administrators always keep full access.": "将 NC Connector 管理委派给选定用户。Nextcloud 管理员始终保留完整访问权限。",
+  "Delegated admin": "委派管理员",
+  "Delegation overview": "委派概览",
+  "Delegation removed.": "委派已移除。",
+  "Delegation saved.": "委派已保存。",
+  "Delegation user": "委派用户",
+  "Failed to load delegations.": "无法加载委派。",
+  "Failed to remove delegation.": "无法移除委派。",
+  "Failed to save delegation.": "无法保存委派。",
+  "Failed to search delegation users.": "无法搜索委派用户。",
+  "NCC Admin Delegation": "NCC 管理委派",
+  "No delegated admins configured.": "未配置委派管理员。",
+  "No permissions": "无权限",
+  "Permissions": "权限",
+  "Remove delegation": "移除委派",
+  "Save delegation": "保存委派",
+  "Search user": "搜索用户",
+  "Select a user to edit delegation.": "请选择一个用户来编辑委派。",
+  "Select user": "选择用户",
+  "Shows which users can administer NC Connector and which areas they can edit.": "显示哪些用户可以管理 NC Connector 以及他们可以编辑哪些区域。"
 },
-"nplurals=1; plural=0;"
+    'nplurals=1; plural=0;'
 );

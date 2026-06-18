@@ -293,7 +293,29 @@ OC.L10N.register(
   "Current": "Naprakesz",
   "Update available": "Frissites elerheto",
   "Update status unavailable.": "A frissitesi allapot nem erheto el.",
-  "Checking backend version...": "Backend verzio ellenorzese..."
+  "Checking backend version...": "Backend verzio ellenorzese...",
+  "Advanced": "Speciális",
+  "Area": "Terület",
+  "Delegate NC Connector administration to selected users. Nextcloud administrators always keep full access.": "Az NC Connector adminisztrációját kijelölt felhasználókra ruházhatja át. A Nextcloud-adminisztrátorok mindig teljes hozzáférést kapnak.",
+  "Delegated admin": "Delegált adminisztrátor",
+  "Delegation overview": "Delegálási áttekintés",
+  "Delegation removed.": "Delegálás eltávolítva.",
+  "Delegation saved.": "Delegálás mentve.",
+  "Delegation user": "Delegált felhasználó",
+  "Failed to load delegations.": "A delegálások betöltése sikertelen.",
+  "Failed to remove delegation.": "A delegálás eltávolítása sikertelen.",
+  "Failed to save delegation.": "A delegálás mentése sikertelen.",
+  "Failed to search delegation users.": "A delegált felhasználók keresése sikertelen.",
+  "NCC Admin Delegation": "NCC admin delegálás",
+  "No delegated admins configured.": "Nincs konfigurált delegált adminisztrátor.",
+  "No permissions": "Nincsenek jogosultságok",
+  "Permissions": "Jogosultságok",
+  "Remove delegation": "Delegálás eltávolítása",
+  "Save delegation": "Delegálás mentése",
+  "Search user": "Felhasználó keresése",
+  "Select a user to edit delegation.": "Válasszon felhasználót a delegálás szerkesztéséhez.",
+  "Select user": "Felhasználó kiválasztása",
+  "Shows which users can administer NC Connector and which areas they can edit.": "Megmutatja, mely felhasználók adminisztrálhatják az NC Connectort, és mely területeket szerkeszthetik."
 },
-"nplurals=2; plural=(n != 1);"
+    'nplurals=2; plural=(n != 1);'
 );

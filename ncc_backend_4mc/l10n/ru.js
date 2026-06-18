@@ -293,7 +293,29 @@ OC.L10N.register(
   "Current": "Актуально",
   "Update available": "Доступно обновление",
   "Update status unavailable.": "Статус обновления недоступен.",
-  "Checking backend version...": "Проверяется версия бэкенда..."
+  "Checking backend version...": "Проверяется версия бэкенда...",
+  "Advanced": "Дополнительно",
+  "Area": "Область",
+  "Delegate NC Connector administration to selected users. Nextcloud administrators always keep full access.": "Делегируйте администрирование NC Connector выбранным пользователям. Администраторы Nextcloud всегда сохраняют полный доступ.",
+  "Delegated admin": "Делегированный администратор",
+  "Delegation overview": "Обзор делегирования",
+  "Delegation removed.": "Делегирование удалено.",
+  "Delegation saved.": "Делегирование сохранено.",
+  "Delegation user": "Пользователь делегирования",
+  "Failed to load delegations.": "Не удалось загрузить делегирования.",
+  "Failed to remove delegation.": "Не удалось удалить делегирование.",
+  "Failed to save delegation.": "Не удалось сохранить делегирование.",
+  "Failed to search delegation users.": "Не удалось найти пользователей делегирования.",
+  "NCC Admin Delegation": "Делегирование администратора NCC",
+  "No delegated admins configured.": "Делегированные администраторы не настроены.",
+  "No permissions": "Нет разрешений",
+  "Permissions": "Разрешения",
+  "Remove delegation": "Удалить делегирование",
+  "Save delegation": "Сохранить делегирование",
+  "Search user": "Найти пользователя",
+  "Select a user to edit delegation.": "Выберите пользователя для редактирования делегирования.",
+  "Select user": "Выбрать пользователя",
+  "Shows which users can administer NC Connector and which areas they can edit.": "Показывает, какие пользователи могут администрировать NC Connector и какие области они могут редактировать."
 },
-"nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2));"
+    'nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2));'
 );
