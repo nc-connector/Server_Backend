@@ -13,6 +13,7 @@ use OCP\Util;
 
 $appId = Application::APP_ID;
 $l = \OC::$server->getL10N($appId);
+$fullAdminFallback = !empty($_['fullAdminFallback']);
 Util::addScript($appId, 'vendor/tinymce/tinymce.min');
 Util::addScript($appId, 'vendor/tinymce/models/dom/model.min');
 Util::addScript($appId, 'vendor/tinymce/icons/default/icons.min');
@@ -35,4 +36,4 @@ Util::addStyle($appId, 'adminSettings');
 	<div class="nccb-top-banner__title">NC Connector Backend</div>
 	<div class="nccb-top-banner__text"><?php p($l->t('Mail client policies, seats and license status managed centrally.')); ?></div>
 </div>
-<div id="nccb-admin-settings"></div>
+<div id="nccb-admin-settings" data-full-admin-fallback="<?php p($fullAdminFallback ? '1' : '0'); ?>"></div>

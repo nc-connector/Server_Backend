@@ -87,6 +87,10 @@
 	min-width: 220px;
 }
 
+.nccb-delegation-user-select {
+	min-width: min(420px, 100%);
+}
+
 #nccb-admin-settings input[type='checkbox'],
 #nccb-admin-settings input[type='radio'],
 #nccb-admin-settings .nccb-setting-control[type='checkbox'] {
@@ -578,6 +582,68 @@ textarea.nccb-setting-control {
 	font-family: Arial, sans-serif;
 	line-height: 1.5;
 	word-break: break-word;
+}
+
+.nccb-delegation-permissions {
+	margin-top: 12px;
+}
+
+.nccb-permission-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	gap: 12px;
+}
+
+.nccb-permission-card {
+	padding: 12px;
+	border: 1px solid var(--color-border, #ddd);
+	border-radius: 8px;
+	background: var(--color-background-hover, rgba(127, 127, 127, 0.08));
+}
+
+.nccb-permission-card__title {
+	font-weight: 700;
+	margin-bottom: 10px;
+}
+
+.nccb-permission-card__options {
+	display: grid;
+	gap: 8px;
+}
+
+.nccb-permission-card__option {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0 !important;
+}
+
+.nccb-delegation-permission-group {
+	display: grid;
+	grid-template-columns: 140px 1fr;
+	gap: 8px;
+	align-items: start;
+	margin: 4px 0;
+}
+
+.nccb-delegation-permission-group__area {
+	font-weight: 700;
+}
+
+.nccb-delegation-permission-group__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.nccb-permission-chip {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border: 1px solid var(--color-border, #ddd);
+	border-radius: 999px;
+	background: var(--color-background-hover, rgba(127, 127, 127, 0.08));
+	white-space: nowrap;
 }
 
 .nccb-template-editor-modal {

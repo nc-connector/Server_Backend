@@ -243,6 +243,17 @@
 		EMAIL_SIGNATURE_CUSTOM1_KEY,
 		EMAIL_SIGNATURE_CUSTOM2_KEY,
 	])
+	const SIGNATURE_TEMPLATE_USER_SETTING_KEYS = new Set([
+		EMAIL_SIGNATURE_TEMPLATE_KEY,
+		EMAIL_SIGNATURE_PHONE_MOBILE_KEY,
+		EMAIL_SIGNATURE_CUSTOM1_KEY,
+		EMAIL_SIGNATURE_CUSTOM2_KEY,
+	])
+	const SIGNATURE_POLICY_USER_SETTING_KEYS = new Set([
+		EMAIL_SIGNATURE_ON_COMPOSE_KEY,
+		EMAIL_SIGNATURE_ON_REPLY_KEY,
+		EMAIL_SIGNATURE_ON_FORWARD_KEY,
+	])
 	const TALK_TEMPLATE_FORMAT_HTML = 'html'
 	const TALK_TEMPLATE_FORMAT_PLAIN_TEXT = 'plain_text'
 	const DEFAULT_TEMPLATE_LOGO_URL = 'https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png'
@@ -259,6 +270,26 @@
 		[SHARE_PASSWORD_TEMPLATE_KEY]: ['PASSWORD'],
 		[TALK_INVITATION_TEMPLATE_KEY]: ['MEETING_URL', 'PASSWORD'],
 		[EMAIL_SIGNATURE_TEMPLATE_KEY]: ['NAME', 'EMAIL', 'PHONE', 'PHONE_MOBILE', 'ABOUT', 'FUNCTION', 'ORGANISATION', 'CUSTOM1', 'CUSTOM2'],
+	}
+	const ADMIN_PERMISSION_MATRIX = [
+		{ area: 'share', label: 'Shares' },
+		{ area: 'talk', label: 'Talk' },
+		{ area: 'signature', label: 'Email signature' },
+	]
+	const ADMIN_PERMISSION_COLUMNS = [
+		{ suffix: 'policy', label: 'Policies' },
+		{ suffix: 'templates', label: 'Templates' },
+		{ suffix: 'group_overrides', label: 'Group overrides' },
+		{ suffix: 'user_overrides', label: 'User overrides' },
+	]
+	const TEMPLATE_DEFAULT_PERMISSION_BY_KEY = {
+		[SHARE_HTML_TEMPLATE_KEY]: 'share.templates',
+		[SHARE_PASSWORD_TEMPLATE_KEY]: 'share.templates',
+		language_share_html_block: 'share.templates',
+		[TALK_INVITATION_TEMPLATE_KEY]: 'talk.templates',
+		[TALK_INVITATION_TEMPLATE_FORMAT_KEY]: 'talk.templates',
+		language_talk_description: 'talk.templates',
+		[EMAIL_SIGNATURE_TEMPLATE_KEY]: 'signature.templates',
 	}
 	const ENUM_OPTION_LABELS = {
 		share_send_password_mode: {
@@ -566,6 +597,12 @@
 			.replaceAll('>', '&gt;')
 			.replaceAll('"', '&quot;')
 			.replaceAll("'", '&#039;')
+	}
+
+	function htmlToElement(html) {
+		const template = document.createElement('template')
+		template.innerHTML = String(html || '').trim()
+		return template.content.firstElementChild || document.createElement('div')
 	}
 
 	function formatDateTime(ts) {
@@ -903,6 +940,96 @@
 			return 'talk'
 		}
 		return 'share'
+	}
+
+	function adminPermissionAreaForSetting(settingKey) {
+		const category = settingCategory(settingKey)
+		return category === 'email_signature' ? 'signature' : category
+	}
+
+	function defaultAdminPermissionForSetting(settingKey) {
+		const key = String(settingKey || '')
+		return TEMPLATE_DEFAULT_PERMISSION_BY_KEY[key] || `${adminPermissionAreaForSetting(key)}.policy`
+	}
+
+	function userOverrideAdminPermissionForSetting(settingKey) {
+		const key = String(settingKey || '')
+		if (SIGNATURE_TEMPLATE_USER_SETTING_KEYS.has(key)) {
+			return 'signature.templates'
+		}
+		if (SIGNATURE_POLICY_USER_SETTING_KEYS.has(key)) {
+			return 'signature.policy'
+		}
+		return `${adminPermissionAreaForSetting(key)}.user_overrides`
+	}
+
+	function groupOverrideAdminPermissionForSetting(settingKey) {
+		return `${adminPermissionAreaForSetting(settingKey)}.group_overrides`
+	}
+
+	function hasAdminPermission(state, permission) {
+		if (state.admin?.is_nextcloud_admin) {
+			return true
+		}
+		return Array.isArray(state.admin?.permissions) && state.admin.permissions.includes(permission)
+	}
+
+	function hasAnyAdminPermission(state, permissions) {
+		if (state.admin?.is_nextcloud_admin) {
+			return true
+		}
+		return permissions.some((permission) => hasAdminPermission(state, permission))
+	}
+
+	function canEditDefaultSetting(state, settingKey) {
+		return hasAdminPermission(state, defaultAdminPermissionForSetting(settingKey))
+	}
+
+	function canEditUserOverrideSetting(state, settingKey) {
+		return hasAdminPermission(state, userOverrideAdminPermissionForSetting(settingKey))
+	}
+
+	function canEditGroupOverrideSetting(state, settingKey) {
+		return hasAdminPermission(state, groupOverrideAdminPermissionForSetting(settingKey))
+	}
+
+	function canReadAssignedSeatOverview(state) {
+		return Boolean(state.admin?.is_nextcloud_admin) || hasAnyAdminPermission(state, [
+			'share.group_overrides',
+			'share.user_overrides',
+			'talk.group_overrides',
+			'talk.user_overrides',
+			'signature.group_overrides',
+			'signature.user_overrides',
+			'signature.templates',
+		])
+	}
+
+	function permissionsForCategory(category, suffixes) {
+		const area = category === 'email_signature' ? 'signature' : category
+		return suffixes.map((suffix) => `${area}.${suffix}`)
+	}
+
+	function userOverridePermissionsForCategory(category) {
+		const suffixes = category === 'email_signature'
+			? ['user_overrides', 'templates']
+			: ['user_overrides']
+		return permissionsForCategory(category, suffixes)
+	}
+
+	function canUseAnyUserOverridePanel(state) {
+		return ['share', 'talk', 'email_signature'].some((category) => (
+			hasAnyAdminPermission(state, userOverridePermissionsForCategory(category))
+		))
+	}
+
+	function mergeSchema(state, schema) {
+		if (schema && typeof schema === 'object') {
+			state.schema = {
+				...(state.schema || {}),
+				...schema,
+			}
+		}
 	}
 
 	function isTemplateEditorSettingKey(settingKey) {
@@ -2112,13 +2239,14 @@
 		}
 
 		if (!response.ok) {
-			throw new Error(payload?.error || `HTTP ${response.status}`)
+			throw new Error(payload?.error || `HTTP ${response.status} (${path})`)
 		}
 
 		return payload
 	}
 
 	const api = {
+		loadAdminMe: () => apiRequest('GET', '/api/v1/admin/me'),
 		loadLicense: () => apiRequest('GET', '/api/v1/admin/license'),
 		loadBackendUpdate: () => apiRequest('GET', '/api/v1/admin/update-check'),
 		saveMode: (mode) => apiRequest('PUT', '/api/v1/admin/license/mode', { mode }),
@@ -2157,6 +2285,12 @@
 			const qs = new URLSearchParams({ group_id: groupId || '' })
 			return apiRequest('GET', '/api/v1/admin/client-settings/groups?' + qs.toString())
 		},
+		loadDelegations: () => apiRequest('GET', '/api/v1/admin/delegations'),
+		saveDelegation: (userId, enabled, permissions) => apiRequest('PUT', `/api/v1/admin/delegations/${encodeURIComponent(userId)}`, {
+			enabled,
+			permissions,
+		}),
+		deleteDelegation: (userId) => apiRequest('DELETE', `/api/v1/admin/delegations/${encodeURIComponent(userId)}`),
 		saveGroupOverrides: (groupId, priority, overrides) => apiRequest('PUT', '/api/v1/admin/client-settings/groups', {
 			group_id: groupId,
 			priority,
@@ -2315,7 +2449,7 @@
 					)
 					: ''
 				return `
-					<tr class="nccb-template-row">
+					<tr class="nccb-template-row" data-default-setting-key="${escapeHtml(key)}">
 						<td>
 							<div class="nccb-key-cell">
 								<div class="nccb-key-title">${escapeHtml(settingLabel(key))}${renderSettingHelp(key)}</div>
@@ -2332,7 +2466,7 @@
 			}
 
 			return `
-				<tr>
+				<tr data-default-setting-key="${escapeHtml(key)}">
 					<td>
 						<div class="nccb-key-cell">
 							<div class="nccb-key-title">${escapeHtml(settingLabel(key))}${renderSettingHelp(key)}</div>
@@ -2423,7 +2557,7 @@
 					)
 					: ''
 				return `
-					<tr class="nccb-template-row">
+					<tr class="nccb-template-row" data-user-setting-key="${escapeHtml(key)}">
 						<td>
 							<div class="nccb-key-cell">
 								<div class="nccb-key-title">${escapeHtml(settingLabel(key))}${renderSettingHelp(key)}</div>
@@ -2444,7 +2578,7 @@
 				`
 			}
 			return `
-				<tr>
+				<tr data-user-setting-key="${escapeHtml(key)}">
 					<td>
 						<div class="nccb-key-cell">
 							<div class="nccb-key-title">${escapeHtml(settingLabel(key))}${renderSettingHelp(key)}</div>
@@ -2554,7 +2688,7 @@
 					)
 					: ''
 				return `
-					<tr class="nccb-template-row">
+					<tr class="nccb-template-row" data-group-setting-key="${escapeHtml(key)}">
 						<td>
 							<div class="nccb-key-cell">
 								<div class="nccb-key-title">${escapeHtml(settingLabel(key))}${renderSettingHelp(key)}</div>
@@ -2575,7 +2709,7 @@
 				`
 			}
 			return `
-				<tr>
+				<tr data-group-setting-key="${escapeHtml(key)}">
 					<td>
 						<div class="nccb-key-cell">
 							<div class="nccb-key-title">${escapeHtml(settingLabel(key))}${renderSettingHelp(key)}</div>
@@ -2950,12 +3084,128 @@
 		})
 	}
 
+	function setAdvancedTab(root, name) {
+		root.querySelectorAll('[data-advanced-tab-button]').forEach((button) => {
+			button.classList.toggle('active', button.getAttribute('data-advanced-tab-button') === name)
+		})
+		root.querySelectorAll('[data-advanced-tab-panel]').forEach((panel) => {
+			panel.hidden = panel.getAttribute('data-advanced-tab-panel') !== name
+		})
+	}
+
+	function renderPermissionMatrix(selectedPermissions = []) {
+		const selected = new Set(Array.isArray(selectedPermissions) ? selectedPermissions : [])
+		const cards = ADMIN_PERMISSION_MATRIX.map((area) => {
+			const options = ADMIN_PERMISSION_COLUMNS.map((column) => {
+				const permission = `${area.area}.${column.suffix}`
+				return `
+					<label class="nccb-permission-card__option">
+						<input type="checkbox" class="nccb-delegation-permission" value="${escapeHtml(permission)}" ${selected.has(permission) ? 'checked' : ''}>
+						<span>${escapeHtml(tr(column.label))}</span>
+					</label>
+				`
+			}).join('')
+			return `
+				<div class="nccb-permission-card">
+					<div class="nccb-permission-card__title">${escapeHtml(tr(area.label))}</div>
+					<div class="nccb-permission-card__options">${options}</div>
+				</div>
+			`
+		}).join('')
+
+		return `
+			<div class="nccb-permission-cards" data-delegation-permissions>
+				${cards}
+			</div>
+		`
+	}
+
+	function groupedDelegationPermissions(permissions) {
+		const grouped = new Map(ADMIN_PERMISSION_MATRIX.map((area) => [area.area, []]))
+		if (!Array.isArray(permissions)) {
+			return grouped
+		}
+		permissions.forEach((permission) => {
+			const [area, suffix] = String(permission).split('.')
+			if (!grouped.has(area)) {
+				return
+			}
+			const column = ADMIN_PERMISSION_COLUMNS.find((item) => item.suffix === suffix)
+			if (column) {
+				grouped.get(area).push(column)
+			}
+		})
+		return grouped
+	}
+
+	function renderDelegationPermissionGroups(permissions) {
+		if (!Array.isArray(permissions) || permissions.length === 0) {
+			return `<span class="nccb-muted">${escapeHtml(tr('No permissions'))}</span>`
+		}
+		const grouped = groupedDelegationPermissions(permissions)
+		return ADMIN_PERMISSION_MATRIX.map((area) => {
+			const columns = grouped.get(area.area) || []
+			if (columns.length === 0) {
+				return ''
+			}
+			return `
+				<div class="nccb-delegation-permission-group">
+					<span class="nccb-delegation-permission-group__area">${escapeHtml(tr(area.label))}</span>
+					<span class="nccb-delegation-permission-group__chips">
+						${columns.map((column) => `<span class="nccb-permission-chip">${escapeHtml(tr(column.label))}</span>`).join('')}
+					</span>
+				</div>
+			`
+		}).join('')
+	}
+
+	function renderDelegationOverview(container, delegations) {
+		if (!(container instanceof HTMLElement)) {
+			return
+		}
+		const items = Array.isArray(delegations) ? delegations : []
+		if (items.length === 0) {
+			container.innerHTML = `<div class="nccb-muted">${escapeHtml(tr('No delegated admins configured.'))}</div>`
+			return
+		}
+
+		container.innerHTML = `
+			<table class="nccb-table">
+				<thead>
+					<tr>
+						<th>${escapeHtml(tr('User ID'))}</th>
+						<th>${escapeHtml(tr('Name'))}</th>
+						<th>${escapeHtml(tr('Status'))}</th>
+						<th>${escapeHtml(tr('Permissions'))}</th>
+					</tr>
+				</thead>
+				<tbody>
+					${items.map((item) => `
+						<tr>
+							<td>${escapeHtml(item.user_id || '')}</td>
+							<td>${escapeHtml(item.display_name || '—')}</td>
+							<td>${escapeHtml(item.enabled ? tr('Enabled') : tr('Disabled'))}</td>
+							<td>${renderDelegationPermissionGroups(item.permissions || [])}</td>
+						</tr>
+					`).join('')}
+				</tbody>
+			</table>
+		`
+	}
+
+	function readDelegationPermissions(root) {
+		return Array.from(root.querySelectorAll('.nccb-delegation-permission:checked'))
+			.map((input) => String(input.value || ''))
+			.filter((value) => value !== '')
+	}
+
 	function render(root) {
 		root.innerHTML = `
 			<h2>NC Connector Backend</h2>
 			<div class="nccb-tabbar">
 				<button class="button active" data-main-tab-button="general">${escapeHtml(tr('General'))}</button>
 				<button class="button" data-main-tab-button="group">${escapeHtml(tr('Group Settings'))}</button>
+				<button class="button" data-main-tab-button="advanced">${escapeHtml(tr('Advanced'))}</button>
 			</div>
 
 			<section class="nccb-main-panel" data-main-tab-panel="general">
@@ -3250,6 +3500,42 @@
 					</div>
 				</section>
 			</section>
+
+			<section class="nccb-main-panel" data-main-tab-panel="advanced" hidden>
+				<div class="nccb-tabbar">
+					<button class="button active" data-advanced-tab-button="delegation">${escapeHtml(tr('NCC Admin Delegation'))}</button>
+					<button class="button" data-advanced-tab-button="delegation-overview">${escapeHtml(tr('Delegation overview'))}</button>
+				</div>
+
+				<section class="nccb-group-panel" data-advanced-tab-panel="delegation">
+					<div class="nccb-section">
+						<h3>${escapeHtml(tr('NCC Admin Delegation'))}</h3>
+						<div class="nccb-muted">${escapeHtml(tr('Delegate NC Connector administration to selected users. Nextcloud administrators always keep full access.'))}</div>
+						<div id="nccb-delegation-message" class="nccb-muted" role="status"></div>
+						<div class="nccb-row">
+							<label for="nccb-delegation-user">${escapeHtml(tr('Delegation user'))}</label>
+							<select id="nccb-delegation-user" class="nccb-delegation-user-select">
+								<option value="">${escapeHtml(tr('Select user'))}</option>
+							</select>
+						</div>
+						<div class="nccb-delegation-permissions">
+							${renderPermissionMatrix([])}
+						</div>
+						<div class="nccb-row">
+							<button id="nccb-delegation-save" class="button">${escapeHtml(tr('Save delegation'))}</button>
+							<button id="nccb-delegation-remove" class="button">${escapeHtml(tr('Remove delegation'))}</button>
+						</div>
+					</div>
+				</section>
+
+				<section class="nccb-group-panel" data-advanced-tab-panel="delegation-overview" hidden>
+					<div class="nccb-section">
+						<h3>${escapeHtml(tr('Delegation overview'))}</h3>
+						<div class="nccb-muted">${escapeHtml(tr('Shows which users can administer NC Connector and which areas they can edit.'))}</div>
+						<div id="nccb-delegation-overview" class="nccb-scroll nccb-scroll--settings"></div>
+					</div>
+				</section>
+			</section>
 		`
 	}
 
@@ -3265,14 +3551,17 @@
 			return
 		}
 
+		root.hidden = true
 		render(root)
 		setMainTab(root, 'general')
 		setGroupTab(root, 'defaults')
 		setDefaultsTab(root, 'share')
 		setOverrideTab(root, 'share')
 		setGroupOverrideTab(root, 'share')
+		setAdvancedTab(root, 'delegation')
 
 		const state = {
+			admin: { is_nextcloud_admin: false, permissions: [] },
 			schema: {},
 			defaults: {},
 			defaultModes: {},
@@ -3285,6 +3574,8 @@
 			schemaTemplateAssets: {},
 			recommendedApps: [],
 			assignedSeats: [],
+			delegations: [],
+			delegationUsers: [],
 			userPaging: {
 				limit: 20,
 				offset: 0,
@@ -3298,6 +3589,7 @@
 			defaultTabs: root.querySelectorAll('[data-default-tab-button]'),
 			overrideTabs: root.querySelectorAll('[data-override-tab-button]'),
 			groupOverrideTabs: root.querySelectorAll('[data-group-override-tab-button]'),
+			advancedTabs: root.querySelectorAll('[data-advanced-tab-button]'),
 			modeInputs: root.querySelectorAll('input[name="nccb-license-mode"]'),
 			proSettings: root.querySelector('#nccb-pro-settings'),
 			licenseEmail: root.querySelector('#nccb-license-email'),
@@ -3342,10 +3634,105 @@
 			overrideTableShare: root.querySelector('#nccb-override-tbody-share'),
 			overrideTableTalk: root.querySelector('#nccb-override-tbody-talk'),
 			overrideTableEmailSignature: root.querySelector('#nccb-override-tbody-email-signature'),
+			delegationUser: root.querySelector('#nccb-delegation-user'),
+			delegationSave: root.querySelector('#nccb-delegation-save'),
+			delegationRemove: root.querySelector('#nccb-delegation-remove'),
+			delegationMessage: root.querySelector('#nccb-delegation-message'),
+			delegationOverview: root.querySelector('#nccb-delegation-overview'),
 		}
 
 		let licenseSnapshot = null
 		let searchTimer = null
+		const fullAdminFallback = root.dataset.fullAdminFallback === '1'
+
+		const setTabVisibility = (buttonAttr, panelAttr, name, visible) => {
+			const button = root.querySelector(`[${buttonAttr}="${name}"]`)
+			const panel = root.querySelector(`[${panelAttr}="${name}"]`)
+			if (button instanceof HTMLElement) {
+				button.hidden = !visible
+			}
+			if (panel instanceof HTMLElement) {
+				if (!visible) {
+					panel.hidden = true
+				} else if (button instanceof HTMLElement && button.classList.contains('active')) {
+					panel.hidden = false
+				}
+			}
+		}
+
+		const setFirstVisibleTab = (buttonAttr, setTab) => {
+			const button = Array.from(root.querySelectorAll(`[${buttonAttr}]`))
+				.find((candidate) => candidate instanceof HTMLElement && !candidate.hidden)
+			if (button instanceof HTMLElement) {
+				setTab(root, button.getAttribute(buttonAttr))
+			}
+		}
+
+		const applySettingRowVisibility = () => {
+			if (state.admin?.is_nextcloud_admin) {
+				root.querySelectorAll('[data-default-setting-key], [data-user-setting-key], [data-group-setting-key]').forEach((row) => {
+					if (row instanceof HTMLElement) {
+						row.hidden = false
+					}
+				})
+				return
+			}
+			root.querySelectorAll('[data-default-setting-key]').forEach((row) => {
+				if (row instanceof HTMLElement) {
+					row.hidden = !canEditDefaultSetting(state, row.dataset.defaultSettingKey || '')
+				}
+			})
+			root.querySelectorAll('[data-user-setting-key]').forEach((row) => {
+				if (row instanceof HTMLElement) {
+					row.hidden = !canEditUserOverrideSetting(state, row.dataset.userSettingKey || '')
+				}
+			})
+			root.querySelectorAll('[data-group-setting-key]').forEach((row) => {
+				if (row instanceof HTMLElement) {
+					row.hidden = !canEditGroupOverrideSetting(state, row.dataset.groupSettingKey || '')
+				}
+			})
+		}
+
+		const applyAdminUiVisibility = () => {
+			const isFullAdmin = Boolean(state.admin?.is_nextcloud_admin)
+			setTabVisibility('data-main-tab-button', 'data-main-tab-panel', 'general', isFullAdmin)
+			setTabVisibility('data-main-tab-button', 'data-main-tab-panel', 'advanced', isFullAdmin)
+			if (!isFullAdmin) {
+				setMainTab(root, 'group')
+			}
+
+			const defaultCategories = ['share', 'talk', 'email_signature']
+			defaultCategories.forEach((category) => {
+				setTabVisibility(
+					'data-default-tab-button',
+					'data-default-tab-panel',
+					category,
+					hasAnyAdminPermission(state, permissionsForCategory(category, ['policy', 'templates']))
+				)
+			})
+			setTabVisibility('data-group-tab-button', 'data-group-tab-panel', 'defaults', defaultCategories.some((category) => hasAnyAdminPermission(state, permissionsForCategory(category, ['policy', 'templates']))))
+			setTabVisibility('data-group-tab-button', 'data-group-tab-panel', 'seats', isFullAdmin)
+			setTabVisibility('data-group-tab-button', 'data-group-tab-panel', 'assigned', canReadAssignedSeatOverview(state))
+			setTabVisibility('data-group-tab-button', 'data-group-tab-panel', 'group-overrides', defaultCategories.some((category) => hasAnyAdminPermission(state, permissionsForCategory(category, ['group_overrides']))))
+			setTabVisibility('data-group-tab-button', 'data-group-tab-panel', 'overrides', canUseAnyUserOverridePanel(state))
+			if (refs.seatReportDownload instanceof HTMLButtonElement) {
+				const reportRow = refs.seatReportDownload.closest('.nccb-row')
+				if (reportRow instanceof HTMLElement) {
+					reportRow.hidden = !isFullAdmin
+				}
+			}
+			setFirstVisibleTab('data-group-tab-button', setGroupTab)
+
+			defaultCategories.forEach((category) => {
+				setTabVisibility('data-group-override-tab-button', 'data-group-override-tab-panel', category, hasAnyAdminPermission(state, permissionsForCategory(category, ['group_overrides'])))
+				setTabVisibility('data-override-tab-button', 'data-override-tab-panel', category, hasAnyAdminPermission(state, userOverridePermissionsForCategory(category)))
+			})
+			setFirstVisibleTab('data-default-tab-button', setDefaultsTab)
+			setFirstVisibleTab('data-group-override-tab-button', setGroupOverrideTab)
+			setFirstVisibleTab('data-override-tab-button', setOverrideTab)
+			applySettingRowVisibility()
+		}
 
 		templateAssetRefreshHandler = async (wrapper) => {
 			if (!(wrapper instanceof HTMLElement)) {
@@ -3411,6 +3798,7 @@
 							},
 						})
 					if (!isModalDraft) {
+						mergeSchema(state, response.schema)
 						state.overrides = response.items || state.overrides
 						state.overrideTemplateAssets = response.template_assets || state.overrideTemplateAssets
 						state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
@@ -3438,6 +3826,7 @@
 							},
 						})
 					if (!isModalDraft) {
+						mergeSchema(state, response.schema)
 						state.groupOverridePriority = Number.parseInt(String(response.priority ?? priority), 10) || priority
 						refs.groupOverridePriority.value = String(state.groupOverridePriority)
 						state.groupOverrides = response.items || state.groupOverrides
@@ -3674,6 +4063,65 @@
 			renderGroupOverrideTables(root, refs, state, refs.groupOverrideGroup.value)
 		}
 
+		const selectedDelegation = () => {
+			const userId = refs.delegationUser?.value || ''
+			return state.delegations.find((item) => item.user_id === userId) || null
+		}
+
+		const renderDelegationSelection = () => {
+			const delegation = selectedDelegation()
+			const permissions = delegation?.permissions || []
+			root.querySelector('[data-delegation-permissions]')?.replaceWith(htmlToElement(renderPermissionMatrix(permissions)))
+			refs.delegationSave.disabled = !refs.delegationUser.value
+			refs.delegationRemove.disabled = !refs.delegationUser.value || !delegation
+		}
+
+		const fillDelegationUsers = (users) => {
+			const prev = refs.delegationUser.value
+			refs.delegationUser.innerHTML = `<option value="">${escapeHtml(tr('Select user'))}</option>`
+			;(users || []).forEach((user) => {
+				const option = document.createElement('option')
+				option.value = user.user_id
+				option.textContent = user.display_name ? `${user.display_name} (${user.user_id})` : user.user_id
+				option.disabled = Boolean(user.is_nextcloud_admin)
+				refs.delegationUser.appendChild(option)
+			})
+			if (prev && Array.from(refs.delegationUser.options).some((option) => option.value === prev && !option.disabled)) {
+				refs.delegationUser.value = prev
+			}
+			renderDelegationSelection()
+		}
+
+		const refreshDelegations = async () => {
+			if (!state.admin?.is_nextcloud_admin) {
+				return
+			}
+			const response = await api.loadDelegations()
+			state.delegations = response.items || []
+			renderDelegationOverview(refs.delegationOverview, state.delegations)
+			renderDelegationSelection()
+		}
+
+		const loadDelegationUsers = async () => {
+			if (!state.admin?.is_nextcloud_admin) {
+				return
+			}
+			const users = []
+			let offset = 0
+			const limit = 200
+			while (true) {
+				const response = await api.loadUsers('', '', limit, offset)
+				const items = response.items || []
+				users.push(...items)
+				if (items.length < limit) {
+					break
+				}
+				offset += limit
+			}
+			state.delegationUsers = users
+			fillDelegationUsers(state.delegationUsers)
+		}
+
 		const attachSeatHandlers = () => {
 			refs.userTable.querySelectorAll('tr[data-user-id]').forEach((row) => {
 				const userId = row.getAttribute('data-user-id')
@@ -3740,8 +4188,7 @@
 			attachSeatHandlers()
 		}
 
-		const refreshSeatsAndUsers = async (resetPaging = false) => {
-			await refreshUsers(resetPaging)
+		const loadAssignedSeats = async () => {
 			const seats = []
 			let offset = 0
 			const limit = 200
@@ -3758,10 +4205,22 @@
 				}
 				offset += limit
 			}
+			return { seats, seatStatus }
+		}
+
+		const refreshAssignedSeatOverview = async () => {
+			const { seats, seatStatus } = await loadAssignedSeats()
 			state.assignedSeats = seats
 			renderSeatUsage(seatStatus)
 			renderAssignedSeats(refs.assignedSeats, seats)
-			fillOverrideUsers(seats)
+			if (canUseAnyUserOverridePanel(state)) {
+				fillOverrideUsers(seats)
+			}
+		}
+
+		const refreshSeatsAndUsers = async (resetPaging = false) => {
+			await refreshUsers(resetPaging)
+			await refreshAssignedSeatOverview()
 		}
 
 		const refreshDefaults = async () => {
@@ -3786,6 +4245,7 @@
 			attachTemplateEditorHandlers(root)
 			renderGroupOverrideTables(root, refs, state, refs.groupOverrideGroup.value)
 			renderOverrideTables(root, refs, state, refs.overrideUser.value)
+			applySettingRowVisibility()
 		}
 
 		const refreshOverrides = async (userId) => {
@@ -3794,11 +4254,13 @@
 				state.overrideTemplateAssets = {}
 			} else {
 				const response = await api.loadUserOverrides(userId)
+				mergeSchema(state, response.schema)
 				state.overrides = response.items || {}
 				state.overrideTemplateAssets = response.template_assets || {}
 				state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
 			}
 			renderOverrideTables(root, refs, state, userId)
+			applySettingRowVisibility()
 		}
 
 		const refreshGroupOverrides = async (groupId) => {
@@ -3809,6 +4271,7 @@
 				refs.groupOverridePriority.value = '100'
 			} else {
 				const response = await api.loadGroupOverrides(groupId)
+				mergeSchema(state, response.schema)
 				state.groupOverridePriority = Number.parseInt(String(response.priority ?? 100), 10) || 100
 				refs.groupOverridePriority.value = String(state.groupOverridePriority)
 				state.groupOverrides = response.items || {}
@@ -3816,6 +4279,7 @@
 				state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
 			}
 			renderGroupOverrideTables(root, refs, state, groupId)
+			applySettingRowVisibility()
 		}
 
 		const isAttachmentThresholdEnabled = (prefix) => {
@@ -3831,6 +4295,9 @@
 			const payload = {}
 			sortedSettingKeys(state.schema).forEach((key) => {
 				if (isUserOverrideOnlySettingKey(key)) {
+					return
+				}
+				if (!canEditDefaultSetting(state, key)) {
 					return
 				}
 				const addonToggle = root.querySelector(`.nccb-addon-changeable[data-setting-key="${key}"]`)
@@ -3850,6 +4317,9 @@
 		const collectOverridePayload = () => {
 			const payload = {}
 			sortedSettingKeys(state.schema).forEach((key) => {
+				if (!canEditUserOverrideSetting(state, key)) {
+					return
+				}
 				const modeKey = getTemplateModeControlKey(key)
 				const mode = root.querySelector(`.nccb-user-mode[data-setting-key="${modeKey}"]`)?.value || 'inherit'
 				if (mode !== 'forced') {
@@ -3871,6 +4341,9 @@
 			const payload = {}
 			sortedSettingKeys(state.schema).forEach((key) => {
 				if (isUserOverrideOnlySettingKey(key)) {
+					return
+				}
+				if (!canEditGroupOverrideSetting(state, key)) {
 					return
 				}
 				const modeKey = getTemplateModeControlKey(key)
@@ -3911,6 +4384,7 @@
 		refs.defaultTabs.forEach((button) => button.addEventListener('click', () => setDefaultsTab(root, button.getAttribute('data-default-tab-button'))))
 		refs.overrideTabs.forEach((button) => button.addEventListener('click', () => setOverrideTab(root, button.getAttribute('data-override-tab-button'))))
 		refs.groupOverrideTabs.forEach((button) => button.addEventListener('click', () => setGroupOverrideTab(root, button.getAttribute('data-group-override-tab-button'))))
+		refs.advancedTabs.forEach((button) => button.addEventListener('click', () => setAdvancedTab(root, button.getAttribute('data-advanced-tab-button'))))
 		root.addEventListener('click', async (event) => {
 			const target = event.target instanceof Element ? event.target.closest('[data-group-override-link], [data-user-override-link]') : null
 			if (!(target instanceof HTMLElement)) {
@@ -4001,6 +4475,48 @@
 			} catch (error) {
 				console.error('nccb manual license sync failed', error)
 				setMessage(refs.licenseMessage, error.message || tr('Synchronization failed.'), 'error')
+			}
+		})
+
+		refs.delegationUser.addEventListener('change', renderDelegationSelection)
+		refs.delegationSave.addEventListener('click', async () => {
+			if (!refs.delegationUser.value) {
+				setMessage(refs.delegationMessage, tr('Select a user to edit delegation.'), 'error')
+				return
+			}
+			const permissions = readDelegationPermissions(root)
+			if (permissions.length === 0) {
+				setMessage(refs.delegationMessage, `${tr('Permissions')}: ${tr('No permissions')}`, 'error')
+				return
+			}
+			setMessage(refs.delegationMessage, '', '')
+			try {
+				await api.saveDelegation(
+					refs.delegationUser.value,
+					true,
+					permissions
+				)
+				await refreshDelegations()
+				setMessage(refs.delegationMessage, tr('Delegation saved.'), 'success')
+			} catch (error) {
+				console.error('nccb delegation save failed', refs.delegationUser.value, error)
+				setMessage(refs.delegationMessage, error.message || tr('Failed to save delegation.'), 'error')
+			}
+		})
+		refs.delegationRemove.addEventListener('click', async () => {
+			if (!refs.delegationUser.value) {
+				setMessage(refs.delegationMessage, tr('Select a user to edit delegation.'), 'error')
+				return
+			}
+			setMessage(refs.delegationMessage, '', '')
+			try {
+				await api.deleteDelegation(refs.delegationUser.value)
+				await refreshDelegations()
+				renderDelegationSelection()
+				setMessage(refs.delegationMessage, tr('Delegation removed.'), 'success')
+			} catch (error) {
+				console.error('nccb delegation remove failed', refs.delegationUser.value, error)
+				setMessage(refs.delegationMessage, error.message || tr('Failed to remove delegation.'), 'error')
 			}
 		})
 
@@ -4150,6 +4666,7 @@
 			try {
 				const priority = Number.parseInt(String(refs.groupOverridePriority.value || state.groupOverridePriority || 100), 10) || 100
 				const response = await api.saveGroupOverrides(refs.groupOverrideGroup.value, priority, collectGroupOverridePayload())
+				mergeSchema(state, response.schema)
 				state.groupOverridePriority = Number.parseInt(String(response.priority ?? priority), 10) || priority
 				refs.groupOverridePriority.value = String(state.groupOverridePriority)
 				state.groupOverrides = response.items || state.groupOverrides
@@ -4178,6 +4695,7 @@
 			setMessage(refs.overrideMessage, '', '')
 			try {
 				const response = await api.saveUserOverrides(refs.overrideUser.value, collectOverridePayload())
+				mergeSchema(state, response.schema)
 				state.overrides = response.items || state.overrides
 				state.overrideTemplateAssets = response.template_assets || {}
 				state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
@@ -4191,18 +4709,43 @@
 		})
 
 		try {
-			await refreshLicense()
+			state.admin = await api.loadAdminMe()
 		} catch (error) {
-			console.error('nccb license init failed', error)
+			console.error('nccb admin permission init failed', error)
+			if (fullAdminFallback) {
+				state.admin = { is_nextcloud_admin: true, permissions: [] }
+			}
+		}
+		applyAdminUiVisibility()
+		root.hidden = false
+		if (state.admin?.is_nextcloud_admin) {
+			try {
+				await refreshLicense()
+			} catch (error) {
+				console.error('nccb license init failed', error)
+			}
+			try {
+				await refreshBackendUpdateStatus()
+			} catch (error) {
+				console.error('nccb backend update status init failed', error)
+				renderBackendUpdateStatus(null)
+			}
+			try {
+				await refreshDelegations()
+				await loadDelegationUsers()
+			} catch (error) {
+				console.error('nccb delegation init failed', error)
+				setMessage(refs.delegationMessage, error.message || tr('Failed to load delegations.'), 'error')
+			}
 		}
 		try {
-			await refreshBackendUpdateStatus()
-		} catch (error) {
-			console.error('nccb backend update status init failed', error)
-			renderBackendUpdateStatus(null)
-		}
-		try {
-			await refreshGroups()
+			if (state.admin?.is_nextcloud_admin || hasAnyAdminPermission(state, [
+				'share.group_overrides',
+				'talk.group_overrides',
+				'signature.group_overrides',
+			])) {
+				await refreshGroups()
+			}
 		} catch (error) {
 			console.error('nccb group init failed', error)
 			setMessage(refs.seatMessage, error.message || tr('Failed to load groups.'), 'error')
@@ -4214,7 +4757,11 @@
 			setMessage(refs.defaultMessage, error.message || tr('Failed to load default settings.'), 'error')
 		}
 		try {
-			await refreshSeatsAndUsers(true)
+			if (state.admin?.is_nextcloud_admin) {
+				await refreshSeatsAndUsers(true)
+			} else if (canReadAssignedSeatOverview(state)) {
+				await refreshAssignedSeatOverview()
+			}
 		} catch (error) {
 			console.error('nccb seat section init failed', error)
 			setMessage(refs.seatMessage, error.message || tr('Failed to load seat section.'), 'error')
