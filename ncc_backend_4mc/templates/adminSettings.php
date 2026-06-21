@@ -31,6 +31,7 @@ Util::addScript($appId, 'adminApi');
 Util::addScript($appId, 'adminSettingsMeta');
 Util::addScript($appId, 'adminTemplatePreview');
 Util::addScript($appId, 'adminPermissions');
+Util::addScript($appId, 'adminTemplateImages');
 Util::addScript($appId, $appId . '-adminSettings');
 Util::addStyle($appId, 'tinymceSkin');
 Util::addStyle($appId, 'adminSettings');
