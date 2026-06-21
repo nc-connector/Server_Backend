@@ -1,0 +1,60 @@
+/**
+ * Copyright (c) 2026 Bastian Kleinschmidt
+ * Licensed under the GNU Affero General Public License v3.0.
+ * See LICENSE.txt for details.
+ */
+.nccb-scroll--users {
+	max-height: none;
+	overflow-y: visible;
+}
+
+.nccb-scroll--seats {
+	max-height: none;
+	white-space: normal;
+	overflow: visible;
+}
+
+.nccb-seat-state {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 12px;
+	border: 1px solid var(--color-border, #ddd);
+}
+
+.nccb-seat-state--active {
+	color: var(--color-success, #2ea043);
+	border-color: rgba(46, 160, 67, 0.5);
+}
+
+.nccb-seat-state--paused {
+	color: var(--color-warning, #d58f00);
+	border-color: rgba(213, 143, 0, 0.5);
+}
+
+.nccb-override-state {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 12px;
+	border: 1px solid var(--color-border, #ddd);
+}
+
+.nccb-override-state--enabled {
+	color: var(--color-success, #2ea043);
+	border-color: rgba(46, 160, 67, 0.5);
+}
+
+.nccb-override-state--disabled {
+	color: var(--color-text-maxcontrast, #777);
+	border-color: var(--color-border, #ddd);
+}
+
+.nccb-pagination {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 10px;
+}

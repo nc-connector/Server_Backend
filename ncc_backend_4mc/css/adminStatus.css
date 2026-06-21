@@ -1,0 +1,77 @@
+/**
+ * Copyright (c) 2026 Bastian Kleinschmidt
+ * Licensed under the GNU Affero General Public License v3.0.
+ * See LICENSE.txt for details.
+ */
+#nccb-pro-settings {
+	padding: 10px 12px;
+	border: 1px solid var(--color-border, #ddd);
+	border-radius: 6px;
+	margin-top: 8px;
+}
+
+.nccb-pro-funnel {
+	margin: 14px 0;
+	padding: 14px 16px;
+	border: 1px solid var(--color-border, #ddd);
+	border-left: 4px solid var(--color-primary-element, #0082c9);
+	border-radius: 6px;
+	background: var(--color-background-hover, #f7f7f7);
+}
+
+.nccb-pro-funnel h3 {
+	margin-top: 0;
+}
+
+.nccb-pro-funnel-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 10px 0;
+}
+
+.nccb-backend-update {
+	margin: 12px 0;
+}
+
+.nccb-update-status-ok {
+	color: var(--color-success, #2ea043);
+	font-weight: 700;
+	margin-right: 4px;
+}
+
+#nccb-license-hint {
+	margin-top: 6px;
+}
+
+.nccb-recommended-apps {
+	margin-top: 10px;
+	display: grid;
+	gap: 8px;
+}
+
+.nccb-recommended-app {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 10px 12px;
+	border: 1px solid var(--color-border, #ddd);
+	border-radius: 6px;
+}
+
+.nccb-recommended-app-status {
+	font-weight: 700;
+	line-height: 1.4;
+}
+
+.nccb-recommended-app-status--ok {
+	color: var(--color-success, #2ea043);
+}
+
+.nccb-recommended-app-status--missing {
+	color: var(--color-error, #e9322d);
+}
+
+.nccb-recommended-app-name {
+	font-weight: 600;
+}

@@ -42,6 +42,10 @@ Util::addScript($appId, 'adminOverridesUi');
 Util::addScript($appId, $appId . '-adminSettings');
 Util::addStyle($appId, 'tinymceSkin');
 Util::addStyle($appId, 'adminSettings');
+Util::addStyle($appId, 'adminStatus');
+Util::addStyle($appId, 'adminSeatOverview');
+Util::addStyle($appId, 'adminTemplates');
+Util::addStyle($appId, 'adminDelegation');
 ?>
 
 <div class="nccb-top-banner" role="region" aria-label="NC Connector Backend">
