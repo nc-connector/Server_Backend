@@ -16,13 +16,9 @@ use OCA\NcConnector\Db\ClientOverrideMapper;
 use OCA\NcConnector\Db\GroupOverride;
 use OCA\NcConnector\Db\GroupOverrideMapper;
 use OCA\NcConnector\Db\SettingMapper;
-use OCP\Accounts\IAccount;
-use OCP\Accounts\IAccountManager;
-use OCP\Accounts\PropertyDoesNotExistException;
 use OCP\App\IAppManager;
 use OCP\IGroup;
 use OCP\IGroupManager;
-use OCP\IUser;
 use OCP\IUserManager;
 use Psr\Log\LoggerInterface;
 
@@ -42,15 +38,11 @@ class ClientSettingsService {
 	private const SHARE_SEND_PASSWORD_MODE_PLAIN = 'plain';
 	private const SHARE_SEND_PASSWORD_MODE_SECRETS = 'secrets';
 	private const SHARE_SECRETS_EXPIRE_DAYS_KEY = 'share_secrets_expire_days';
-	private const EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY = 'email_signature_email_address';
-	private const EMAIL_SIGNATURE_PHONE_MOBILE_KEY = 'email_signature_phone_mobile';
-	private const EMAIL_SIGNATURE_CUSTOM1_KEY = 'email_signature_custom1';
-	private const EMAIL_SIGNATURE_CUSTOM2_KEY = 'email_signature_custom2';
 	private const USER_OVERRIDE_ONLY_SETTINGS = [
-		self::EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY => true,
-		self::EMAIL_SIGNATURE_PHONE_MOBILE_KEY => true,
-		self::EMAIL_SIGNATURE_CUSTOM1_KEY => true,
-		self::EMAIL_SIGNATURE_CUSTOM2_KEY => true,
+		EmailSignatureRuntimeService::EMAIL_ADDRESS_KEY => true,
+		EmailSignatureRuntimeService::PHONE_MOBILE_KEY => true,
+		EmailSignatureRuntimeService::CUSTOM1_KEY => true,
+		EmailSignatureRuntimeService::CUSTOM2_KEY => true,
 	];
 	private const BACKEND_ONLY_SETTINGS = [
 		self::SHARE_SECRETS_EXPIRE_DAYS_KEY => true,
@@ -243,10 +235,10 @@ HTML;
 		'email_signature_on_reply' => ['type' => 'bool', 'default' => false],
 		'email_signature_on_forward' => ['type' => 'bool', 'default' => false],
 		'email_signature_template' => ['type' => 'string', 'default' => self::DEFAULT_EMAIL_SIGNATURE_TEMPLATE, 'max_length' => 32768],
-		self::EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY => ['type' => 'string', 'default' => '', 'max_length' => 255],
-		self::EMAIL_SIGNATURE_PHONE_MOBILE_KEY => ['type' => 'string', 'default' => '', 'max_length' => 255],
-		self::EMAIL_SIGNATURE_CUSTOM1_KEY => ['type' => 'string', 'default' => '', 'max_length' => 255],
-		self::EMAIL_SIGNATURE_CUSTOM2_KEY => ['type' => 'string', 'default' => '', 'max_length' => 255],
+		EmailSignatureRuntimeService::EMAIL_ADDRESS_KEY => ['type' => 'string', 'default' => '', 'max_length' => 255],
+		EmailSignatureRuntimeService::PHONE_MOBILE_KEY => ['type' => 'string', 'default' => '', 'max_length' => 255],
+		EmailSignatureRuntimeService::CUSTOM1_KEY => ['type' => 'string', 'default' => '', 'max_length' => 255],
+		EmailSignatureRuntimeService::CUSTOM2_KEY => ['type' => 'string', 'default' => '', 'max_length' => 255],
 	];
 
 	public function __construct(
@@ -255,10 +247,10 @@ HTML;
 		private GroupOverrideMapper $groupOverrides,
 		private IGroupManager $groupManager,
 		private IUserManager $userManager,
-		private IAccountManager $accountManager,
 		private IAppManager $appManager,
 		private TemplateAssetService $templateAssets,
 		private TalkTemplateRuntimeService $talkTemplates,
+		private EmailSignatureRuntimeService $emailSignatures,
 		private LoggerInterface $logger,
 	) {
 	}
@@ -1139,254 +1131,15 @@ HTML;
 			return;
 		}
 
-		$settings['email_signature_template'] = $this->renderEmailSignatureTemplateForPolicy((string)$template, $userId);
+		$settings['email_signature_template'] = $this->emailSignatures->renderTemplateForPolicy((string)$template, $userId);
 	}
 
 	public function getEmailSignatureUserEmail(string $userId): string {
-		$variables = $this->getEmailSignatureTemplateVariables($userId);
-		return (string)($variables['EMAIL'] ?? '');
-	}
-
-	private function renderEmailSignatureTemplateForPolicy(string $template, string $userId): string {
-		$variables = $this->getEmailSignatureTemplateVariables($userId);
-		$replacements = [];
-		$template = $this->removeEmptyEmailSignatureVariableLines($template, $variables);
-
-		foreach ($variables as $name => $value) {
-			$replacements['{' . $name . '}'] = $name === 'ABOUT'
-				? $this->escapeEmailSignatureTemplateMultilineValue($value)
-				: $this->escapeEmailSignatureTemplateValue($value);
-		}
-
-		return strtr($template, $replacements);
-	}
-
-	/**
-	 * @return array<string, string>
-	 */
-	private function getEmailSignatureTemplateVariables(string $userId): array {
-		$variables = [
-			'NAME' => '',
-			'EMAIL' => '',
-			'PHONE' => '',
-			'PHONE_MOBILE' => '',
-			'ABOUT' => '',
-			'FUNCTION' => '',
-			'ORGANISATION' => '',
-			'CUSTOM1' => '',
-			'CUSTOM2' => '',
-		];
-
-		$user = $this->userManager->get($userId);
-		if (!$user instanceof IUser) {
-			return $this->applyEmailSignatureUserOverrides($variables, $userId);
-		}
-
-		$variables['NAME'] = (string)$user->getDisplayName();
-		$variables['EMAIL'] = (string)($user->getEMailAddress() ?? '');
-
-		try {
-			$account = $this->accountManager->getAccount($user);
-		} catch (\Throwable $error) {
-			$this->logError('Email signature profile lookup failed.', [
-				'userId' => $userId,
-				'exception' => $error,
-			]);
-			return $this->applyEmailSignatureUserOverrides($variables, $userId);
-		}
-
-		if ($variables['EMAIL'] === '') {
-			$variables['EMAIL'] = $this->getAccountPropertyValue($account, IAccountManager::PROPERTY_EMAIL);
-		}
-
-		$variables['PHONE'] = $this->getAccountPropertyValue($account, IAccountManager::PROPERTY_PHONE);
-		$variables['ABOUT'] = $this->getAccountPropertyValue($account, IAccountManager::PROPERTY_BIOGRAPHY);
-		$variables['FUNCTION'] = $this->getAccountPropertyValue($account, IAccountManager::PROPERTY_ROLE);
-		$variables['ORGANISATION'] = $this->getAccountPropertyValue($account, IAccountManager::PROPERTY_ORGANISATION);
-
-		return $this->applyEmailSignatureUserOverrides($variables, $userId);
-	}
-
-	/**
-	 * @param array<string, string> $variables
-	 * @return array<string, string>
-	 */
-	private function applyEmailSignatureUserOverrides(array $variables, string $userId): array {
-		$overrideMap = $this->overrides->getForUser($userId);
-
-		$emailAddress = $this->getForcedUserOverrideString($overrideMap, self::EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY);
-		if ($emailAddress !== null) {
-			$variables['EMAIL'] = $emailAddress;
-		}
-
-		$phoneMobile = $this->getForcedUserOverrideString($overrideMap, self::EMAIL_SIGNATURE_PHONE_MOBILE_KEY);
-		if ($phoneMobile !== null) {
-			$variables['PHONE_MOBILE'] = $phoneMobile;
-		}
-
-		$custom1 = $this->getForcedUserOverrideString($overrideMap, self::EMAIL_SIGNATURE_CUSTOM1_KEY);
-		if ($custom1 !== null) {
-			$variables['CUSTOM1'] = $custom1;
-		}
-
-		$custom2 = $this->getForcedUserOverrideString($overrideMap, self::EMAIL_SIGNATURE_CUSTOM2_KEY);
-		if ($custom2 !== null) {
-			$variables['CUSTOM2'] = $custom2;
-		}
-
-		return $variables;
-	}
-
-	/**
-	 * @param array<string, ClientOverride> $overrideMap
-	 */
-	private function getForcedUserOverrideString(array $overrideMap, string $key): ?string {
-		$override = $overrideMap[$key] ?? null;
-		if (!$override instanceof ClientOverride || $override->getMode() !== self::MODE_FORCED) {
-			return null;
-		}
-
-		return (string)$this->parseStoredValue($key, (string)$override->getSettingValue());
+		return $this->emailSignatures->getUserEmail($userId);
 	}
 
 	private function getUserOnlyFallbackValue(string $key, string $userId): string {
-		if ($key !== self::EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY) {
-			return '';
-		}
-
-		$variables = $this->getEmailSignatureTemplateVariables($userId);
-		return (string)($variables['EMAIL'] ?? '');
-	}
-
-	/**
-	 * @param array<string, string> $variables
-	 */
-	private function removeEmptyEmailSignatureVariableLines(string $template, array $variables): string {
-		$emptyNames = array_keys(array_filter(
-			$variables,
-			static fn (string $value): bool => trim($value) === ''
-		));
-		if ($emptyNames === []) {
-			return $template;
-		}
-
-		$variablePattern = $this->buildEmailSignatureVariablePattern($emptyNames);
-		$template = preg_replace_callback(
-			'~<tr\b[^>]*>.*?</tr>~is',
-			function (array $match) use ($variablePattern): string {
-				if (preg_match($variablePattern, $match[0]) !== 1) {
-					return $match[0];
-				}
-
-				$row = preg_replace_callback(
-					'~(<t[dh]\b[^>]*>)(.*?)(</t[dh]>)~is',
-					function (array $cellMatch) use ($variablePattern): string {
-						$inner = $this->removeEmptyEmailSignatureBrLines($cellMatch[2], $variablePattern);
-						return $cellMatch[1] . $inner . $cellMatch[3];
-					},
-					$match[0]
-				) ?? $match[0];
-				return trim(strip_tags($row)) === '' ? '' : $row;
-			},
-			$template
-		) ?? $template;
-		$template = preg_replace_callback(
-			'~<li\b[^>]*>.*?</li>~is',
-			static fn (array $match): string => preg_match($variablePattern, $match[0]) === 1 ? '' : $match[0],
-			$template
-		) ?? $template;
-
-		$template = preg_replace_callback(
-			'~(<(p|div)\b[^>]*>)(.*?)(</\2>)~is',
-			function (array $match) use ($variablePattern): string {
-				if (preg_match($variablePattern, $match[3]) !== 1) {
-					return $match[0];
-				}
-
-				$inner = $this->removeEmptyEmailSignatureBrLines($match[3], $variablePattern);
-				if (trim(strip_tags($inner)) === '') {
-					return '';
-				}
-				return $match[1] . $inner . $match[4];
-			},
-			$template
-		) ?? $template;
-
-		$lines = preg_split('/\n/', $template);
-		if (!is_array($lines)) {
-			return $template;
-		}
-
-		$lines = array_values(array_filter(
-			$lines,
-			static fn (string $line): bool => preg_match($variablePattern, $line) !== 1
-		));
-		return implode("\n", $lines);
-	}
-
-	/**
-	 * @param string[] $variableNames
-	 */
-	private function buildEmailSignatureVariablePattern(array $variableNames): string {
-		$escaped = array_map(
-			static fn (string $name): string => preg_quote($name, '~'),
-			$variableNames
-		);
-		return '~\{(?:' . implode('|', $escaped) . ')\}~';
-	}
-
-	private function removeEmptyEmailSignatureBrLines(string $html, string $variablePattern): string {
-		$parts = preg_split('~(<br\b[^>]*\/?>)~i', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
-		if (!is_array($parts) || count($parts) <= 1) {
-			return preg_match($variablePattern, $html) === 1 ? '' : $html;
-		}
-
-		$result = [];
-		$partCount = count($parts);
-		for ($index = 0; $index < $partCount; $index++) {
-			$part = $parts[$index];
-			if ($index % 2 === 1) {
-				$result[] = $part;
-				continue;
-			}
-
-			if (preg_match($variablePattern, $part) !== 1) {
-				$result[] = $part;
-				continue;
-			}
-
-			if ($result !== [] && preg_match('~^<br\b~i', (string)end($result)) === 1) {
-				array_pop($result);
-				continue;
-			}
-			if ($index + 1 < $partCount && preg_match('~^<br\b~i', $parts[$index + 1]) === 1) {
-				$index++;
-			}
-		}
-
-		return implode('', $result);
-	}
-
-	private function getAccountPropertyValue(IAccount $account, string $property): string {
-		try {
-			return (string)$account->getProperty($property)->getValue();
-		} catch (PropertyDoesNotExistException) {
-			return '';
-		}
-	}
-
-	private function escapeEmailSignatureTemplateValue(string $value): string {
-		$normalized = trim((string)preg_replace('/\s+/u', ' ', $value));
-		return htmlspecialchars($normalized, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-	}
-
-	private function escapeEmailSignatureTemplateMultilineValue(string $value): string {
-		$normalized = trim(str_replace(["\r\n", "\r"], "\n", $value));
-		return str_replace(
-			"\n",
-			'<br>',
-			htmlspecialchars($normalized, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
-		);
+		return $this->emailSignatures->getUserOnlyFallbackValue($key, $userId);
 	}
 
 	private function normalizeDefaultMode(string $key, string $mode): string {

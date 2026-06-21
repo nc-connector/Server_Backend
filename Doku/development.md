@@ -227,12 +227,13 @@ Core services:
 |---|---|
 | `LicenseService` | License mode, credentials, sync, entitlement state |
 | `SeatService` | Seat assignment, seat-limit enforcement, and the explicit admin-seat override |
-| `ClientSettingsService` | Default values, group/user overrides, effective policy resolution, template normalization, and email signature profile rendering |
+| `ClientSettingsService` | Default values, group/user overrides, effective policy resolution, and template activation rules |
 | `AccessService` | Access checks for direct page visibility and user-facing runtime state |
 | `AdminPermissionService` | Maps admin actions to delegated NC Connector permission scopes |
 | `AdminDelegationService` | Stores and normalizes delegated admin permissions |
 | `TemplateAssetService` | Mirrors external template images into local runtime assets for editor rendering |
 | `TalkTemplateRuntimeService` | Renders Talk invitation templates as HTML or cleaned plain text for policy responses |
+| `EmailSignatureRuntimeService` | Resolves email signature profile variables, user overrides, empty-variable cleanup, and HTML escaping |
 | `UpdateCheckService` | Daily backend version check against `nc-connector.de`; runs independently of license mode |
 
 Most important service in day-to-day maintenance:
@@ -244,7 +245,6 @@ That file is the core of the backend because it owns:
 - override modes
 - precedence resolution
 - template activation rules
-- email signature profile variable rendering
 - seat-overview helper data for matching overrides
 
 Logging rule for service/controller work:
