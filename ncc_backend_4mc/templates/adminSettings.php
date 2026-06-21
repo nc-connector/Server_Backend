@@ -35,6 +35,7 @@ Util::addScript($appId, 'adminDelegationUi');
 Util::addScript($appId, 'adminTemplateImages');
 Util::addScript($appId, 'adminSeatReport');
 Util::addScript($appId, 'adminTabs');
+Util::addScript($appId, 'adminSeatUi');
 Util::addScript($appId, $appId . '-adminSettings');
 Util::addStyle($appId, 'tinymceSkin');
 Util::addStyle($appId, 'adminSettings');

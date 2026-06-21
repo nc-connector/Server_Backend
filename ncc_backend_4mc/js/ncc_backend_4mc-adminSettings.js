@@ -100,6 +100,11 @@
 		console.error('nccb admin tabs module missing')
 		return
 	}
+	const seatUi = window.NCCBackendSeatUi
+	if (!seatUi) {
+		console.error('nccb seat UI module missing')
+		return
+	}
 
 	function escapeHtml(value) {
 		return String(value)
@@ -152,6 +157,17 @@
 
 	function readDelegationPermissions(root) {
 		return delegationUi.readDelegationPermissions(root)
+	}
+
+	function getSeatUiHelpers() {
+		return {
+			escapeHtml,
+			tr,
+		}
+	}
+
+	function renderUsers(tbody, users) {
+		seatUi.renderUsers(tbody, users, getSeatUiHelpers())
 	}
 
 	function formatDateTime(ts) {
@@ -1814,20 +1830,6 @@
 		attachSettingLayerModeHandlers(tbody, SETTING_LAYER_UI.groupOverride, syncGroupOverrideControlState)
 	}
 
-	function renderUsers(tbody, users) {
-		if (!users || users.length === 0) {
-			tbody.innerHTML = `<tr><td colspan="3" class="nccb-muted">${escapeHtml(tr('No users found.'))}</td></tr>`
-			return
-		}
-		tbody.innerHTML = users.map((user) => `
-			<tr data-user-id="${escapeHtml(user.user_id)}">
-				<td>${escapeHtml(user.user_id)}</td>
-				<td>${escapeHtml(user.display_name || '—')}</td>
-				<td><input class="nccb-seat-toggle" type="checkbox" ${user.has_seat ? 'checked' : ''}></td>
-			</tr>
-		`).join('')
-	}
-
 	function setMainTab(root, name) {
 		adminTabs.setTab(root, 'main', name)
 	}
@@ -2510,12 +2512,7 @@
 		}
 
 		const updatePager = (count) => {
-			const page = Math.floor(state.userPaging.offset / state.userPaging.limit) + 1
-			const from = count > 0 ? state.userPaging.offset + 1 : 0
-			const to = state.userPaging.offset + count
-			refs.userPage.textContent = `${tr('Page')} ${page} (${from}-${to})`
-			refs.userPrev.disabled = state.userPaging.offset <= 0
-			refs.userNext.disabled = !state.userPaging.hasNext
+			seatUi.updatePager(refs, state.userPaging, count, tr)
 		}
 
 		const updateModeUi = (snapshot) => {
@@ -2665,13 +2662,7 @@
 		}
 
 		const renderSeatUsage = (seatStatus) => {
-			const seats = seatStatus || { total: 0, assigned: 0, active_assigned: 0, suspended_assigned: 0, free: 0, overlicensed: false, overlicensed_by: 0 }
-			let text = `${tr('Seats available')}: ${seats.total} | ${tr('Active used')}: ${seats.active_assigned ?? seats.assigned} | ${tr('Paused')}: ${seats.suspended_assigned ?? 0} | ${tr('Free')}: ${seats.free}`
-			if (seats.overlicensed) {
-				text += ` | ${tr('Overlicensed by')}: ${seats.overlicensed_by}`
-			}
-			refs.seatUsage.textContent = text
-			refs.assignedSeatUsage.textContent = text
+			seatUi.renderSeatUsage(refs, seatStatus, tr)
 		}
 
 		const fillOverrideUsers = (assignedSeats) => {

@@ -128,6 +128,7 @@ Key paths inside the app folder:
 | `ncc_backend_4mc/js/adminTemplateImages.js` | Template image source rewriting and admin-template sanitizing |
 | `ncc_backend_4mc/js/adminSeatReport.js` | Assigned-seat table rendering and seat-report CSV export |
 | `ncc_backend_4mc/js/adminTabs.js` | Shared admin tab switching |
+| `ncc_backend_4mc/js/adminSeatUi.js` | Seat assignment table, usage, and pager rendering |
 | `ncc_backend_4mc/js/ncc_backend_4mc-main.js` | Direct page UI under `/apps/ncc_backend_4mc` |
 | `ncc_backend_4mc/css/*` | Admin and direct-page styling |
 | `ncc_backend_4mc/templates/*` | Nextcloud-rendered PHP templates |
@@ -159,6 +160,7 @@ Main files:
 - `ncc_backend_4mc/js/adminTemplateImages.js`
 - `ncc_backend_4mc/js/adminSeatReport.js`
 - `ncc_backend_4mc/js/adminTabs.js`
+- `ncc_backend_4mc/js/adminSeatUi.js`
 - `ncc_backend_4mc/css/adminSettings.css`
 - `ncc_backend_4mc/templates/adminSettings.php`
 
@@ -189,6 +191,7 @@ Important UI behaviors currently implemented there:
 - template image source rewriting and admin-template sanitizing live in `adminTemplateImages.js`
 - assigned-seat table rendering and seat-report CSV export live in `adminSeatReport.js`
 - repeated tab switching logic lives in `adminTabs.js`
+- seat assignment table, usage, and pager rendering live in `adminSeatUi.js`
 
 ### 4.2 Controller layer
 
