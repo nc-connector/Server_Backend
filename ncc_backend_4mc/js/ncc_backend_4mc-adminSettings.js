@@ -107,9 +107,9 @@
 		console.error('nccb general status UI module missing')
 		return
 	}
-	const overrideSelects = window.NCCBackendOverrideSelects
-	if (!overrideSelects) {
-		console.error('nccb override selects module missing')
+	const overridesUi = window.NCCBackendOverridesUi
+	if (!overridesUi) {
+		console.error('nccb overrides UI module missing')
 		return
 	}
 
@@ -187,10 +187,41 @@
 		}
 	}
 
-	function getOverrideSelectHelpers() {
+	function getOverridesUiHelpers() {
 		return {
 			escapeHtml,
+			getTemplateInactiveNote,
+			isTemplateEditorSettingKey,
+			isUserOverrideOnlySettingKey,
+			renderSettingControl,
+			renderSettingHelp,
+			renderTalkTemplateFormatControl,
+			settingCategory,
+			settingLabel,
+			shouldRenderStandaloneSettingRow,
+			sortedSettingKeys,
+			talkInvitationTemplateFormatKey: TALK_INVITATION_TEMPLATE_FORMAT_KEY,
+			talkInvitationTemplateKey: TALK_INVITATION_TEMPLATE_KEY,
 			tr,
+		}
+	}
+
+	function getOverridesUiContext() {
+		return {
+			helpers: getOverridesUiHelpers(),
+			settingLayerUi: SETTING_LAYER_UI,
+			callbacks: {
+				attachAttachmentDependencyHandlers,
+				attachEmailSignatureDependencyHandlers,
+				attachGroupOverrideModeHandlers,
+				attachOverrideModeHandlers,
+				attachSharePasswordDependencyHandlers,
+				attachTemplateEditorHandlers,
+				attachTemplateLanguageDependencyHandlers,
+				removeTemplateEditorsByPrefix,
+				syncGroupOverrideControlState,
+				syncOverrideControlState,
+			},
 		}
 	}
 
@@ -1540,74 +1571,6 @@
 		},
 	}
 
-	function renderForcedModeSelect(config, key, mode, extraClass = '') {
-		const className = extraClass ? `${config.modeClass} ${extraClass}` : config.modeClass
-		return `
-			<select class="${escapeHtml(className)}" data-setting-key="${escapeHtml(key)}">
-				<option value="inherit" ${mode === 'inherit' ? 'selected' : ''}>${escapeHtml(tr('Inherit default'))}</option>
-				<option value="forced" ${mode === 'forced' ? 'selected' : ''}>${escapeHtml(tr('Forced value'))}</option>
-			</select>
-		`
-	}
-
-	function renderForcedOverrideRows(tbody, schema, items, templateAssets, defaultTemplateAssets, category, config, options = {}) {
-		const keys = sortedSettingKeys(schema).filter((key) => settingCategory(key) === category
-			&& shouldRenderStandaloneSettingRow(key)
-			&& (!options.skipUserOverrideOnly || !isUserOverrideOnlySettingKey(key)))
-		if (keys.length === 0) {
-			tbody.innerHTML = `<tr><td colspan="3" class="nccb-muted">${escapeHtml(tr('No settings found.'))}</td></tr>`
-			return
-		}
-
-		tbody.innerHTML = keys.map((key) => {
-			const definition = schema[key] || {}
-			const item = items?.[key] || { mode: 'inherit', value: null, effective_value: definition.default, source: 'default', default_mode: 'default' }
-			const mode = item.mode === 'forced' ? 'forced' : 'inherit'
-			const currentValue = mode === 'forced' ? item.value : item.effective_value
-			if (isTemplateEditorSettingKey(key)) {
-				const talkTemplateFormat = key === TALK_INVITATION_TEMPLATE_KEY
-					? renderTalkTemplateFormatControl(
-						config.prefix,
-						schema,
-						items?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.mode === 'forced'
-							? items?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.value
-							: items?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.effective_value ?? schema?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.default,
-						mode !== 'forced'
-					)
-					: ''
-				return `
-					<tr class="nccb-template-row" ${config.rowAttribute}="${escapeHtml(key)}">
-						<td>
-							<div class="nccb-key-cell">
-								<div class="nccb-key-title">${escapeHtml(settingLabel(key))}${renderSettingHelp(key)}</div>
-							</div>
-						</td>
-						<td colspan="2">
-							<div class="nccb-template-row-head">
-								<span class="nccb-template-row-head-label nccb-template-row-head-select-label">${escapeHtml(tr('Preset'))}</span>
-								${renderForcedModeSelect(config, key, mode, 'nccb-template-row-mode')}
-								${talkTemplateFormat}
-								<span class="nccb-template-row-head-note" hidden>${escapeHtml(tr(getTemplateInactiveNote(key)))}</span>
-							</div>
-							${renderSettingControl(config.prefix, key, definition, currentValue, mode !== 'forced', templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}
-						</td>
-					</tr>
-				`
-			}
-			return `
-				<tr ${config.rowAttribute}="${escapeHtml(key)}">
-					<td>
-						<div class="nccb-key-cell">
-							<div class="nccb-key-title">${escapeHtml(settingLabel(key))}${renderSettingHelp(key)}</div>
-						</div>
-					</td>
-					<td>${renderForcedModeSelect(config, key, mode)}</td>
-					<td>${renderSettingControl(config.prefix, key, definition, currentValue, mode !== 'forced', templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}</td>
-				</tr>
-			`
-		}).join('')
-	}
-
 	function syncSettingLayerControlState(container, config) {
 		const modeControls = container.querySelectorAll(config.modeSelector)
 		for (const modeControl of modeControls) {
@@ -1724,34 +1687,8 @@
 		attachSettingLayerModeHandlers(root, SETTING_LAYER_UI.defaults, syncDefaultControlState)
 	}
 
-	function renderOverrideRows(tbody, schema, items, templateAssets, defaultTemplateAssets, category) {
-		renderForcedOverrideRows(tbody, schema, items, templateAssets, defaultTemplateAssets, category, SETTING_LAYER_UI.userOverride)
-	}
-
-	function renderOverridePlaceholder(tbody) {
-		tbody.innerHTML = `<tr><td colspan="3" class="nccb-muted">${escapeHtml(tr('Please select a seat user.'))}</td></tr>`
-	}
-
 	function renderOverrideTables(root, refs, state, selectedUserId) {
-		const hasSelectedUser = Boolean(selectedUserId)
-		refs.overrideSave.disabled = !hasSelectedUser
-		removeTemplateEditorsByPrefix('override')
-		if (!hasSelectedUser) {
-			renderOverridePlaceholder(refs.overrideTableShare)
-			renderOverridePlaceholder(refs.overrideTableTalk)
-			renderOverridePlaceholder(refs.overrideTableEmailSignature)
-			return
-		}
-		renderOverrideRows(refs.overrideTableShare, state.schema, state.overrides, state.overrideTemplateAssets, state.schemaTemplateAssets, 'share')
-		renderOverrideRows(refs.overrideTableTalk, state.schema, state.overrides, state.overrideTemplateAssets, state.schemaTemplateAssets, 'talk')
-		renderOverrideRows(refs.overrideTableEmailSignature, state.schema, state.overrides, state.overrideTemplateAssets, state.schemaTemplateAssets, 'email_signature')
-		syncOverrideControlState(root)
-		attachOverrideModeHandlers(root)
-		attachAttachmentDependencyHandlers(root)
-		attachSharePasswordDependencyHandlers(root)
-		attachTemplateLanguageDependencyHandlers(root, 'override')
-		attachEmailSignatureDependencyHandlers(root, 'override')
-		attachTemplateEditorHandlers(root)
+		overridesUi.renderOverrideTables(root, refs, state, selectedUserId, getOverridesUiContext())
 	}
 
 	function syncOverrideControlState(tbody) {
@@ -1762,35 +1699,8 @@
 		attachSettingLayerModeHandlers(tbody, SETTING_LAYER_UI.userOverride, syncOverrideControlState)
 	}
 
-	function renderGroupOverrideRows(tbody, schema, items, templateAssets, defaultTemplateAssets, category) {
-		renderForcedOverrideRows(tbody, schema, items, templateAssets, defaultTemplateAssets, category, SETTING_LAYER_UI.groupOverride, { skipUserOverrideOnly: true })
-	}
-
-	function renderGroupOverridePlaceholder(tbody) {
-		tbody.innerHTML = `<tr><td colspan="3" class="nccb-muted">${escapeHtml(tr('Please select a group.'))}</td></tr>`
-	}
-
 	function renderGroupOverrideTables(root, refs, state, selectedGroupId) {
-		const hasSelectedGroup = Boolean(selectedGroupId)
-		refs.groupOverrideSave.disabled = !hasSelectedGroup
-		refs.groupOverridePriority.disabled = !hasSelectedGroup
-		removeTemplateEditorsByPrefix('group-override')
-		if (!hasSelectedGroup) {
-			renderGroupOverridePlaceholder(refs.groupOverrideTableShare)
-			renderGroupOverridePlaceholder(refs.groupOverrideTableTalk)
-			renderGroupOverridePlaceholder(refs.groupOverrideTableEmailSignature)
-			return
-		}
-		renderGroupOverrideRows(refs.groupOverrideTableShare, state.schema, state.groupOverrides, state.groupOverrideTemplateAssets, state.schemaTemplateAssets, 'share')
-		renderGroupOverrideRows(refs.groupOverrideTableTalk, state.schema, state.groupOverrides, state.groupOverrideTemplateAssets, state.schemaTemplateAssets, 'talk')
-		renderGroupOverrideRows(refs.groupOverrideTableEmailSignature, state.schema, state.groupOverrides, state.groupOverrideTemplateAssets, state.schemaTemplateAssets, 'email_signature')
-		syncGroupOverrideControlState(root)
-		attachGroupOverrideModeHandlers(root)
-		attachAttachmentDependencyHandlers(root, 'group-override')
-		attachSharePasswordDependencyHandlers(root)
-		attachTemplateLanguageDependencyHandlers(root, 'group-override')
-		attachEmailSignatureDependencyHandlers(root, 'group-override')
-		attachTemplateEditorHandlers(root)
+		overridesUi.renderGroupOverrideTables(root, refs, state, selectedGroupId, getOverridesUiContext())
 	}
 
 	function syncGroupOverrideControlState(tbody) {
@@ -2516,7 +2426,7 @@
 		}
 
 		const fillOverrideUsers = (assignedSeats) => {
-			const result = overrideSelects.fillOverrideUsers(refs, assignedSeats, getOverrideSelectHelpers())
+			const result = overridesUi.fillOverrideUsers(refs, assignedSeats, getOverridesUiHelpers())
 			if (!result.retained) {
 				refs.overrideUser.value = ''
 				state.overrides = {}
@@ -2526,7 +2436,7 @@
 		}
 
 		const fillGroupOverrideGroups = (groups) => {
-			const result = overrideSelects.fillGroupOverrideGroups(refs, groups, getOverrideSelectHelpers())
+			const result = overridesUi.fillGroupOverrideGroups(refs, groups, getOverridesUiHelpers())
 			if (!result.retained) {
 				refs.groupOverrideGroup.value = ''
 				state.groupOverrides = {}

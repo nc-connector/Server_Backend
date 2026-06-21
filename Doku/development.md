@@ -130,7 +130,7 @@ Key paths inside the app folder:
 | `ncc_backend_4mc/js/adminTabs.js` | Shared admin tab switching |
 | `ncc_backend_4mc/js/adminSeatUi.js` | Seat assignment table, usage, and pager rendering |
 | `ncc_backend_4mc/js/adminGeneralStatusUi.js` | General-tab license, Pro hint, update status, and recommended-app rendering |
-| `ncc_backend_4mc/js/adminOverrideSelects.js` | User and group override select rendering |
+| `ncc_backend_4mc/js/adminOverridesUi.js` | User and group override selection and table rendering |
 | `ncc_backend_4mc/js/ncc_backend_4mc-main.js` | Direct page UI under `/apps/ncc_backend_4mc` |
 | `ncc_backend_4mc/css/*` | Admin and direct-page styling |
 | `ncc_backend_4mc/templates/*` | Nextcloud-rendered PHP templates |
@@ -164,7 +164,7 @@ Main files:
 - `ncc_backend_4mc/js/adminTabs.js`
 - `ncc_backend_4mc/js/adminSeatUi.js`
 - `ncc_backend_4mc/js/adminGeneralStatusUi.js`
-- `ncc_backend_4mc/js/adminOverrideSelects.js`
+- `ncc_backend_4mc/js/adminOverridesUi.js`
 - `ncc_backend_4mc/css/adminSettings.css`
 - `ncc_backend_4mc/templates/adminSettings.php`
 
@@ -197,7 +197,7 @@ Important UI behaviors currently implemented there:
 - repeated tab switching logic lives in `adminTabs.js`
 - seat assignment table, usage, and pager rendering live in `adminSeatUi.js`
 - General-tab license, Pro hint, update status, and recommended-app rendering live in `adminGeneralStatusUi.js`
-- user and group override select rendering lives in `adminOverrideSelects.js`
+- user and group override selection and table rendering live in `adminOverridesUi.js`
 
 ### 4.2 Controller layer
 
