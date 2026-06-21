@@ -95,6 +95,11 @@
 		return
 	}
 	const downloadTextFile = seatReport.downloadTextFile
+	const adminTabs = window.NCCBackendAdminTabs
+	if (!adminTabs) {
+		console.error('nccb admin tabs module missing')
+		return
+	}
 
 	function escapeHtml(value) {
 		return String(value)
@@ -1824,57 +1829,27 @@
 	}
 
 	function setMainTab(root, name) {
-		root.querySelectorAll('[data-main-tab-button]').forEach((button) => {
-			button.classList.toggle('active', button.getAttribute('data-main-tab-button') === name)
-		})
-		root.querySelectorAll('[data-main-tab-panel]').forEach((panel) => {
-			panel.hidden = panel.getAttribute('data-main-tab-panel') !== name
-		})
+		adminTabs.setTab(root, 'main', name)
 	}
 
 	function setGroupTab(root, name) {
-		root.querySelectorAll('[data-group-tab-button]').forEach((button) => {
-			button.classList.toggle('active', button.getAttribute('data-group-tab-button') === name)
-		})
-		root.querySelectorAll('[data-group-tab-panel]').forEach((panel) => {
-			panel.hidden = panel.getAttribute('data-group-tab-panel') !== name
-		})
+		adminTabs.setTab(root, 'group', name)
 	}
 
 	function setDefaultsTab(root, name) {
-		root.querySelectorAll('[data-default-tab-button]').forEach((button) => {
-			button.classList.toggle('active', button.getAttribute('data-default-tab-button') === name)
-		})
-		root.querySelectorAll('[data-default-tab-panel]').forEach((panel) => {
-			panel.hidden = panel.getAttribute('data-default-tab-panel') !== name
-		})
+		adminTabs.setTab(root, 'defaults', name)
 	}
 
 	function setOverrideTab(root, name) {
-		root.querySelectorAll('[data-override-tab-button]').forEach((button) => {
-			button.classList.toggle('active', button.getAttribute('data-override-tab-button') === name)
-		})
-		root.querySelectorAll('[data-override-tab-panel]').forEach((panel) => {
-			panel.hidden = panel.getAttribute('data-override-tab-panel') !== name
-		})
+		adminTabs.setTab(root, 'override', name)
 	}
 
 	function setGroupOverrideTab(root, name) {
-		root.querySelectorAll('[data-group-override-tab-button]').forEach((button) => {
-			button.classList.toggle('active', button.getAttribute('data-group-override-tab-button') === name)
-		})
-		root.querySelectorAll('[data-group-override-tab-panel]').forEach((panel) => {
-			panel.hidden = panel.getAttribute('data-group-override-tab-panel') !== name
-		})
+		adminTabs.setTab(root, 'groupOverride', name)
 	}
 
 	function setAdvancedTab(root, name) {
-		root.querySelectorAll('[data-advanced-tab-button]').forEach((button) => {
-			button.classList.toggle('active', button.getAttribute('data-advanced-tab-button') === name)
-		})
-		root.querySelectorAll('[data-advanced-tab-panel]').forEach((panel) => {
-			panel.hidden = panel.getAttribute('data-advanced-tab-panel') !== name
-		})
+		adminTabs.setTab(root, 'advanced', name)
 	}
 
 	function render(root) {

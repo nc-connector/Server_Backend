@@ -127,6 +127,7 @@ Key paths inside the app folder:
 | `ncc_backend_4mc/js/adminDelegationUi.js` | Delegation permission matrix and delegated-admin overview rendering |
 | `ncc_backend_4mc/js/adminTemplateImages.js` | Template image source rewriting and admin-template sanitizing |
 | `ncc_backend_4mc/js/adminSeatReport.js` | Assigned-seat table rendering and seat-report CSV export |
+| `ncc_backend_4mc/js/adminTabs.js` | Shared admin tab switching |
 | `ncc_backend_4mc/js/ncc_backend_4mc-main.js` | Direct page UI under `/apps/ncc_backend_4mc` |
 | `ncc_backend_4mc/css/*` | Admin and direct-page styling |
 | `ncc_backend_4mc/templates/*` | Nextcloud-rendered PHP templates |
@@ -157,6 +158,7 @@ Main files:
 - `ncc_backend_4mc/js/adminDelegationUi.js`
 - `ncc_backend_4mc/js/adminTemplateImages.js`
 - `ncc_backend_4mc/js/adminSeatReport.js`
+- `ncc_backend_4mc/js/adminTabs.js`
 - `ncc_backend_4mc/css/adminSettings.css`
 - `ncc_backend_4mc/templates/adminSettings.php`
 
@@ -186,6 +188,7 @@ Important UI behaviors currently implemented there:
 - delegation permission matrix and delegated-admin overview rendering live in `adminDelegationUi.js`
 - template image source rewriting and admin-template sanitizing live in `adminTemplateImages.js`
 - assigned-seat table rendering and seat-report CSV export live in `adminSeatReport.js`
+- repeated tab switching logic lives in `adminTabs.js`
 
 ### 4.2 Controller layer
 
