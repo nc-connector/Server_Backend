@@ -11,6 +11,10 @@ declare(strict_types=1);
 namespace OCA\NcConnector\Service;
 
 class AdminPermissionService {
+	public const SETTING_LAYER_DEFAULT = 'default';
+	public const SETTING_LAYER_USER_OVERRIDE = 'user_override';
+	public const SETTING_LAYER_GROUP_OVERRIDE = 'group_override';
+
 	private const SIGNATURE_TEMPLATE_USER_SETTINGS = [
 		'email_signature_template' => true,
 		'email_signature_phone_mobile' => true,
@@ -82,14 +86,7 @@ class AdminPermissionService {
 	 * @return string[]
 	 */
 	public function scopesForDefaultPayload(array $defaults, array $templateAssetPreview = []): array {
-		$scopes = [];
-		foreach (array_keys($defaults) as $key) {
-			$scopes[] = $this->scopeForDefaultSetting((string)$key);
-		}
-		foreach (array_keys($templateAssetPreview) as $key) {
-			$scopes[] = $this->scopeForDefaultSetting((string)$key);
-		}
-		return $this->uniqueScopes($scopes);
+		return $this->scopesForSettingsPayload(self::SETTING_LAYER_DEFAULT, $defaults, $templateAssetPreview);
 	}
 
 	/**
@@ -98,14 +95,7 @@ class AdminPermissionService {
 	 * @return string[]
 	 */
 	public function scopesForUserOverridePayload(array $overrides, array $templateAssetPreview = []): array {
-		$scopes = [];
-		foreach (array_keys($overrides) as $key) {
-			$scopes[] = $this->scopeForUserOverrideSetting((string)$key);
-		}
-		foreach (array_keys($templateAssetPreview) as $key) {
-			$scopes[] = $this->scopeForUserOverrideSetting((string)$key);
-		}
-		return $this->uniqueScopes($scopes);
+		return $this->scopesForSettingsPayload(self::SETTING_LAYER_USER_OVERRIDE, $overrides, $templateAssetPreview);
 	}
 
 	/**
@@ -114,14 +104,32 @@ class AdminPermissionService {
 	 * @return string[]
 	 */
 	public function scopesForGroupOverridePayload(array $overrides, array $templateAssetPreview = []): array {
+		return $this->scopesForSettingsPayload(self::SETTING_LAYER_GROUP_OVERRIDE, $overrides, $templateAssetPreview);
+	}
+
+	/**
+	 * @param array<string, mixed> $settings
+	 * @param array<string, mixed> $templateAssetPreview
+	 * @return string[]
+	 */
+	public function scopesForSettingsPayload(string $layer, array $settings, array $templateAssetPreview = []): array {
 		$scopes = [];
-		foreach (array_keys($overrides) as $key) {
-			$scopes[] = $this->scopeForGroupOverrideSetting((string)$key);
+		foreach (array_keys($settings) as $key) {
+			$scopes[] = $this->scopeForSettingLayer($layer, (string)$key);
 		}
 		foreach (array_keys($templateAssetPreview) as $key) {
-			$scopes[] = $this->scopeForGroupOverrideSetting((string)$key);
+			$scopes[] = $this->scopeForSettingLayer($layer, (string)$key);
 		}
 		return $this->uniqueScopes($scopes);
+	}
+
+	public function scopeForSettingLayer(string $layer, string $key): string {
+		return match ($layer) {
+			self::SETTING_LAYER_DEFAULT => $this->scopeForDefaultSetting($key),
+			self::SETTING_LAYER_USER_OVERRIDE => $this->scopeForUserOverrideSetting($key),
+			self::SETTING_LAYER_GROUP_OVERRIDE => $this->scopeForGroupOverrideSetting($key),
+			default => throw new \InvalidArgumentException('Unknown settings layer'),
+		};
 	}
 
 	public function scopeForDefaultSetting(string $key): string {

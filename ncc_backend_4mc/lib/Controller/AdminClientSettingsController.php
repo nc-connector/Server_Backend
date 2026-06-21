@@ -323,7 +323,7 @@ class AdminClientSettingsController extends Controller {
 	 * @return array<string, mixed>
 	 */
 	private function filterDefaultPayload(array $payload): array {
-		return $this->filterPayload($payload, fn (string $key): string => $this->adminPermissions->scopeForDefaultSetting($key));
+		return $this->filterPayloadForLayer($payload, AdminPermissionService::SETTING_LAYER_DEFAULT);
 	}
 
 	/**
@@ -331,7 +331,7 @@ class AdminClientSettingsController extends Controller {
 	 * @return array<string, mixed>
 	 */
 	private function filterUserPayload(array $payload): array {
-		return $this->filterPayload($payload, fn (string $key): string => $this->adminPermissions->scopeForUserOverrideSetting($key));
+		return $this->filterPayloadForLayer($payload, AdminPermissionService::SETTING_LAYER_USER_OVERRIDE);
 	}
 
 	/**
@@ -339,7 +339,15 @@ class AdminClientSettingsController extends Controller {
 	 * @return array<string, mixed>
 	 */
 	private function filterGroupPayload(array $payload): array {
-		return $this->filterPayload($payload, fn (string $key): string => $this->adminPermissions->scopeForGroupOverrideSetting($key));
+		return $this->filterPayloadForLayer($payload, AdminPermissionService::SETTING_LAYER_GROUP_OVERRIDE);
+	}
+
+	/**
+	 * @param array<string, mixed> $payload
+	 * @return array<string, mixed>
+	 */
+	private function filterPayloadForLayer(array $payload, string $layer): array {
+		return $this->filterPayload($payload, fn (string $key): string => $this->adminPermissions->scopeForSettingLayer($layer, $key));
 	}
 
 	/**
