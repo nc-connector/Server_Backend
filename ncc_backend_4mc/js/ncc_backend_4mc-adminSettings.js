@@ -86,6 +86,29 @@
 	const normalizeEditorImageSources = templateImages.normalizeEditorImageSources
 	const rewriteImageSources = templateImages.rewriteImageSources
 	const sanitizeTemplateHtml = templateImages.sanitizeTemplateHtml
+	const templateEditorModule = window.NCCBackendTemplateEditor
+	if (!templateEditorModule) {
+		console.error('nccb template editor module missing')
+		return
+	}
+	const templateEditor = templateEditorModule.createTemplateEditor({
+		contentSecurityPolicy: TEMPLATE_EDITOR_CONTENT_CSP,
+		emailSignatureTemplateKey: EMAIL_SIGNATURE_TEMPLATE_KEY,
+		enumOptionLabel,
+		escapeHtml,
+		normalizeEditorImageSources,
+		openPreview: (editor, wrapper) => templatePreview.openTemplatePreview(editor, wrapper, getTemplatePreviewHelpers()),
+		rewriteImageSources,
+		sanitizeTemplateHtml,
+		settingKeys: [...TEMPLATE_EDITOR_SETTING_KEYS],
+		settingLabel,
+		templateTranslationLocales: TEMPLATE_TRANSLATION_LOCALES,
+		templateTranslationPhrases: TEMPLATE_TRANSLATION_PHRASES,
+		tr,
+		variablesBySetting: TEMPLATE_VARIABLES_BY_SETTING,
+	})
+	const isTemplateEditorSettingKey = templateEditor.isSettingKey
+	const getTemplateInactiveNote = templateEditor.getInactiveNote
 	const seatReport = window.NCCBackendSeatReport
 	if (!seatReport) {
 		console.error('nccb seat report module missing')
@@ -216,9 +239,9 @@
 				attachGroupOverrideModeHandlers,
 				attachOverrideModeHandlers,
 				attachSharePasswordDependencyHandlers,
-				attachTemplateEditorHandlers,
+				attachTemplateEditorHandlers: templateEditor.attachHandlers,
 				attachTemplateLanguageDependencyHandlers,
-				removeTemplateEditorsByPrefix,
+				removeTemplateEditorsByPrefix: templateEditor.removeByPrefix,
 				syncGroupOverrideControlState,
 				syncOverrideControlState,
 			},
@@ -231,7 +254,7 @@
 			talkInvitationTemplateKey: TALK_INVITATION_TEMPLATE_KEY,
 			talkTemplateFormatHtml: TALK_TEMPLATE_FORMAT_HTML,
 			talkTemplateFormatPlainText: TALK_TEMPLATE_FORMAT_PLAIN_TEXT,
-			toPreviewTemplateHtml,
+			toPreviewTemplateHtml: templateEditor.toPreviewHtml,
 			tr,
 		}
 	}
@@ -347,166 +370,6 @@
 		return raw
 	}
 
-	function getTemplateTranslationOptions() {
-		return TEMPLATE_TRANSLATION_LOCALES.map((locale) => ({
-			value: locale,
-			label: enumOptionLabel('language_share_html_block', locale),
-		}))
-	}
-
-	function getTemplateTranslationEntries(settingKey) {
-		const phrases = TEMPLATE_TRANSLATION_PHRASES[String(settingKey || '')]
-		if (!phrases || typeof phrases !== 'object') {
-			return []
-		}
-
-		return Object.values(phrases)
-			.map((translations) => {
-				if (!translations || typeof translations !== 'object') {
-					return null
-				}
-
-				const targets = {}
-				const variants = []
-				for (const locale of TEMPLATE_TRANSLATION_LOCALES) {
-					const value = String(translations[locale] || '').trim()
-					if (!value) {
-						continue
-					}
-					targets[locale] = value
-					variants.push(value)
-				}
-				if (variants.length === 0) {
-					return null
-				}
-
-				return {
-					targets,
-					variants: [...new Set(variants)].sort((left, right) => right.length - left.length),
-				}
-			})
-			.filter(Boolean)
-			.sort((left, right) => {
-				const leftLength = Math.max(...left.variants.map((value) => value.length))
-				const rightLength = Math.max(...right.variants.map((value) => value.length))
-				return rightLength - leftLength
-			})
-	}
-
-	function isTemplateTranslationToken(segment) {
-		return /^\{[A-Z0-9_]+\}$/.test(segment) || /^https?:\/\//i.test(segment)
-	}
-
-	function replaceLiteral(value, search, replacement) {
-		const rawValue = String(value || '')
-		if (!search || search === replacement || !rawValue.includes(search)) {
-			return rawValue
-		}
-		return rawValue.split(search).join(replacement)
-	}
-
-	/**
-	 * Rewrites known template phrases to the selected locale while leaving variables and links untouched.
-	 *
-	 * @param {string} segment
-	 * @param {string} settingKey
-	 * @param {string} targetLocale
-	 * @returns {string}
-	 */
-	function translateTemplateTextSegment(segment, settingKey, targetLocale) {
-		const text = String(segment || '')
-		if (!text.trim() || isTemplateTranslationToken(text.trim())) {
-			return text
-		}
-
-		let translated = text
-		for (const entry of getTemplateTranslationEntries(settingKey)) {
-			const replacement = entry.targets[targetLocale] || entry.targets.en || ''
-			if (!replacement) {
-				continue
-			}
-			for (const variant of entry.variants) {
-				translated = replaceLiteral(translated, variant, replacement)
-			}
-		}
-		return translated
-	}
-
-	/**
-	 * Applies phrase-based template translation to visible text nodes only.
-	 *
-	 * @param {string} rawHtml
-	 * @param {string} settingKey
-	 * @param {string} targetLocale
-	 * @returns {{html: string, changed: boolean}}
-	 */
-	function translateTemplateHtml(rawHtml, settingKey, targetLocale) {
-		const parser = new DOMParser()
-		const doc = parser.parseFromString(String(rawHtml || ''), 'text/html')
-		const body = doc.body
-		if (!body) {
-			return { html: String(rawHtml || ''), changed: false }
-		}
-
-		const walker = doc.createTreeWalker(body, NodeFilter.SHOW_TEXT)
-		const textNodes = []
-		let currentNode = walker.nextNode()
-		while (currentNode) {
-			textNodes.push(currentNode)
-			currentNode = walker.nextNode()
-		}
-
-		let changed = false
-		for (const node of textNodes) {
-			const parent = node.parentElement
-			if (!parent || parent.closest('a') || parent.closest('script') || parent.closest('style')) {
-				continue
-			}
-
-			const rawText = String(node.nodeValue || '')
-			const translatedText = rawText
-				.split(/(\{[A-Z0-9_]+\}|https?:\/\/[^\s<>"']+)/g)
-				.map((segment) => translateTemplateTextSegment(segment, settingKey, targetLocale))
-				.join('')
-			if (translatedText !== rawText) {
-				node.nodeValue = translatedText
-				changed = true
-			}
-		}
-
-		return {
-			html: body.innerHTML,
-			changed,
-		}
-	}
-
-	function populateTemplateLanguageSelect(select) {
-		if (!(select instanceof HTMLSelectElement)) {
-			return
-		}
-
-		const options = ['<option value="">—</option>']
-		for (const option of getTemplateTranslationOptions()) {
-			options.push(`<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`)
-		}
-		select.innerHTML = options.join('')
-		select.value = ''
-	}
-
-	function translateModalTemplateEditor(targetLocale) {
-		const wrapper = templateEditorModalState.wrapper
-		const editor = getModalTemplateEditor()
-		if (!(wrapper instanceof HTMLElement) || !editor || !targetLocale) {
-			return
-		}
-
-		const settingKey = String(wrapper.dataset.settingKey || '')
-		const translated = translateTemplateHtml(editor.getContent(), settingKey, targetLocale)
-		if (!translated.changed) {
-			return
-		}
-		editor.setContent(translated.html)
-	}
 
 	/**
 	 * Returns settings in a stable UI order (instead of plain alphabetical order).
@@ -573,15 +436,6 @@
 		}
 	}
 
-	function isTemplateEditorSettingKey(settingKey) {
-		return TEMPLATE_EDITOR_SETTING_KEYS.has(String(settingKey || ''))
-	}
-
-	function getTemplateInactiveNote(settingKey) {
-		return String(settingKey || '') === EMAIL_SIGNATURE_TEMPLATE_KEY
-			? 'Only active when signatures for new messages are enabled.'
-			: 'Only active when language is set to Custom.'
-	}
 
 	function renderSettingDependencyNotes(prefix, settingKey, definition) {
 		const key = String(settingKey || '')
@@ -619,533 +473,6 @@
 		return isEmbeddedTalkTemplateSettingKey(settingKey)
 			? TALK_INVITATION_TEMPLATE_KEY
 			: String(settingKey || '')
-	}
-
-	function getTemplateVariablesForSetting(settingKey) {
-		const key = String(settingKey || '')
-		return TEMPLATE_VARIABLES_BY_SETTING[key] || []
-	}
-
-	const templateAssetRefreshTimers = new WeakMap()
-	let templateAssetRefreshHandler = null
-	const templateEditorModalState = {
-		wrapper: null,
-		editorId: '',
-		textarea: null,
-		assetMap: {},
-		languageSelect: null,
-	}
-
-	function getTinyMce() {
-		if (typeof window.tinymce === 'object' && typeof window.tinymce.init === 'function') {
-			return window.tinymce
-		}
-		return null
-	}
-
-	function openTemplatePreview(editor, wrapper = null) {
-		templatePreview.openTemplatePreview(editor, wrapper, getTemplatePreviewHelpers())
-	}
-
-	function ensureTemplateEditorModal() {
-		let modal = document.getElementById('nccb-template-editor-modal')
-		if (modal) {
-			return modal
-		}
-
-		modal = document.createElement('div')
-		modal.id = 'nccb-template-editor-modal'
-		modal.className = 'nccb-template-editor-modal'
-		modal.innerHTML = `
-			<div class="nccb-template-editor-backdrop" data-action="close"></div>
-			<div class="nccb-template-editor-dialog" role="dialog" aria-modal="true">
-				<div class="nccb-template-editor-header">
-					<div class="nccb-template-editor-title"></div>
-					<div class="nccb-template-editor-header-actions">
-						<label class="nccb-template-editor-language">
-							<span>${escapeHtml(tr('Languages'))}</span>
-							<select class="nccb-template-editor-language-select" data-action="translate-language"></select>
-						</label>
-						<button type="button" class="nccb-template-editor-close" data-action="close" aria-label="${escapeHtml(tr('Close'))}">×</button>
-					</div>
-				</div>
-				<div class="nccb-template-editor-body"></div>
-				<div class="nccb-template-editor-footer">
-					<button type="button" class="button button-small nccb-template-editor-reset" data-action="reset">${escapeHtml(tr('Reset to default'))}</button>
-					<button type="button" class="button button-small nccb-template-editor-save" data-action="save">${escapeHtml(tr('Save'))}</button>
-					<button type="button" class="button button-small" data-action="close">${escapeHtml(tr('Close'))}</button>
-				</div>
-			</div>
-		`
-		modal.addEventListener('click', (event) => {
-			const target = event.target
-			if (!(target instanceof HTMLElement)) {
-				return
-			}
-
-			if (target.dataset.action === 'close') {
-				closeTemplateEditorModal()
-				return
-			}
-
-			if (target.dataset.action === 'reset') {
-				resetTemplateEditorModalContent()
-				return
-			}
-
-			if (target.dataset.action === 'save') {
-				saveTemplateEditorModalContent()
-			}
-		})
-		modal.addEventListener('change', (event) => {
-			const target = event.target
-			if (!(target instanceof HTMLSelectElement) || target.dataset.action !== 'translate-language') {
-				return
-			}
-			translateModalTemplateEditor(String(target.value || ''))
-		})
-		document.body.appendChild(modal)
-		return modal
-	}
-
-	function resetTemplateEditorModalContent() {
-		const wrapper = templateEditorModalState.wrapper
-		if (!(wrapper instanceof HTMLElement)) {
-			return
-		}
-
-		const control = getTemplateControl(wrapper)
-		if (!(control instanceof HTMLTextAreaElement) || control.disabled) {
-			return
-		}
-
-		const defaultControl = wrapper.querySelector('.nccb-template-default')
-		const defaultValue = String(defaultControl?.value ?? '')
-		templateEditorModalState.assetMap = { ...getTemplateDefaultAssetMap(wrapper) }
-		if (templateEditorModalState.languageSelect instanceof HTMLSelectElement) {
-			templateEditorModalState.languageSelect.value = ''
-		}
-		const editor = getModalTemplateEditor()
-		if (editor) {
-			editor.setContent(toEditorTemplateHtml(defaultValue, templateEditorModalState.assetMap))
-			if (templateEditorModalState.textarea instanceof HTMLTextAreaElement) {
-				templateEditorModalState.textarea.value = defaultValue
-			}
-			return
-		}
-		if (templateEditorModalState.textarea instanceof HTMLTextAreaElement) {
-			templateEditorModalState.textarea.value = defaultValue
-		}
-	}
-
-	function saveTemplateEditorModalContent() {
-		const wrapper = templateEditorModalState.wrapper
-		if (!(wrapper instanceof HTMLElement)) {
-			return
-		}
-
-		const control = getTemplateControl(wrapper)
-		if (!(control instanceof HTMLTextAreaElement) || control.disabled) {
-			return
-		}
-		const editor = getModalTemplateEditor()
-		if (editor) {
-			control.value = fromEditorTemplateHtml(editor.getContent())
-		} else if (templateEditorModalState.textarea instanceof HTMLTextAreaElement) {
-			control.value = fromEditorTemplateHtml(templateEditorModalState.textarea.value || '')
-		}
-
-		const prefix = String(wrapper.dataset.prefix || 'default')
-		const targetButtonId = getSaveButtonIdForTemplatePrefix(prefix)
-		const targetButton = document.getElementById(targetButtonId)
-		if (targetButton instanceof HTMLButtonElement) {
-			targetButton.click()
-		}
-	}
-
-	function getSaveButtonIdForTemplatePrefix(prefix) {
-		if (prefix === 'override') {
-			return 'nccb-override-save'
-		}
-		if (prefix === 'group-override') {
-			return 'nccb-group-override-save'
-		}
-		return 'nccb-default-save'
-	}
-
-	function closeTemplateEditorModal() {
-		const modal = document.getElementById('nccb-template-editor-modal')
-		const editor = getModalTemplateEditor()
-		if (editor) {
-			editor.remove()
-		}
-		if (modal instanceof HTMLElement) {
-			modal.classList.remove('nccb-template-editor-modal--open')
-			const languageWrapper = modal.querySelector('.nccb-template-editor-language')
-			if (languageWrapper instanceof HTMLElement) {
-				languageWrapper.hidden = false
-				languageWrapper.style.display = ''
-			}
-			const saveButton = modal.querySelector('.nccb-template-editor-save')
-			if (saveButton instanceof HTMLButtonElement) {
-				saveButton.textContent = tr('Save')
-			}
-			const container = modal.querySelector('.nccb-template-editor-body')
-			if (container instanceof HTMLElement) {
-				container.innerHTML = ''
-			}
-		}
-
-		templateEditorModalState.wrapper = null
-		templateEditorModalState.editorId = ''
-		templateEditorModalState.textarea = null
-		templateEditorModalState.assetMap = {}
-		templateEditorModalState.languageSelect = null
-	}
-
-	function openTemplateEditorModal(wrapper) {
-		if (!(wrapper instanceof HTMLElement)) {
-			return
-		}
-
-		const control = getTemplateControl(wrapper)
-		if (!(control instanceof HTMLTextAreaElement) || control.disabled) {
-			return
-		}
-
-		const modal = ensureTemplateEditorModal()
-		const title = modal.querySelector('.nccb-template-editor-title')
-		const container = modal.querySelector('.nccb-template-editor-body')
-		const saveButton = modal.querySelector('.nccb-template-editor-save')
-		const languageWrapper = modal.querySelector('.nccb-template-editor-language')
-		const languageSelect = modal.querySelector('.nccb-template-editor-language-select')
-		if (!(title instanceof HTMLElement) || !(container instanceof HTMLElement)) {
-			return
-		}
-
-		if (templateEditorModalState.wrapper === wrapper) {
-			modal.classList.add('nccb-template-editor-modal--open')
-			return
-		}
-
-		closeTemplateEditorModal()
-
-		templateEditorModalState.wrapper = wrapper
-		templateEditorModalState.editorId = `${control.id}--modal`
-		templateEditorModalState.assetMap = { ...getTemplateAssetMap(wrapper) }
-		const supportsLanguageSelect = String(wrapper.dataset.settingKey || '') !== EMAIL_SIGNATURE_TEMPLATE_KEY
-		if (languageWrapper instanceof HTMLElement) {
-			languageWrapper.hidden = !supportsLanguageSelect
-			languageWrapper.style.display = supportsLanguageSelect ? '' : 'none'
-		}
-		templateEditorModalState.languageSelect = supportsLanguageSelect && languageSelect instanceof HTMLSelectElement ? languageSelect : null
-
-		title.textContent = settingLabel(wrapper.dataset.settingKey || '')
-		if (saveButton instanceof HTMLButtonElement) {
-			saveButton.textContent = tr('Save')
-		}
-		if (supportsLanguageSelect) {
-			populateTemplateLanguageSelect(templateEditorModalState.languageSelect)
-		} else if (languageSelect instanceof HTMLSelectElement) {
-			languageSelect.innerHTML = ''
-		}
-		const modalTextarea = document.createElement('textarea')
-		modalTextarea.id = templateEditorModalState.editorId
-		modalTextarea.className = 'nccb-template-modal-control'
-		modalTextarea.rows = 14
-		modalTextarea.value = control.value || ''
-		container.appendChild(modalTextarea)
-		templateEditorModalState.textarea = modalTextarea
-		modal.classList.add('nccb-template-editor-modal--open')
-		initializeTemplateModalEditor(wrapper, control, modalTextarea)
-
-		window.setTimeout(() => {
-			const editor = getModalTemplateEditor()
-			if (editor) {
-				editor.focus()
-				normalizeEditorImageSources(editor, getEffectiveTemplateAssetMap(wrapper))
-			}
-		}, 50)
-	}
-
-	function parseTemplateAssetMap(value) {
-		if (typeof value !== 'string' || value.trim() === '') {
-			return {}
-		}
-		try {
-			const parsed = JSON.parse(value)
-			if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-				return {}
-			}
-			return parsed
-		} catch (error) {
-			console.error('nccb template asset map parse failed', error)
-			return {}
-		}
-	}
-
-	function getTemplateAssetMap(wrapper) {
-		return parseTemplateAssetMap(wrapper?.dataset?.templateAssets || '')
-	}
-
-	/**
-	 * Resolves the asset map that should be used for the current editor render cycle.
-	 *
-	 * @param {HTMLElement} wrapper
-	 * @returns {Object<string, string>}
-	 */
-	function getEffectiveTemplateAssetMap(wrapper) {
-		if (templateEditorModalState.wrapper === wrapper) {
-			return templateEditorModalState.assetMap || {}
-		}
-		return getTemplateAssetMap(wrapper)
-	}
-
-	function getTemplateDefaultAssetMap(wrapper) {
-		return parseTemplateAssetMap(wrapper?.dataset?.templateDefaultAssets || '')
-	}
-
-	function setTemplateAssetMap(wrapper, assetMap) {
-		if (wrapper?.dataset) {
-			wrapper.dataset.templateAssets = JSON.stringify(assetMap || {})
-		}
-	}
-
-	function setTemplateDefaultAssetMap(wrapper, assetMap) {
-		if (wrapper?.dataset) {
-			wrapper.dataset.templateDefaultAssets = JSON.stringify(assetMap || {})
-		}
-	}
-
-	/**
-	 * Refreshes runtime image assets for the current template draft without persisting the template value.
-	 *
-	 * @param {HTMLElement} wrapper
-	 * @returns {void}
-	 */
-	function scheduleTemplateAssetRefresh(wrapper) {
-		if (typeof templateAssetRefreshHandler !== 'function' || !(wrapper instanceof HTMLElement)) {
-			return
-		}
-		const existingTimer = templateAssetRefreshTimers.get(wrapper)
-		if (existingTimer) {
-			window.clearTimeout(existingTimer)
-		}
-		const timer = window.setTimeout(() => {
-			templateAssetRefreshTimers.delete(wrapper)
-			void templateAssetRefreshHandler(wrapper)
-		}, 350)
-		templateAssetRefreshTimers.set(wrapper, timer)
-	}
-
-	function getTemplateRefreshValue(wrapper, control) {
-		if (
-			templateEditorModalState.wrapper === wrapper
-			&& templateEditorModalState.textarea instanceof HTMLTextAreaElement
-		) {
-			return String(templateEditorModalState.textarea.value || '')
-		}
-		return String(control?.value || '')
-	}
-
-	function toEditorTemplateHtml(rawHtml, assetMap = {}) {
-		const sanitizedHtml = sanitizeTemplateHtml(rawHtml)
-		const parser = new DOMParser()
-		const doc = parser.parseFromString(sanitizedHtml, 'text/html')
-		rewriteImageSources(doc, 'editor', assetMap)
-		return doc.body ? doc.body.innerHTML : sanitizedHtml
-	}
-
-	function toPreviewTemplateHtml(rawHtml) {
-		const sanitizedHtml = sanitizeTemplateHtml(rawHtml)
-		const parser = new DOMParser()
-		const doc = parser.parseFromString(sanitizedHtml, 'text/html')
-		doc.querySelectorAll('img').forEach((img) => {
-			img.removeAttribute('data-nccb-original-src')
-		})
-		return doc.body ? doc.body.innerHTML : sanitizedHtml
-	}
-
-	function fromEditorTemplateHtml(editorHtml) {
-		const rawHtml = String(editorHtml || '')
-		const parser = new DOMParser()
-		const doc = parser.parseFromString(rawHtml, 'text/html')
-		rewriteImageSources(doc, 'storage')
-		return sanitizeTemplateHtml(doc.body ? doc.body.innerHTML : rawHtml)
-	}
-
-	function getTemplateControl(wrapper) {
-		return wrapper.querySelector('.nccb-setting-control')
-	}
-
-	function getTemplateEditor(wrapper) {
-		const control = getTemplateControl(wrapper)
-		if (!control || !control.id || typeof window.tinymce !== 'object') {
-			return null
-		}
-		return window.tinymce.get(control.id) || null
-	}
-
-	function getModalTemplateEditor() {
-		if (!templateEditorModalState.editorId || typeof window.tinymce !== 'object') {
-			return null
-		}
-		return window.tinymce.get(templateEditorModalState.editorId) || null
-	}
-
-	function getActiveTemplateEditor(wrapper) {
-		if (templateEditorModalState.wrapper === wrapper) {
-			return getModalTemplateEditor()
-		}
-		return getTemplateEditor(wrapper)
-	}
-
-	function setTemplateExpanded(wrapper, expanded) {
-		const toggleButton = wrapper.querySelector('.nccb-template-toggle')
-		wrapper.classList.toggle('nccb-template-collapsed', !expanded)
-		if (toggleButton) {
-			toggleButton.dataset.expanded = expanded ? '1' : '0'
-			toggleButton.textContent = tr(expanded ? 'Hide editor' : 'Show editor')
-		}
-	}
-
-	function syncTemplateEditorMode(wrapper) {
-		const control = getTemplateControl(wrapper)
-		const editor = getActiveTemplateEditor(wrapper)
-		if (!control || !editor) {
-			return
-		}
-		editor.mode.set(control.disabled ? 'readonly' : 'design')
-	}
-
-	function updateTemplateEditorButtons(wrapper) {
-		const control = getTemplateControl(wrapper)
-		const disabled = Boolean(control?.disabled)
-		wrapper.querySelectorAll('.nccb-template-action').forEach((button) => {
-			button.disabled = disabled
-		})
-	}
-
-	function initializeTemplateModalEditor(wrapper, sourceControl, modalControl) {
-		const tinymce = getTinyMce()
-		if (!tinymce || !(modalControl instanceof HTMLTextAreaElement)) {
-			return
-		}
-
-		const existingEditor = getModalTemplateEditor()
-		if (existingEditor) {
-			existingEditor.remove()
-		}
-
-		tinymce.init({
-			target: modalControl,
-			license_key: 'gpl',
-			skin: false,
-			content_css: false,
-			content_security_policy: TEMPLATE_EDITOR_CONTENT_CSP,
-			height: 620,
-			menubar: false,
-			branding: false,
-			promotion: false,
-			convert_urls: false,
-			relative_urls: false,
-			remove_script_host: false,
-			plugins: 'code link lists autolink table image',
-			toolbar: [
-				'undo redo | fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor',
-				'alignleft aligncenter alignright | bullist numlist | link image table tablecellprops tableprops | templatevars | code nccbpreview',
-			],
-			readonly: sourceControl.disabled,
-			setup: (editor) => {
-				const templateVariables = getTemplateVariablesForSetting(wrapper.dataset.settingKey)
-				editor.ui.registry.addMenuButton('templatevars', {
-					text: tr('Insert variable'),
-					fetch: (callback) => {
-						const items = templateVariables.map((variableName) => ({
-							type: 'menuitem',
-							text: `{${variableName}}`,
-							onAction: () => editor.insertContent(`{${variableName}}`),
-						}))
-						callback(items)
-					},
-				})
-				editor.ui.registry.addButton('nccbpreview', {
-					text: tr('Preview'),
-					onAction: () => openTemplatePreview(editor, wrapper),
-				})
-
-				editor.on('init', () => {
-					editor.setContent(toEditorTemplateHtml(sourceControl.value || '', getEffectiveTemplateAssetMap(wrapper)))
-					normalizeEditorImageSources(editor, getEffectiveTemplateAssetMap(wrapper))
-				})
-
-				const sync = () => {
-					modalControl.value = fromEditorTemplateHtml(editor.getContent())
-					scheduleTemplateAssetRefresh(wrapper)
-				}
-				editor.on('SetContent change undo redo', () => normalizeEditorImageSources(editor, getEffectiveTemplateAssetMap(wrapper)))
-				editor.on('blur change input undo redo keyup SetContent', sync)
-			},
-		}).catch((error) => {
-			console.error('nccb modal tiny editor load failed', error)
-		})
-	}
-
-	function attachTemplateEditorHandlers(root) {
-		root.querySelectorAll('.nccb-template-editor').forEach((wrapper) => {
-			const control = getTemplateControl(wrapper)
-			if (!control) {
-				return
-			}
-
-			if (wrapper.dataset.nccbTemplateEditorBound !== '1') {
-				wrapper.dataset.nccbTemplateEditorBound = '1'
-				setTemplateExpanded(wrapper, false)
-
-				const toggleButton = wrapper.querySelector('.nccb-template-toggle')
-				if (toggleButton) {
-					toggleButton.addEventListener('click', () => {
-						if (control.disabled) {
-							return
-						}
-						openTemplateEditorModal(wrapper)
-					})
-				}
-			}
-
-			updateTemplateEditorButtons(wrapper)
-			syncTemplateEditorMode(wrapper)
-		})
-	}
-
-	function syncTemplateEditorState(root, prefix) {
-		root.querySelectorAll(`.nccb-template-editor[data-prefix="${prefix}"]`).forEach((wrapper) => {
-			updateTemplateEditorButtons(wrapper)
-			syncTemplateEditorMode(wrapper)
-			const control = getTemplateControl(wrapper)
-			if (templateEditorModalState.wrapper === wrapper && control?.disabled) {
-				closeTemplateEditorModal()
-			}
-		})
-	}
-
-	function removeTinyMceEditorById(editorId) {
-		if (!editorId || typeof window.tinymce !== 'object') {
-			return
-		}
-		const editor = window.tinymce.get(editorId)
-		if (editor) {
-			editor.remove()
-		}
-	}
-
-	function removeTemplateEditorsByPrefix(prefix) {
-		if (templateEditorModalState.wrapper?.dataset?.prefix === prefix) {
-			closeTemplateEditorModal()
-		}
-		TEMPLATE_EDITOR_SETTING_KEYS.forEach((settingKey) => {
-			removeTinyMceEditorById(`${prefix}-${settingKey}`)
-		})
 	}
 
 	function syncAttachmentMinSizeDependency(container, prefix) {
@@ -1604,7 +931,7 @@
 		applySharePasswordDependency(container, config.prefix)
 		applyTemplateLanguageDependency(container, config.prefix)
 		applyEmailSignatureDependency(container, config.prefix)
-		syncTemplateEditorState(container, config.prefix)
+		templateEditor.syncState(container, config.prefix)
 	}
 
 	function attachSettingLayerModeHandlers(container, config, syncCallback) {
@@ -2270,12 +1597,12 @@
 			applySettingRowVisibility()
 		}
 
-		templateAssetRefreshHandler = async (wrapper) => {
+		templateEditor.setAssetRefreshHandler(async (wrapper) => {
 			if (!(wrapper instanceof HTMLElement)) {
 				return
 			}
 
-			const control = getTemplateControl(wrapper)
+			const control = templateEditor.getControl(wrapper)
 			const settingKey = String(wrapper.dataset.settingKey || '')
 			const prefix = String(wrapper.dataset.prefix || '')
 			if (!control || !settingKey || !state.schema[settingKey]) {
@@ -2285,14 +1612,14 @@
 				return
 			}
 
-			const isModalDraft = templateEditorModalState.wrapper === wrapper
-			const refreshValue = getTemplateRefreshValue(wrapper, control)
+			const isModalDraft = templateEditor.isModalDraft(wrapper)
+			const refreshValue = templateEditor.getRefreshValue(wrapper, control)
 			const externalSources = extractExternalImageSourcesFromHtml(refreshValue)
 			if (externalSources.length === 0) {
 				return
 			}
 
-			const currentAssetMap = getEffectiveTemplateAssetMap(wrapper)
+			const currentAssetMap = templateEditor.getEffectiveAssetMap(wrapper)
 			const hasMissingAssets = externalSources.some((source) => !currentAssetMap[source])
 			if (!hasMissingAssets) {
 				return
@@ -2315,10 +1642,10 @@
 						state.defaultTemplateAssets = response.template_assets || state.defaultTemplateAssets
 						state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
 						control.value = String(state.defaults?.[settingKey] ?? control.value)
-						setTemplateAssetMap(wrapper, state.defaultTemplateAssets?.[settingKey] || {})
-						setTemplateDefaultAssetMap(wrapper, state.schemaTemplateAssets?.[settingKey] || {})
+						templateEditor.setAssetMap(wrapper, state.defaultTemplateAssets?.[settingKey] || {})
+						templateEditor.setDefaultAssetMap(wrapper, state.schemaTemplateAssets?.[settingKey] || {})
 					} else {
-						templateEditorModalState.assetMap = response.template_assets?.[settingKey] || {}
+						templateEditor.setModalAssetMap(wrapper, response.template_assets?.[settingKey] || {})
 					}
 				} else if (prefix === 'override' && refs.overrideUser.value) {
 					const modeSelect = root.querySelector(`.nccb-user-mode[data-setting-key="${settingKey}"]`)
@@ -2342,10 +1669,10 @@
 						if (updatedItem?.mode === 'forced') {
 							control.value = String(updatedItem.value ?? control.value)
 						}
-						setTemplateAssetMap(wrapper, state.overrideTemplateAssets?.[settingKey] || {})
-						setTemplateDefaultAssetMap(wrapper, state.schemaTemplateAssets?.[settingKey] || {})
+						templateEditor.setAssetMap(wrapper, state.overrideTemplateAssets?.[settingKey] || {})
+						templateEditor.setDefaultAssetMap(wrapper, state.schemaTemplateAssets?.[settingKey] || {})
 					} else {
-						templateEditorModalState.assetMap = response.template_assets?.[settingKey] || {}
+						templateEditor.setModalAssetMap(wrapper, response.template_assets?.[settingKey] || {})
 					}
 				} else if (prefix === 'group-override' && refs.groupOverrideGroup.value) {
 					const modeSelect = root.querySelector(`.nccb-group-mode[data-setting-key="${settingKey}"]`)
@@ -2372,25 +1699,25 @@
 						if (updatedItem?.mode === 'forced') {
 							control.value = String(updatedItem.value ?? control.value)
 						}
-						setTemplateAssetMap(wrapper, state.groupOverrideTemplateAssets?.[settingKey] || {})
-						setTemplateDefaultAssetMap(wrapper, state.schemaTemplateAssets?.[settingKey] || {})
+						templateEditor.setAssetMap(wrapper, state.groupOverrideTemplateAssets?.[settingKey] || {})
+						templateEditor.setDefaultAssetMap(wrapper, state.schemaTemplateAssets?.[settingKey] || {})
 					} else {
-						templateEditorModalState.assetMap = response.template_assets?.[settingKey] || {}
+						templateEditor.setModalAssetMap(wrapper, response.template_assets?.[settingKey] || {})
 					}
 				} else {
 					return
 				}
 
-				const editor = getActiveTemplateEditor(wrapper)
+				const editor = templateEditor.getActiveEditor(wrapper)
 				if (editor) {
-					editor.setContent(toEditorTemplateHtml(refreshValue, getEffectiveTemplateAssetMap(wrapper)))
+					editor.setContent(templateEditor.toEditorHtml(refreshValue, templateEditor.getEffectiveAssetMap(wrapper)))
 				}
 			} catch (error) {
 				console.error('nccb template asset refresh failed', settingKey, error)
 			} finally {
 				delete wrapper.dataset.templateAssetSync
 			}
-		}
+		})
 
 		const updatePager = (count) => {
 			seatUi.updatePager(refs, state.userPaging, count, tr)
@@ -2608,7 +1935,7 @@
 		}
 
 		const refreshDefaults = async () => {
-			removeTemplateEditorsByPrefix('default')
+			templateEditor.removeByPrefix('default')
 			const response = await api.loadDefaults()
 			state.schema = response.schema || {}
 			state.defaults = response.defaults || {}
@@ -2626,7 +1953,7 @@
 			attachSharePasswordDependencyHandlers(root)
 			attachTemplateLanguageDependencyHandlers(root, 'default')
 			attachEmailSignatureDependencyHandlers(root, 'default')
-			attachTemplateEditorHandlers(root)
+			templateEditor.attachHandlers(root)
 			renderGroupOverrideTables(root, refs, state, refs.groupOverrideGroup.value)
 			renderOverrideTables(root, refs, state, refs.overrideUser.value)
 			applySettingRowVisibility()
@@ -2991,7 +2318,7 @@
 				state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
 				state.recommendedApps = response.recommended_apps || state.recommendedApps
 				renderRecommendedApps(state.recommendedApps)
-				removeTemplateEditorsByPrefix('default')
+				templateEditor.removeByPrefix('default')
 				renderDefaultsRows(refs.defaultTableShare, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'share')
 				renderDefaultsRows(refs.defaultTableTalk, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'talk')
 				renderDefaultsRows(refs.defaultTableEmailSignature, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'email_signature')
@@ -3001,7 +2328,7 @@
 				attachSharePasswordDependencyHandlers(root)
 				attachTemplateLanguageDependencyHandlers(root, 'default')
 				attachEmailSignatureDependencyHandlers(root, 'default')
-				attachTemplateEditorHandlers(root)
+				templateEditor.attachHandlers(root)
 				setMessage(refs.defaultMessage, tr('Default settings saved.'), 'success')
 				if (refs.overrideUser.value) {
 					await refreshOverrides(refs.overrideUser.value)

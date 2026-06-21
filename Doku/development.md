@@ -126,6 +126,7 @@ Key paths inside the app folder:
 | `ncc_backend_4mc/js/adminPermissions.js` | Delegated admin permission mapping used by the admin UI |
 | `ncc_backend_4mc/js/adminDelegationUi.js` | Delegation permission matrix and delegated-admin overview rendering |
 | `ncc_backend_4mc/js/adminTemplateImages.js` | Template image source rewriting and admin-template sanitizing |
+| `ncc_backend_4mc/js/adminTemplateEditor.js` | Template editor modal, TinyMCE wiring, draft asset maps, and editor translations |
 | `ncc_backend_4mc/js/adminSeatReport.js` | Assigned-seat table rendering and seat-report CSV export |
 | `ncc_backend_4mc/js/adminTabs.js` | Shared admin tab switching |
 | `ncc_backend_4mc/js/adminSeatUi.js` | Seat assignment table, usage, and pager rendering |
@@ -160,6 +161,7 @@ Main files:
 - `ncc_backend_4mc/js/adminPermissions.js`
 - `ncc_backend_4mc/js/adminDelegationUi.js`
 - `ncc_backend_4mc/js/adminTemplateImages.js`
+- `ncc_backend_4mc/js/adminTemplateEditor.js`
 - `ncc_backend_4mc/js/adminSeatReport.js`
 - `ncc_backend_4mc/js/adminTabs.js`
 - `ncc_backend_4mc/js/adminSeatUi.js`
@@ -176,12 +178,9 @@ Responsibilities:
 - handle translations in the browser
 
 Important UI behaviors currently implemented there:
-- modal-based template editor
 - preview and source-code dialogs layered correctly above the modal
-- runtime image refresh for newly inserted image URLs
 - clickable tooltip links from seat overview to group/user overrides
 - CSV export for assigned seats
-- language dropdown in the editor modal for built-in Share/Talk template translation
 - Pro checkout/trial hint is shown until Pro has an active or grace license state
 - compact backend update status in the `General` tab
 - delegated admins only see tabs and rows covered by their NC Connector permissions
@@ -193,6 +192,7 @@ Important UI behaviors currently implemented there:
 - delegated admin permission mapping for the admin UI lives in `adminPermissions.js`
 - delegation permission matrix and delegated-admin overview rendering live in `adminDelegationUi.js`
 - template image source rewriting and admin-template sanitizing live in `adminTemplateImages.js`
+- template editor modal, TinyMCE setup, draft asset maps, and editor-only template translations live in `adminTemplateEditor.js`
 - assigned-seat table rendering and seat-report CSV export live in `adminSeatReport.js`
 - repeated tab switching logic lives in `adminTabs.js`
 - seat assignment table, usage, and pager rendering live in `adminSeatUi.js`
