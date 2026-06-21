@@ -124,6 +124,7 @@ Key paths inside the app folder:
 | `ncc_backend_4mc/js/adminSettingsMeta.js` | Static admin UI labels, enum labels, and built-in template translation fragments |
 | `ncc_backend_4mc/js/adminTemplatePreview.js` | Template preview document and Talk plain-text preview rendering |
 | `ncc_backend_4mc/js/adminPermissions.js` | Delegated admin permission mapping used by the admin UI |
+| `ncc_backend_4mc/js/adminDelegationUi.js` | Delegation permission matrix and delegated-admin overview rendering |
 | `ncc_backend_4mc/js/adminTemplateImages.js` | Template image source rewriting and admin-template sanitizing |
 | `ncc_backend_4mc/js/adminSeatReport.js` | Assigned-seat table rendering and seat-report CSV export |
 | `ncc_backend_4mc/js/ncc_backend_4mc-main.js` | Direct page UI under `/apps/ncc_backend_4mc` |
@@ -153,6 +154,7 @@ Main files:
 - `ncc_backend_4mc/js/adminSettingsMeta.js`
 - `ncc_backend_4mc/js/adminTemplatePreview.js`
 - `ncc_backend_4mc/js/adminPermissions.js`
+- `ncc_backend_4mc/js/adminDelegationUi.js`
 - `ncc_backend_4mc/js/adminTemplateImages.js`
 - `ncc_backend_4mc/js/adminSeatReport.js`
 - `ncc_backend_4mc/css/adminSettings.css`
@@ -181,6 +183,7 @@ Important UI behaviors currently implemented there:
 - static setting metadata and built-in template translation fragments live in `adminSettingsMeta.js`
 - preview-document and Talk plain-text preview rendering live in `adminTemplatePreview.js`
 - delegated admin permission mapping for the admin UI lives in `adminPermissions.js`
+- delegation permission matrix and delegated-admin overview rendering live in `adminDelegationUi.js`
 - template image source rewriting and admin-template sanitizing live in `adminTemplateImages.js`
 - assigned-seat table rendering and seat-report CSV export live in `adminSeatReport.js`
 

@@ -57,8 +57,6 @@
 		console.error('nccb admin permissions module missing')
 		return
 	}
-	const ADMIN_PERMISSION_MATRIX = adminPermissions.permissionMatrix
-	const ADMIN_PERMISSION_COLUMNS = adminPermissions.permissionColumns
 	const settingCategory = adminPermissions.settingCategory
 	const canEditDefaultSetting = adminPermissions.canEditDefaultSetting
 	const canEditUserOverrideSetting = adminPermissions.canEditUserOverrideSetting
@@ -69,6 +67,11 @@
 	const canUseAnyUserOverridePanel = adminPermissions.canUseAnyUserOverridePanel
 	const hasAnyAdminPermission = adminPermissions.hasAnyAdminPermission
 	const isUserOverrideOnlySettingKey = adminPermissions.isUserOverrideOnlySettingKey
+	const delegationUi = window.NCCBackendDelegationUi
+	if (!delegationUi) {
+		console.error('nccb delegation UI module missing')
+		return
+	}
 	const templatePreview = window.NCCBackendTemplatePreview
 	if (!templatePreview) {
 		console.error('nccb template preview module missing')
@@ -125,6 +128,25 @@
 
 	function buildSeatReportCsv(seats, schema, api) {
 		return seatReport.buildSeatReportCsv(seats, schema, api, getSeatReportHelpers())
+	}
+
+	function getDelegationUiHelpers() {
+		return {
+			escapeHtml,
+			tr,
+		}
+	}
+
+	function renderPermissionMatrix(selectedPermissions = []) {
+		return delegationUi.renderPermissionMatrix(selectedPermissions, getDelegationUiHelpers())
+	}
+
+	function renderDelegationOverview(container, delegations) {
+		delegationUi.renderDelegationOverview(container, delegations, getDelegationUiHelpers())
+	}
+
+	function readDelegationPermissions(root) {
+		return delegationUi.readDelegationPermissions(root)
 	}
 
 	function formatDateTime(ts) {
@@ -1853,112 +1875,6 @@
 		root.querySelectorAll('[data-advanced-tab-panel]').forEach((panel) => {
 			panel.hidden = panel.getAttribute('data-advanced-tab-panel') !== name
 		})
-	}
-
-	function renderPermissionMatrix(selectedPermissions = []) {
-		const selected = new Set(Array.isArray(selectedPermissions) ? selectedPermissions : [])
-		const cards = ADMIN_PERMISSION_MATRIX.map((area) => {
-			const options = ADMIN_PERMISSION_COLUMNS.map((column) => {
-				const permission = `${area.area}.${column.suffix}`
-				return `
-					<label class="nccb-permission-card__option">
-						<input type="checkbox" class="nccb-delegation-permission" value="${escapeHtml(permission)}" ${selected.has(permission) ? 'checked' : ''}>
-						<span>${escapeHtml(tr(column.label))}</span>
-					</label>
-				`
-			}).join('')
-			return `
-				<div class="nccb-permission-card">
-					<div class="nccb-permission-card__title">${escapeHtml(tr(area.label))}</div>
-					<div class="nccb-permission-card__options">${options}</div>
-				</div>
-			`
-		}).join('')
-
-		return `
-			<div class="nccb-permission-cards" data-delegation-permissions>
-				${cards}
-			</div>
-		`
-	}
-
-	function groupedDelegationPermissions(permissions) {
-		const grouped = new Map(ADMIN_PERMISSION_MATRIX.map((area) => [area.area, []]))
-		if (!Array.isArray(permissions)) {
-			return grouped
-		}
-		permissions.forEach((permission) => {
-			const [area, suffix] = String(permission).split('.')
-			if (!grouped.has(area)) {
-				return
-			}
-			const column = ADMIN_PERMISSION_COLUMNS.find((item) => item.suffix === suffix)
-			if (column) {
-				grouped.get(area).push(column)
-			}
-		})
-		return grouped
-	}
-
-	function renderDelegationPermissionGroups(permissions) {
-		if (!Array.isArray(permissions) || permissions.length === 0) {
-			return `<span class="nccb-muted">${escapeHtml(tr('No permissions'))}</span>`
-		}
-		const grouped = groupedDelegationPermissions(permissions)
-		return ADMIN_PERMISSION_MATRIX.map((area) => {
-			const columns = grouped.get(area.area) || []
-			if (columns.length === 0) {
-				return ''
-			}
-			return `
-				<div class="nccb-delegation-permission-group">
-					<span class="nccb-delegation-permission-group__area">${escapeHtml(tr(area.label))}</span>
-					<span class="nccb-delegation-permission-group__chips">
-						${columns.map((column) => `<span class="nccb-permission-chip">${escapeHtml(tr(column.label))}</span>`).join('')}
-					</span>
-				</div>
-			`
-		}).join('')
-	}
-
-	function renderDelegationOverview(container, delegations) {
-		if (!(container instanceof HTMLElement)) {
-			return
-		}
-		const items = Array.isArray(delegations) ? delegations : []
-		if (items.length === 0) {
-			container.innerHTML = `<div class="nccb-muted">${escapeHtml(tr('No delegated admins configured.'))}</div>`
-			return
-		}
-
-		container.innerHTML = `
-			<table class="nccb-table">
-				<thead>
-					<tr>
-						<th>${escapeHtml(tr('User ID'))}</th>
-						<th>${escapeHtml(tr('Name'))}</th>
-						<th>${escapeHtml(tr('Status'))}</th>
-						<th>${escapeHtml(tr('Permissions'))}</th>
-					</tr>
-				</thead>
-				<tbody>
-					${items.map((item) => `
-						<tr>
-							<td>${escapeHtml(item.user_id || '')}</td>
-							<td>${escapeHtml(item.display_name || '—')}</td>
-							<td>${escapeHtml(item.enabled ? tr('Enabled') : tr('Disabled'))}</td>
-							<td>${renderDelegationPermissionGroups(item.permissions || [])}</td>
-						</tr>
-					`).join('')}
-				</tbody>
-			</table>
-		`
-	}
-
-	function readDelegationPermissions(root) {
-		return Array.from(root.querySelectorAll('.nccb-delegation-permission:checked'))
-			.map((input) => String(input.value || ''))
-			.filter((value) => value !== '')
 	}
 
 	function render(root) {
