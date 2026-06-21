@@ -227,10 +227,11 @@ Core services:
 |---|---|
 | `LicenseService` | License mode, credentials, sync, entitlement state |
 | `SeatService` | Seat assignment, seat-limit enforcement, and the explicit admin-seat override |
-| `ClientSettingsService` | Default values, group/user overrides, effective policy resolution, template normalization, email signature profile rendering, runtime image cache |
+| `ClientSettingsService` | Default values, group/user overrides, effective policy resolution, template normalization, and email signature profile rendering |
 | `AccessService` | Access checks for direct page visibility and user-facing runtime state |
 | `AdminPermissionService` | Maps admin actions to delegated NC Connector permission scopes |
 | `AdminDelegationService` | Stores and normalizes delegated admin permissions |
+| `TemplateAssetService` | Mirrors external template images into local runtime assets for editor rendering |
 | `UpdateCheckService` | Daily backend version check against `nc-connector.de`; runs independently of license mode |
 
 Most important service in day-to-day maintenance:
@@ -243,7 +244,6 @@ That file is the core of the backend because it owns:
 - precedence resolution
 - template activation rules
 - email signature profile variable rendering
-- editor asset handling
 - seat-overview helper data for matching overrides
 
 Logging rule for service/controller work:
@@ -371,7 +371,7 @@ Important current API behavior:
 
 The editor path deserves its own section because it is more than simple form storage.
 
-Relevant responsibilities in `ClientSettingsService` and `ncc_backend_4mc-adminSettings.js`:
+Relevant responsibilities in `ClientSettingsService`, `TemplateAssetService`, and `ncc_backend_4mc-adminSettings.js`:
 - detect whether a template row is active at all
 - treat Share/Talk template rows as active only when the corresponding language is `custom`
 - keep the email signature template independent from template-language selection
