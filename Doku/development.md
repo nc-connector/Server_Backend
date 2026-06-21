@@ -229,6 +229,7 @@ Core services:
 | `SeatService` | Seat assignment, seat-limit enforcement, and the explicit admin-seat override |
 | `ClientSettingsDefinitionService` | Client setting definitions, built-in defaults, value parsing, value serialization, and setting classification |
 | `ClientSettingsService` | Stored defaults, group/user overrides, effective policy resolution, and template activation rules |
+| `ClientPolicyRuntimeService` | Applies final client-policy dependencies before values are returned to mail clients |
 | `AccessService` | Access checks for direct page visibility and user-facing runtime state |
 | `AdminPermissionService` | Maps admin actions to delegated NC Connector permission scopes |
 | `AdminDelegationService` | Stores and normalizes delegated admin permissions |
@@ -248,6 +249,7 @@ That file is the core of the backend because it owns:
 - seat-overview helper data for matching overrides
 
 `ClientSettingsDefinitionService.php` owns the static setting catalog and the value codec used by defaults, user overrides, and group overrides.
+`ClientPolicyRuntimeService.php` owns runtime-only policy shaping, including Secrets availability, attachment dependency values, template-language activation, and email-signature rendering for policy responses.
 
 Logging rule for service/controller work:
 - server-side logging uses `Psr\Log\LoggerInterface`
