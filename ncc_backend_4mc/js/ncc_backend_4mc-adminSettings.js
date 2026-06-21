@@ -110,6 +110,11 @@
 		console.error('nccb general status UI module missing')
 		return
 	}
+	const overrideSelects = window.NCCBackendOverrideSelects
+	if (!overrideSelects) {
+		console.error('nccb override selects module missing')
+		return
+	}
 
 	function escapeHtml(value) {
 		return String(value)
@@ -181,6 +186,13 @@
 			formatDate,
 			formatDateTime,
 			renderInlineHelp,
+			tr,
+		}
+	}
+
+	function getOverrideSelectHelpers() {
+		return {
+			escapeHtml,
 			tr,
 		}
 	}
@@ -2560,45 +2572,25 @@
 		}
 
 		const fillOverrideUsers = (assignedSeats) => {
-			const prev = refs.overrideUser.value
-			refs.overrideUser.innerHTML = `<option value="">${escapeHtml(tr('Please select a seat user'))}</option>`
-			const sorted = [...assignedSeats].sort((a, b) => (a.display_name || a.user_id).localeCompare(b.display_name || b.user_id))
-			sorted.forEach((seat) => {
-				const option = document.createElement('option')
-				option.value = seat.user_id
-				option.textContent = seat.display_name ? `${seat.display_name} (${seat.user_id})` : seat.user_id
-				refs.overrideUser.appendChild(option)
-			})
-			if (prev && sorted.some((seat) => seat.user_id === prev)) {
-				refs.overrideUser.value = prev
-			} else {
+			const result = overrideSelects.fillOverrideUsers(refs, assignedSeats, getOverrideSelectHelpers())
+			if (!result.retained) {
 				refs.overrideUser.value = ''
 				state.overrides = {}
 				state.overrideTemplateAssets = {}
 			}
-			renderOverrideTables(root, refs, state, refs.overrideUser.value)
+			renderOverrideTables(root, refs, state, result.selectedUserId)
 		}
 
 		const fillGroupOverrideGroups = (groups) => {
-			const prev = refs.groupOverrideGroup.value
-			refs.groupOverrideGroup.innerHTML = `<option value="">${escapeHtml(tr('Please select a group'))}</option>`
-			const sorted = [...groups].sort((a, b) => (a.display_name || a.group_id).localeCompare(b.display_name || b.group_id))
-			sorted.forEach((group) => {
-				const option = document.createElement('option')
-				option.value = group.group_id
-				option.textContent = group.display_name ? `${group.display_name} (${group.group_id})` : group.group_id
-				refs.groupOverrideGroup.appendChild(option)
-			})
-			if (prev && sorted.some((group) => group.group_id === prev)) {
-				refs.groupOverrideGroup.value = prev
-			} else {
+			const result = overrideSelects.fillGroupOverrideGroups(refs, groups, getOverrideSelectHelpers())
+			if (!result.retained) {
 				refs.groupOverrideGroup.value = ''
 				state.groupOverrides = {}
 				state.groupOverrideTemplateAssets = {}
 				state.groupOverridePriority = 100
 				refs.groupOverridePriority.value = '100'
 			}
-			renderGroupOverrideTables(root, refs, state, refs.groupOverrideGroup.value)
+			renderGroupOverrideTables(root, refs, state, result.selectedGroupId)
 		}
 
 		const selectedDelegation = () => {
