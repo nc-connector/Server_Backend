@@ -42,8 +42,6 @@ class ClientSettingsService {
 	private const SHARE_SEND_PASSWORD_MODE_PLAIN = 'plain';
 	private const SHARE_SEND_PASSWORD_MODE_SECRETS = 'secrets';
 	private const SHARE_SECRETS_EXPIRE_DAYS_KEY = 'share_secrets_expire_days';
-	private const TALK_TEMPLATE_FORMAT_HTML = 'html';
-	private const TALK_TEMPLATE_FORMAT_PLAIN_TEXT = 'plain_text';
 	private const EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY = 'email_signature_email_address';
 	private const EMAIL_SIGNATURE_PHONE_MOBILE_KEY = 'email_signature_phone_mobile';
 	private const EMAIL_SIGNATURE_CUSTOM1_KEY = 'email_signature_custom1';
@@ -226,8 +224,8 @@ HTML;
 		'language_talk_description' => ['type' => 'enum', 'default' => 'en', 'options' => [
 			'ui_default', 'custom', 'en', 'de', 'fr', 'zh_cn', 'zh_tw', 'it', 'ja', 'nl', 'pl', 'pt_br', 'pt_pt', 'ru', 'es', 'cs', 'hu',
 		]],
-		'talk_invitation_template_format' => ['type' => 'enum', 'default' => self::TALK_TEMPLATE_FORMAT_PLAIN_TEXT, 'options' => [
-			self::TALK_TEMPLATE_FORMAT_PLAIN_TEXT, self::TALK_TEMPLATE_FORMAT_HTML,
+		'talk_invitation_template_format' => ['type' => 'enum', 'default' => TalkTemplateRuntimeService::FORMAT_PLAIN_TEXT, 'options' => [
+			TalkTemplateRuntimeService::FORMAT_PLAIN_TEXT, TalkTemplateRuntimeService::FORMAT_HTML,
 		]],
 		'talk_invitation_template' => ['type' => 'string', 'default' => self::DEFAULT_TALK_INVITATION_TEMPLATE, 'max_length' => 32768],
 
@@ -260,6 +258,7 @@ HTML;
 		private IAccountManager $accountManager,
 		private IAppManager $appManager,
 		private TemplateAssetService $templateAssets,
+		private TalkTemplateRuntimeService $talkTemplates,
 		private LoggerInterface $logger,
 	) {
 	}
@@ -1102,9 +1101,9 @@ HTML;
 			return;
 		}
 
-		$talkTemplateFormat = $this->normalizeTalkTemplateFormat((string)($settings['talk_invitation_template_format'] ?? self::TALK_TEMPLATE_FORMAT_PLAIN_TEXT));
+		$talkTemplateFormat = $this->talkTemplates->normalizeFormat((string)($settings['talk_invitation_template_format'] ?? TalkTemplateRuntimeService::FORMAT_PLAIN_TEXT));
 		$settings['talk_invitation_template_format'] = $talkTemplateFormat;
-		$settings['talk_invitation_template'] = $this->renderTalkTemplateForPolicy(
+		$settings['talk_invitation_template'] = $this->talkTemplates->renderForPolicy(
 			(string)($settings['talk_invitation_template'] ?? ''),
 			$talkTemplateFormat
 		);
@@ -1446,156 +1445,6 @@ HTML;
 			|| $key === 'share_password_template'
 			|| $key === 'talk_invitation_template'
 			|| $key === 'email_signature_template';
-	}
-
-	private function normalizeTalkTemplateFormat(string $format): string {
-		return strtolower(trim($format)) === self::TALK_TEMPLATE_FORMAT_HTML
-			? self::TALK_TEMPLATE_FORMAT_HTML
-			: self::TALK_TEMPLATE_FORMAT_PLAIN_TEXT;
-	}
-
-	private function renderTalkTemplateForPolicy(string $template, string $format): string {
-		$normalizedFormat = $this->normalizeTalkTemplateFormat($format);
-		if ($normalizedFormat === self::TALK_TEMPLATE_FORMAT_HTML) {
-			return $template;
-		}
-
-		return $this->convertTalkTemplateHtmlToPlainText($template);
-	}
-
-	private function convertTalkTemplateHtmlToPlainText(string $template): string {
-		if (trim($template) === '') {
-			return '';
-		}
-
-		$previousUseInternalErrors = libxml_use_internal_errors(true);
-		$document = new \DOMDocument();
-		$loaded = $document->loadHTML('<?xml encoding="utf-8" ?>' . $template, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-		libxml_clear_errors();
-		libxml_use_internal_errors($previousUseInternalErrors);
-
-		if ($loaded === false || !$document->documentElement) {
-			return $this->fallbackTalkTemplateHtmlToPlainText($template);
-		}
-
-		$plain = $this->renderTalkTemplateDocumentAsPlainText($document);
-		return $this->normalizeTalkPlainText($plain);
-	}
-
-	private function renderTalkTemplateDocumentAsPlainText(\DOMDocument $document): string {
-		$result = '';
-		foreach ($document->childNodes as $node) {
-			if ($node instanceof \DOMDocumentType || $node instanceof \DOMProcessingInstruction) {
-				continue;
-			}
-
-			if ($node instanceof \DOMElement && strtolower($node->tagName) === 'html') {
-				$result .= $this->renderTalkTemplateHtmlElementAsPlainText($node);
-				continue;
-			}
-
-			$result .= $this->renderTalkTemplateNodeAsPlainText($node);
-		}
-
-		return $result;
-	}
-
-	private function renderTalkTemplateHtmlElementAsPlainText(\DOMElement $htmlElement): string {
-		$result = '';
-		foreach ($htmlElement->childNodes as $node) {
-			if ($node instanceof \DOMElement && strtolower($node->tagName) === 'head') {
-				continue;
-			}
-
-			if ($node instanceof \DOMElement && strtolower($node->tagName) === 'body') {
-				$result .= $this->renderTalkTemplateNodesAsPlainText($node->childNodes);
-				continue;
-			}
-
-			$result .= $this->renderTalkTemplateNodeAsPlainText($node);
-		}
-
-		return $result;
-	}
-
-	private function fallbackTalkTemplateHtmlToPlainText(string $template): string {
-		$withPreservedLinks = preg_replace_callback(
-			'/<a\b[^>]*(?:href|data-mce-href)=(["\'])(.*?)\\1[^>]*>(.*?)<\/a>/is',
-			function (array $matches): string {
-				$href = html_entity_decode(trim((string)($matches[2] ?? '')), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$linkText = $this->normalizeTalkPlainText(strip_tags((string)($matches[3] ?? '')));
-				if ($href === '') {
-					return $linkText;
-				}
-
-				if ($linkText === '' || $linkText === $href) {
-					return $href;
-				}
-
-				return sprintf('%s: %s', $linkText, $href);
-			},
-			$template
-		) ?? $template;
-
-		return $this->normalizeTalkPlainText(strip_tags($withPreservedLinks));
-	}
-
-	private function renderTalkTemplateNodesAsPlainText(\DOMNodeList $nodes): string {
-		$result = '';
-		foreach ($nodes as $node) {
-			$result .= $this->renderTalkTemplateNodeAsPlainText($node);
-		}
-		return $result;
-	}
-
-	private function renderTalkTemplateNodeAsPlainText(\DOMNode $node): string {
-		if ($node instanceof \DOMText) {
-			return $node->nodeValue ?? '';
-		}
-
-		if ($node instanceof \DOMElement) {
-			$tagName = strtolower($node->tagName);
-			if ($tagName === 'br') {
-				return "\n";
-			}
-
-			if ($tagName === 'a') {
-				$linkText = $this->normalizeTalkPlainText($this->renderTalkTemplateNodesAsPlainText($node->childNodes));
-				$href = trim((string)($node->getAttribute('href') ?: $node->getAttribute('data-mce-href')));
-				if ($href === '') {
-					return $linkText;
-				}
-				if ($linkText === '' || $linkText === $href) {
-					return $href;
-				}
-				return sprintf('%s: %s', $linkText, $href);
-			}
-
-			$content = $this->renderTalkTemplateNodesAsPlainText($node->childNodes);
-			if (in_array($tagName, ['p', 'div', 'section', 'article', 'header', 'footer', 'aside', 'blockquote', 'pre', 'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'], true)) {
-				$content = $this->normalizeTalkPlainText($content);
-				if ($content === '') {
-					return '';
-				}
-				if ($tagName === 'li') {
-					return '- ' . $content . "\n";
-				}
-				return $content . "\n\n";
-			}
-
-			return $content;
-		}
-
-		return '';
-	}
-
-	private function normalizeTalkPlainText(string $value): string {
-		$normalized = str_replace(["\r\n", "\r"], "\n", $value);
-		$normalized = preg_replace("/[ \t]+\n/u", "\n", $normalized) ?? $normalized;
-		$normalized = preg_replace("/\n[ \t]+/u", "\n", $normalized) ?? $normalized;
-		$normalized = preg_replace("/[ \t]{2,}/u", ' ', $normalized) ?? $normalized;
-		$normalized = preg_replace("/\n{3,}/u", "\n\n", $normalized) ?? $normalized;
-		return trim($normalized);
 	}
 
 	/**

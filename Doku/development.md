@@ -232,6 +232,7 @@ Core services:
 | `AdminPermissionService` | Maps admin actions to delegated NC Connector permission scopes |
 | `AdminDelegationService` | Stores and normalizes delegated admin permissions |
 | `TemplateAssetService` | Mirrors external template images into local runtime assets for editor rendering |
+| `TalkTemplateRuntimeService` | Renders Talk invitation templates as HTML or cleaned plain text for policy responses |
 | `UpdateCheckService` | Daily backend version check against `nc-connector.de`; runs independently of license mode |
 
 Most important service in day-to-day maintenance:
@@ -371,7 +372,7 @@ Important current API behavior:
 
 The editor path deserves its own section because it is more than simple form storage.
 
-Relevant responsibilities in `ClientSettingsService`, `TemplateAssetService`, and `ncc_backend_4mc-adminSettings.js`:
+Relevant responsibilities in `ClientSettingsService`, `TemplateAssetService`, `TalkTemplateRuntimeService`, and `ncc_backend_4mc-adminSettings.js`:
 - detect whether a template row is active at all
 - treat Share/Talk template rows as active only when the corresponding language is `custom`
 - keep the email signature template independent from template-language selection
@@ -391,7 +392,7 @@ Current implementation model:
 
 Talk plain-text rendering intentionally exists in two places:
 - JavaScript renders the admin preview so admins can see the plain-text result before saving.
-- PHP renders the runtime policy response because mail clients must not depend on admin UI code.
+- `TalkTemplateRuntimeService` renders the runtime policy response because mail clients must not depend on admin UI code.
 
 Keep both paths aligned when changing Talk template markup rules. The important parity points are:
 - visible text is preserved
