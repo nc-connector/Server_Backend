@@ -100,9 +100,81 @@
 		return `<pre style="white-space:pre-wrap;font:14px/1.45 sans-serif;margin:0;">${html}</pre>`
 	}
 
+	function ensureTemplatePreviewModal(helpers) {
+		const { tr } = helpers
+		let modal = document.getElementById('nccb-template-preview-modal')
+		if (modal) {
+			return modal
+		}
+
+		modal = document.createElement('div')
+		modal.id = 'nccb-template-preview-modal'
+		modal.className = 'nccb-template-preview-modal'
+		modal.innerHTML = `
+			<div class="nccb-template-preview-backdrop" data-action="close"></div>
+			<div class="nccb-template-preview-dialog" role="dialog" aria-modal="true" aria-label="${escapeHtml(tr('Preview'))}">
+				<div class="nccb-template-preview-header">
+					<div class="nccb-template-preview-title">${escapeHtml(tr('Preview'))}</div>
+					<button type="button" class="nccb-template-preview-close" data-action="close" aria-label="${escapeHtml(tr('Close'))}">&times;</button>
+				</div>
+				<div class="nccb-template-preview-body">
+					<iframe class="nccb-template-preview-frame" sandbox=""></iframe>
+				</div>
+			</div>
+		`
+		modal.addEventListener('click', (event) => {
+			const target = event.target
+			if (target instanceof HTMLElement && target.dataset.action === 'close') {
+				modal.classList.remove('nccb-template-preview-modal--open')
+			}
+		})
+		document.body.appendChild(modal)
+		return modal
+	}
+
+	function getTalkTemplateFormatForWrapper(wrapper, helpers) {
+		const {
+			talkInvitationTemplateFormatKey,
+			talkTemplateFormatHtml,
+			talkTemplateFormatPlainText,
+		} = helpers
+		if (!(wrapper instanceof HTMLElement)) {
+			return talkTemplateFormatHtml
+		}
+
+		const control = wrapper.querySelector(`.nccb-setting-control[data-setting-key="${talkInvitationTemplateFormatKey}"]`)
+		const value = String(control?.value || '').toLowerCase()
+		return value === talkTemplateFormatPlainText
+			? talkTemplateFormatPlainText
+			: talkTemplateFormatHtml
+	}
+
+	function openTemplatePreview(editor, wrapper = null, helpers) {
+		const {
+			talkInvitationTemplateKey,
+			talkTemplateFormatPlainText,
+			toPreviewTemplateHtml,
+		} = helpers
+		const modal = ensureTemplatePreviewModal(helpers)
+		const frame = modal.querySelector('.nccb-template-preview-frame')
+		if (!(frame instanceof HTMLIFrameElement)) {
+			return
+		}
+
+		const sourceHtml = editor.getBody()?.innerHTML || editor.getContent()
+		const isTalkTemplate = wrapper instanceof HTMLElement
+			&& String(wrapper.dataset.settingKey || '') === talkInvitationTemplateKey
+		const previewContent = isTalkTemplate && getTalkTemplateFormatForWrapper(wrapper, helpers) === talkTemplateFormatPlainText
+			? plainTextToPreviewHtml(talkTemplateHtmlToPlainText(sourceHtml))
+			: toPreviewTemplateHtml(sourceHtml)
+		frame.setAttribute('srcdoc', buildTemplatePreviewDocument(previewContent))
+		modal.classList.add('nccb-template-preview-modal--open')
+	}
+
 	window.NCCBackendTemplatePreview = {
 		buildTemplatePreviewDocument,
-		talkTemplateHtmlToPlainText,
+		openTemplatePreview,
 		plainTextToPreviewHtml,
+		talkTemplateHtmlToPlainText,
 	}
 })()

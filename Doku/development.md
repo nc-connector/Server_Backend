@@ -122,7 +122,7 @@ Key paths inside the app folder:
 | `ncc_backend_4mc/js/ncc_backend_4mc-adminSettings.js` | Main admin UI logic |
 | `ncc_backend_4mc/js/adminApi.js` | Admin UI API client for backend endpoints |
 | `ncc_backend_4mc/js/adminSettingsMeta.js` | Static admin UI labels, enum labels, and built-in template translation fragments |
-| `ncc_backend_4mc/js/adminTemplatePreview.js` | Template preview document and Talk plain-text preview rendering |
+| `ncc_backend_4mc/js/adminTemplatePreview.js` | Template preview document, preview modal, and Talk plain-text preview rendering |
 | `ncc_backend_4mc/js/adminPermissions.js` | Delegated admin permission mapping used by the admin UI |
 | `ncc_backend_4mc/js/adminDelegationUi.js` | Delegation permission matrix and delegated-admin overview rendering |
 | `ncc_backend_4mc/js/adminTemplateImages.js` | Template image source rewriting and admin-template sanitizing |
@@ -189,7 +189,7 @@ Important UI behaviors currently implemented there:
 - default settings row rendering stays separate because `Editable in add-on` is not the same UI model as `inherit` / `forced`
 - admin HTTP calls live in `adminApi.js`; `ncc_backend_4mc-adminSettings.js` should not grow new `fetch(...)` wrappers
 - static setting metadata and built-in template translation fragments live in `adminSettingsMeta.js`
-- preview-document and Talk plain-text preview rendering live in `adminTemplatePreview.js`
+- preview-document, preview modal, and Talk plain-text preview rendering live in `adminTemplatePreview.js`
 - delegated admin permission mapping for the admin UI lives in `adminPermissions.js`
 - delegation permission matrix and delegated-admin overview rendering live in `adminDelegationUi.js`
 - template image source rewriting and admin-template sanitizing live in `adminTemplateImages.js`
