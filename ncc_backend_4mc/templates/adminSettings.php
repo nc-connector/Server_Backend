@@ -27,6 +27,8 @@ Util::addScript($appId, 'vendor/tinymce/plugins/table/plugin.min');
 Util::addScript($appId, 'vendor/tinymce/plugins/image/plugin.min');
 Util::addScript($appId, 'vendor/dompurify/purify');
 Util::addScript($appId, 'templateSanitizer');
+Util::addScript($appId, 'adminApi');
+Util::addScript($appId, 'adminSettingsMeta');
 Util::addScript($appId, $appId . '-adminSettings');
 Util::addStyle($appId, 'tinymceSkin');
 Util::addStyle($appId, 'adminSettings');
