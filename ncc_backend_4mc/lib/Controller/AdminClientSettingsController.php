@@ -26,6 +26,8 @@ use OCP\IUserManager;
 use Psr\Log\LoggerInterface;
 
 class AdminClientSettingsController extends Controller {
+	use AdminWarningResponseTrait;
+
 	public function __construct(
 		string $appName,
 		IRequest $request,
@@ -417,8 +419,4 @@ class AdminClientSettingsController extends Controller {
 		return null;
 	}
 
-	private function warningResponse(string $message, int $status, array $context = []): DataResponse {
-		$this->logger->warning($message, $context);
-		return new DataResponse(['error' => $message], $status);
-	}
 }
