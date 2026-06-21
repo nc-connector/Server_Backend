@@ -2411,16 +2411,147 @@
 		return String(control.value ?? '')
 	}
 
-	/**
-	 * Renders one default settings table section (share or talk).
-	 *
-	 * @param {HTMLTableSectionElement} tbody
-	 * @param {Record<string, any>} schema
-	 * @param {Record<string, any>} defaults
-	 * @param {Record<string, string>} defaultModes
-	 * @param {'share'|'talk'|'email_signature'} category
-	 * @returns {void}
-	 */
+	const SETTING_LAYER_UI = {
+		defaults: {
+			prefix: 'default',
+			modeSelector: '.nccb-addon-changeable',
+			modeClass: 'nccb-addon-changeable',
+			rowAttribute: 'data-default-setting-key',
+			isDisabledByMode: (control) => Boolean(control.checked),
+			updateDefaultValueCell: true,
+			disableAttachmentToggleByMode: true,
+		},
+		userOverride: {
+			prefix: 'override',
+			modeSelector: '.nccb-user-mode',
+			modeClass: 'nccb-user-mode',
+			rowAttribute: 'data-user-setting-key',
+			isDisabledByMode: (control) => control.value !== 'forced',
+			updateDefaultValueCell: false,
+			disableAttachmentToggleByMode: false,
+		},
+		groupOverride: {
+			prefix: 'group-override',
+			modeSelector: '.nccb-group-mode',
+			modeClass: 'nccb-group-mode',
+			rowAttribute: 'data-group-setting-key',
+			isDisabledByMode: (control) => control.value !== 'forced',
+			updateDefaultValueCell: false,
+			disableAttachmentToggleByMode: false,
+		},
+	}
+
+	function renderForcedModeSelect(config, key, mode, extraClass = '') {
+		const className = extraClass ? `${config.modeClass} ${extraClass}` : config.modeClass
+		return `
+			<select class="${escapeHtml(className)}" data-setting-key="${escapeHtml(key)}">
+				<option value="inherit" ${mode === 'inherit' ? 'selected' : ''}>${escapeHtml(tr('Inherit default'))}</option>
+				<option value="forced" ${mode === 'forced' ? 'selected' : ''}>${escapeHtml(tr('Forced value'))}</option>
+			</select>
+		`
+	}
+
+	function renderForcedOverrideRows(tbody, schema, items, templateAssets, defaultTemplateAssets, category, config, options = {}) {
+		const keys = sortedSettingKeys(schema).filter((key) => settingCategory(key) === category
+			&& shouldRenderStandaloneSettingRow(key)
+			&& (!options.skipUserOverrideOnly || !isUserOverrideOnlySettingKey(key)))
+		if (keys.length === 0) {
+			tbody.innerHTML = `<tr><td colspan="3" class="nccb-muted">${escapeHtml(tr('No settings found.'))}</td></tr>`
+			return
+		}
+
+		tbody.innerHTML = keys.map((key) => {
+			const definition = schema[key] || {}
+			const item = items?.[key] || { mode: 'inherit', value: null, effective_value: definition.default, source: 'default', default_mode: 'default' }
+			const mode = item.mode === 'forced' ? 'forced' : 'inherit'
+			const currentValue = mode === 'forced' ? item.value : item.effective_value
+			if (isTemplateEditorSettingKey(key)) {
+				const talkTemplateFormat = key === TALK_INVITATION_TEMPLATE_KEY
+					? renderTalkTemplateFormatControl(
+						config.prefix,
+						schema,
+						items?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.mode === 'forced'
+							? items?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.value
+							: items?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.effective_value ?? schema?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.default,
+						mode !== 'forced'
+					)
+					: ''
+				return `
+					<tr class="nccb-template-row" ${config.rowAttribute}="${escapeHtml(key)}">
+						<td>
+							<div class="nccb-key-cell">
+								<div class="nccb-key-title">${escapeHtml(settingLabel(key))}${renderSettingHelp(key)}</div>
+							</div>
+						</td>
+						<td colspan="2">
+							<div class="nccb-template-row-head">
+								<span class="nccb-template-row-head-label nccb-template-row-head-select-label">${escapeHtml(tr('Preset'))}</span>
+								${renderForcedModeSelect(config, key, mode, 'nccb-template-row-mode')}
+								${talkTemplateFormat}
+								<span class="nccb-template-row-head-note" hidden>${escapeHtml(tr(getTemplateInactiveNote(key)))}</span>
+							</div>
+							${renderSettingControl(config.prefix, key, definition, currentValue, mode !== 'forced', templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}
+						</td>
+					</tr>
+				`
+			}
+			return `
+				<tr ${config.rowAttribute}="${escapeHtml(key)}">
+					<td>
+						<div class="nccb-key-cell">
+							<div class="nccb-key-title">${escapeHtml(settingLabel(key))}${renderSettingHelp(key)}</div>
+						</div>
+					</td>
+					<td>${renderForcedModeSelect(config, key, mode)}</td>
+					<td>${renderSettingControl(config.prefix, key, definition, currentValue, mode !== 'forced', templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}</td>
+				</tr>
+			`
+		}).join('')
+	}
+
+	function syncSettingLayerControlState(container, config) {
+		const modeControls = container.querySelectorAll(config.modeSelector)
+		for (const modeControl of modeControls) {
+			const key = modeControl.getAttribute('data-setting-key')
+			const disabledByMode = config.isDisabledByMode(modeControl)
+			const control = container.querySelector(`.nccb-setting-control[data-prefix="${config.prefix}"][data-setting-key="${key}"]`)
+			const attachmentToggle = container.querySelector(`.nccb-threshold-enabled[data-prefix="${config.prefix}"][data-setting-key="${key}"]`)
+			const valueCell = modeControl.closest('tr')?.querySelector('.nccb-default-value-cell')
+			if (control) {
+				control.dataset.disabledByMode = disabledByMode ? '1' : '0'
+				control.disabled = disabledByMode
+			}
+			if (attachmentToggle) {
+				attachmentToggle.dataset.disabledByMode = disabledByMode ? '1' : '0'
+				if (config.disableAttachmentToggleByMode) {
+					attachmentToggle.disabled = disabledByMode
+				}
+			}
+			if (config.updateDefaultValueCell && valueCell instanceof HTMLElement) {
+				valueCell.classList.toggle('nccb-default-value-cell--disabled', disabledByMode)
+			}
+			if (key === TALK_INVITATION_TEMPLATE_KEY) {
+				const talkFormatControl = container.querySelector(`.nccb-setting-control[data-prefix="${config.prefix}"][data-setting-key="${TALK_INVITATION_TEMPLATE_FORMAT_KEY}"]`)
+				if (talkFormatControl) {
+					talkFormatControl.dataset.disabledByMode = disabledByMode ? '1' : '0'
+					talkFormatControl.disabled = disabledByMode
+				}
+			}
+		}
+		syncAttachmentMinSizeDependency(container, config.prefix)
+		applySharePasswordDependency(container, config.prefix)
+		applyTemplateLanguageDependency(container, config.prefix)
+		applyEmailSignatureDependency(container, config.prefix)
+		syncTemplateEditorState(container, config.prefix)
+	}
+
+	function attachSettingLayerModeHandlers(container, config, syncCallback) {
+		const modeControls = container.querySelectorAll(config.modeSelector)
+		for (const modeControl of modeControls) {
+			modeControl.addEventListener('change', () => syncCallback(container))
+		}
+	}
+
 	function renderDefaultsRows(tbody, schema, defaults, defaultModes, templateAssets, defaultTemplateAssets, category) {
 		const keys = sortedSettingKeys(schema).filter((key) => settingCategory(key) === category
 			&& shouldRenderStandaloneSettingRow(key)
@@ -2487,112 +2618,15 @@
 	}
 
 	function syncDefaultControlState(root) {
-		const toggles = root.querySelectorAll('.nccb-addon-changeable')
-		for (const toggle of toggles) {
-			const key = toggle.getAttribute('data-setting-key')
-			const disabledByMode = Boolean(toggle.checked)
-			const control = root.querySelector(`.nccb-setting-control[data-prefix="default"][data-setting-key="${key}"]`)
-			const attachmentToggle = root.querySelector(`.nccb-threshold-enabled[data-prefix="default"][data-setting-key="${key}"]`)
-			const valueCell = toggle.closest('tr')?.querySelector('.nccb-default-value-cell')
-			if (control) {
-				control.dataset.disabledByMode = disabledByMode ? '1' : '0'
-				control.disabled = disabledByMode
-			}
-			if (attachmentToggle) {
-				attachmentToggle.dataset.disabledByMode = disabledByMode ? '1' : '0'
-				attachmentToggle.disabled = disabledByMode
-			}
-			if (valueCell instanceof HTMLElement) {
-				valueCell.classList.toggle('nccb-default-value-cell--disabled', disabledByMode)
-			}
-		}
-		syncAttachmentMinSizeDependency(root, 'default')
-		applySharePasswordDependency(root, 'default')
-		applyTemplateLanguageDependency(root, 'default')
-		applyEmailSignatureDependency(root, 'default')
-		syncTemplateEditorState(root, 'default')
+		syncSettingLayerControlState(root, SETTING_LAYER_UI.defaults)
 	}
 
 	function attachDefaultModeHandlers(root) {
-		const toggles = root.querySelectorAll('.nccb-addon-changeable')
-		for (const toggle of toggles) {
-			toggle.addEventListener('change', () => syncDefaultControlState(root))
-		}
+		attachSettingLayerModeHandlers(root, SETTING_LAYER_UI.defaults, syncDefaultControlState)
 	}
 
-	/**
-	 * Renders one user-override section (share or talk).
-	 *
-	 * @param {HTMLTableSectionElement} tbody
-	 * @param {Record<string, any>} schema
-	 * @param {Record<string, any>} items
-	 * @param {'share'|'talk'|'email_signature'} category
-	 * @returns {void}
-	 */
 	function renderOverrideRows(tbody, schema, items, templateAssets, defaultTemplateAssets, category) {
-		const keys = sortedSettingKeys(schema).filter((key) => settingCategory(key) === category && shouldRenderStandaloneSettingRow(key))
-		if (keys.length === 0) {
-			tbody.innerHTML = `<tr><td colspan="3" class="nccb-muted">${escapeHtml(tr('No settings found.'))}</td></tr>`
-			return
-		}
-
-		tbody.innerHTML = keys.map((key) => {
-			const definition = schema[key] || {}
-			const item = items?.[key] || { mode: 'inherit', value: null, effective_value: definition.default, source: 'default', default_mode: 'default' }
-			const mode = item.mode === 'forced' ? 'forced' : 'inherit'
-			const currentValue = mode === 'forced' ? item.value : item.effective_value
-			const modeSelect = `
-				<option value="inherit" ${mode === 'inherit' ? 'selected' : ''}>${escapeHtml(tr('Inherit default'))}</option>
-				<option value="forced" ${mode === 'forced' ? 'selected' : ''}>${escapeHtml(tr('Forced value'))}</option>
-			`
-			if (isTemplateEditorSettingKey(key)) {
-				const talkTemplateFormat = key === TALK_INVITATION_TEMPLATE_KEY
-					? renderTalkTemplateFormatControl(
-						'override',
-						schema,
-						items?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.mode === 'forced'
-							? items?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.value
-							: items?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.effective_value ?? schema?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.default,
-						mode !== 'forced'
-					)
-					: ''
-				return `
-					<tr class="nccb-template-row" data-user-setting-key="${escapeHtml(key)}">
-						<td>
-							<div class="nccb-key-cell">
-								<div class="nccb-key-title">${escapeHtml(settingLabel(key))}${renderSettingHelp(key)}</div>
-							</div>
-						</td>
-						<td colspan="2">
-							<div class="nccb-template-row-head">
-								<span class="nccb-template-row-head-label nccb-template-row-head-select-label">${escapeHtml(tr('Preset'))}</span>
-								<select class="nccb-user-mode nccb-template-row-mode" data-setting-key="${escapeHtml(key)}">
-									${modeSelect}
-								</select>
-								${talkTemplateFormat}
-								<span class="nccb-template-row-head-note" hidden>${escapeHtml(tr(getTemplateInactiveNote(key)))}</span>
-							</div>
-							${renderSettingControl('override', key, definition, currentValue, mode !== 'forced', templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}
-						</td>
-					</tr>
-				`
-			}
-			return `
-				<tr data-user-setting-key="${escapeHtml(key)}">
-					<td>
-						<div class="nccb-key-cell">
-							<div class="nccb-key-title">${escapeHtml(settingLabel(key))}${renderSettingHelp(key)}</div>
-						</div>
-					</td>
-					<td>
-						<select class="nccb-user-mode" data-setting-key="${escapeHtml(key)}">
-							${modeSelect}
-						</select>
-					</td>
-					<td>${renderSettingControl('override', key, definition, currentValue, mode !== 'forced', templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}</td>
-				</tr>
-			`
-		}).join('')
+		renderForcedOverrideRows(tbody, schema, items, templateAssets, defaultTemplateAssets, category, SETTING_LAYER_UI.userOverride)
 	}
 
 	function renderOverridePlaceholder(tbody) {
@@ -2622,108 +2656,15 @@
 	}
 
 	function syncOverrideControlState(tbody) {
-		const selects = tbody.querySelectorAll('.nccb-user-mode')
-		for (const select of selects) {
-			const key = select.getAttribute('data-setting-key')
-			const disabledByMode = select.value !== 'forced'
-			const control = tbody.querySelector(`.nccb-setting-control[data-prefix="override"][data-setting-key="${key}"]`)
-			const attachmentToggle = tbody.querySelector(`.nccb-threshold-enabled[data-prefix="override"][data-setting-key="${key}"]`)
-			if (control) {
-				control.dataset.disabledByMode = disabledByMode ? '1' : '0'
-				control.disabled = disabledByMode
-			}
-			if (attachmentToggle) {
-				attachmentToggle.dataset.disabledByMode = disabledByMode ? '1' : '0'
-			}
-
-			if (key === TALK_INVITATION_TEMPLATE_KEY) {
-				const talkFormatControl = tbody.querySelector(`.nccb-setting-control[data-prefix="override"][data-setting-key="${TALK_INVITATION_TEMPLATE_FORMAT_KEY}"]`)
-				if (talkFormatControl) {
-					talkFormatControl.dataset.disabledByMode = disabledByMode ? '1' : '0'
-					talkFormatControl.disabled = disabledByMode
-				}
-			}
-		}
-		syncAttachmentMinSizeDependency(tbody, 'override')
-		applySharePasswordDependency(tbody, 'override')
-		applyTemplateLanguageDependency(tbody, 'override')
-		applyEmailSignatureDependency(tbody, 'override')
-		syncTemplateEditorState(tbody, 'override')
+		syncSettingLayerControlState(tbody, SETTING_LAYER_UI.userOverride)
 	}
 
 	function attachOverrideModeHandlers(tbody) {
-		const selects = tbody.querySelectorAll('.nccb-user-mode')
-		for (const select of selects) {
-			select.addEventListener('change', () => syncOverrideControlState(tbody))
-		}
+		attachSettingLayerModeHandlers(tbody, SETTING_LAYER_UI.userOverride, syncOverrideControlState)
 	}
 
 	function renderGroupOverrideRows(tbody, schema, items, templateAssets, defaultTemplateAssets, category) {
-		const keys = sortedSettingKeys(schema).filter((key) => settingCategory(key) === category
-			&& shouldRenderStandaloneSettingRow(key)
-			&& !isUserOverrideOnlySettingKey(key))
-		if (keys.length === 0) {
-			tbody.innerHTML = `<tr><td colspan="3" class="nccb-muted">${escapeHtml(tr('No settings found.'))}</td></tr>`
-			return
-		}
-
-		tbody.innerHTML = keys.map((key) => {
-			const definition = schema[key] || {}
-			const item = items?.[key] || { mode: 'inherit', value: null, effective_value: definition.default, source: 'default', default_mode: 'default' }
-			const mode = item.mode === 'forced' ? 'forced' : 'inherit'
-			const currentValue = mode === 'forced' ? item.value : item.effective_value
-			const modeSelect = `
-				<option value="inherit" ${mode === 'inherit' ? 'selected' : ''}>${escapeHtml(tr('Inherit default'))}</option>
-				<option value="forced" ${mode === 'forced' ? 'selected' : ''}>${escapeHtml(tr('Forced value'))}</option>
-			`
-			if (isTemplateEditorSettingKey(key)) {
-				const talkTemplateFormat = key === TALK_INVITATION_TEMPLATE_KEY
-					? renderTalkTemplateFormatControl(
-						'group-override',
-						schema,
-						items?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.mode === 'forced'
-							? items?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.value
-							: items?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.effective_value ?? schema?.[TALK_INVITATION_TEMPLATE_FORMAT_KEY]?.default,
-						mode !== 'forced'
-					)
-					: ''
-				return `
-					<tr class="nccb-template-row" data-group-setting-key="${escapeHtml(key)}">
-						<td>
-							<div class="nccb-key-cell">
-								<div class="nccb-key-title">${escapeHtml(settingLabel(key))}${renderSettingHelp(key)}</div>
-							</div>
-						</td>
-						<td colspan="2">
-							<div class="nccb-template-row-head">
-								<span class="nccb-template-row-head-label nccb-template-row-head-select-label">${escapeHtml(tr('Preset'))}</span>
-								<select class="nccb-group-mode nccb-template-row-mode" data-setting-key="${escapeHtml(key)}">
-									${modeSelect}
-								</select>
-								${talkTemplateFormat}
-								<span class="nccb-template-row-head-note" hidden>${escapeHtml(tr(getTemplateInactiveNote(key)))}</span>
-							</div>
-							${renderSettingControl('group-override', key, definition, currentValue, mode !== 'forced', templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}
-						</td>
-					</tr>
-				`
-			}
-			return `
-				<tr data-group-setting-key="${escapeHtml(key)}">
-					<td>
-						<div class="nccb-key-cell">
-							<div class="nccb-key-title">${escapeHtml(settingLabel(key))}${renderSettingHelp(key)}</div>
-						</div>
-					</td>
-					<td>
-						<select class="nccb-group-mode" data-setting-key="${escapeHtml(key)}">
-							${modeSelect}
-						</select>
-					</td>
-					<td>${renderSettingControl('group-override', key, definition, currentValue, mode !== 'forced', templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}</td>
-				</tr>
-			`
-		}).join('')
+		renderForcedOverrideRows(tbody, schema, items, templateAssets, defaultTemplateAssets, category, SETTING_LAYER_UI.groupOverride, { skipUserOverrideOnly: true })
 	}
 
 	function renderGroupOverridePlaceholder(tbody) {
@@ -2754,40 +2695,11 @@
 	}
 
 	function syncGroupOverrideControlState(tbody) {
-		const selects = tbody.querySelectorAll('.nccb-group-mode')
-		for (const select of selects) {
-			const key = select.getAttribute('data-setting-key')
-			const disabledByMode = select.value !== 'forced'
-			const control = tbody.querySelector(`.nccb-setting-control[data-prefix="group-override"][data-setting-key="${key}"]`)
-			const attachmentToggle = tbody.querySelector(`.nccb-threshold-enabled[data-prefix="group-override"][data-setting-key="${key}"]`)
-			if (control) {
-				control.dataset.disabledByMode = disabledByMode ? '1' : '0'
-				control.disabled = disabledByMode
-			}
-			if (attachmentToggle) {
-				attachmentToggle.dataset.disabledByMode = disabledByMode ? '1' : '0'
-			}
-
-			if (key === TALK_INVITATION_TEMPLATE_KEY) {
-				const talkFormatControl = tbody.querySelector(`.nccb-setting-control[data-prefix="group-override"][data-setting-key="${TALK_INVITATION_TEMPLATE_FORMAT_KEY}"]`)
-				if (talkFormatControl) {
-					talkFormatControl.dataset.disabledByMode = disabledByMode ? '1' : '0'
-					talkFormatControl.disabled = disabledByMode
-				}
-			}
-		}
-		syncAttachmentMinSizeDependency(tbody, 'group-override')
-		applySharePasswordDependency(tbody, 'group-override')
-		applyTemplateLanguageDependency(tbody, 'group-override')
-		applyEmailSignatureDependency(tbody, 'group-override')
-		syncTemplateEditorState(tbody, 'group-override')
+		syncSettingLayerControlState(tbody, SETTING_LAYER_UI.groupOverride)
 	}
 
 	function attachGroupOverrideModeHandlers(tbody) {
-		const selects = tbody.querySelectorAll('.nccb-group-mode')
-		for (const select of selects) {
-			select.addEventListener('change', () => syncGroupOverrideControlState(tbody))
-		}
+		attachSettingLayerModeHandlers(tbody, SETTING_LAYER_UI.groupOverride, syncGroupOverrideControlState)
 	}
 
 	function renderUsers(tbody, users) {
@@ -4291,77 +4203,57 @@
 			return toggle ? Boolean(toggle.checked) : true
 		}
 
-		const collectDefaultPayload = () => {
-			const payload = {}
-			sortedSettingKeys(state.schema).forEach((key) => {
-				if (isUserOverrideOnlySettingKey(key)) {
-					return
-				}
-				if (!canEditDefaultSetting(state, key)) {
-					return
-				}
-				const addonToggle = root.querySelector(`.nccb-addon-changeable[data-setting-key="${key}"]`)
-				const isAddonChangeable = !isTemplateEditorSettingKey(key) && Boolean(addonToggle?.checked)
-				const value = key === 'attachments_min_size_mb'
-					&& !isAttachmentThresholdEnabled('default')
-					? null
-					: readSettingControl(root, 'default', key, state.schema[key])
-				payload[key] = {
-					mode: isAddonChangeable ? 'user_choice' : 'default',
-					value,
-				}
-			})
-			return payload
-		}
+		const readLayerValue = (prefix, key) => key === 'attachments_min_size_mb'
+			&& !isAttachmentThresholdEnabled(prefix)
+			? null
+			: readSettingControl(root, prefix, key, state.schema[key])
 
-		const collectOverridePayload = () => {
+		const collectSettingLayerPayload = (config, options = {}) => {
 			const payload = {}
 			sortedSettingKeys(state.schema).forEach((key) => {
-				if (!canEditUserOverrideSetting(state, key)) {
+				if (options.skipUserOverrideOnly && isUserOverrideOnlySettingKey(key)) {
+					return
+				}
+				if (!options.canEditSetting?.(state, key)) {
+					return
+				}
+				if (options.defaultLayer) {
+					const addonToggle = root.querySelector(`.nccb-addon-changeable[data-setting-key="${key}"]`)
+					const isAddonChangeable = !isTemplateEditorSettingKey(key) && Boolean(addonToggle?.checked)
+					payload[key] = {
+						mode: isAddonChangeable ? 'user_choice' : 'default',
+						value: readLayerValue(config.prefix, key),
+					}
 					return
 				}
 				const modeKey = getTemplateModeControlKey(key)
-				const mode = root.querySelector(`.nccb-user-mode[data-setting-key="${modeKey}"]`)?.value || 'inherit'
+				const mode = root.querySelector(`${config.modeSelector}[data-setting-key="${modeKey}"]`)?.value || 'inherit'
 				if (mode !== 'forced') {
 					payload[key] = { mode: 'inherit' }
 					return
 				}
 				payload[key] = {
 					mode: 'forced',
-					value: key === 'attachments_min_size_mb'
-						&& !isAttachmentThresholdEnabled('override')
-						? null
-						: readSettingControl(root, 'override', key, state.schema[key]),
+					value: readLayerValue(config.prefix, key),
 				}
 			})
 			return payload
 		}
 
-		const collectGroupOverridePayload = () => {
-			const payload = {}
-			sortedSettingKeys(state.schema).forEach((key) => {
-				if (isUserOverrideOnlySettingKey(key)) {
-					return
-				}
-				if (!canEditGroupOverrideSetting(state, key)) {
-					return
-				}
-				const modeKey = getTemplateModeControlKey(key)
-				const mode = root.querySelector(`.nccb-group-mode[data-setting-key="${modeKey}"]`)?.value || 'inherit'
-				if (mode !== 'forced') {
-					payload[key] = { mode: 'inherit' }
-					return
-				}
-				payload[key] = {
-					mode: 'forced',
-					value: key === 'attachments_min_size_mb'
-						&& !isAttachmentThresholdEnabled('group-override')
-						? null
-						: readSettingControl(root, 'group-override', key, state.schema[key]),
-				}
-			})
-			return payload
-		}
+		const collectDefaultPayload = () => collectSettingLayerPayload(SETTING_LAYER_UI.defaults, {
+			skipUserOverrideOnly: true,
+			canEditSetting: canEditDefaultSetting,
+			defaultLayer: true,
+		})
+
+		const collectOverridePayload = () => collectSettingLayerPayload(SETTING_LAYER_UI.userOverride, {
+			canEditSetting: canEditUserOverrideSetting,
+		})
+
+		const collectGroupOverridePayload = () => collectSettingLayerPayload(SETTING_LAYER_UI.groupOverride, {
+			skipUserOverrideOnly: true,
+			canEditSetting: canEditGroupOverrideSetting,
+		})
 
 		const loadAllUsersInScope = async () => {
 			const users = []

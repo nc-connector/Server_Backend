@@ -163,6 +163,8 @@ Important UI behaviors currently implemented there:
 - Pro checkout/trial hint is shown until Pro has an active or grace license state
 - compact backend update status in the `General` tab
 - delegated admins only see tabs and rows covered by their NC Connector permissions
+- settings tables use shared layer helpers for mode sync, event binding, forced override rows, and save payloads
+- default settings row rendering stays separate because `Editable in add-on` is not the same UI model as `inherit` / `forced`
 
 ### 4.2 Controller layer
 
