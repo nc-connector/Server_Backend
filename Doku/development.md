@@ -182,6 +182,7 @@ Main controllers:
 Design intent:
 - Controllers should stay thin.
 - Resolution logic belongs in services, not in endpoint methods.
+- Admin API warning responses use `AdminWarningResponseTrait` so denied access and invalid admin input keep one response shape.
 
 ### 4.3 Service layer
 
@@ -212,6 +213,10 @@ That file is the core of the backend because it owns:
 
 Logging rule for service/controller work:
 - server-side logging uses `Psr\Log\LoggerInterface`
+
+Permission mapping rule:
+- `AdminPermissionService` is the single place that maps Default, user override, and group override settings to delegated admin scopes.
+- Controllers should use its settings-layer helpers instead of duplicating scope branches.
 
 ### 4.4 Persistence layer
 
@@ -348,6 +353,16 @@ Current implementation model:
 - Saving the modal remains the only real commit path.
 - Custom Share, Talk, password-mail, and email-signature HTML is sanitized in the admin editor with bundled DOMPurify before preview and save.
 - The runtime API returns the stored template values after normal policy resolution and variable replacement.
+
+Talk plain-text rendering intentionally exists in two places:
+- JavaScript renders the admin preview so admins can see the plain-text result before saving.
+- PHP renders the runtime policy response because mail clients must not depend on admin UI code.
+
+Keep both paths aligned when changing Talk template markup rules. The important parity points are:
+- visible text is preserved
+- link targets remain visible as raw URLs
+- block-level HTML keeps readable line breaks
+- the final value is normalized before delivery
 
 Export/report behavior:
 - Template HTML is never exported as raw HTML in the seat CSV.
