@@ -37,28 +37,10 @@
 	const EMAIL_SIGNATURE_PHONE_MOBILE_KEY = 'email_signature_phone_mobile'
 	const EMAIL_SIGNATURE_CUSTOM1_KEY = 'email_signature_custom1'
 	const EMAIL_SIGNATURE_CUSTOM2_KEY = 'email_signature_custom2'
-	const USER_OVERRIDE_ONLY_SETTING_KEYS = new Set([
-		EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY,
-		EMAIL_SIGNATURE_PHONE_MOBILE_KEY,
-		EMAIL_SIGNATURE_CUSTOM1_KEY,
-		EMAIL_SIGNATURE_CUSTOM2_KEY,
-	])
-	const SIGNATURE_TEMPLATE_USER_SETTING_KEYS = new Set([
-		EMAIL_SIGNATURE_TEMPLATE_KEY,
-		EMAIL_SIGNATURE_PHONE_MOBILE_KEY,
-		EMAIL_SIGNATURE_CUSTOM1_KEY,
-		EMAIL_SIGNATURE_CUSTOM2_KEY,
-	])
-	const SIGNATURE_POLICY_USER_SETTING_KEYS = new Set([
-		EMAIL_SIGNATURE_ON_COMPOSE_KEY,
-		EMAIL_SIGNATURE_ON_REPLY_KEY,
-		EMAIL_SIGNATURE_ON_FORWARD_KEY,
-	])
 	const TALK_TEMPLATE_FORMAT_HTML = 'html'
 	const TALK_TEMPLATE_FORMAT_PLAIN_TEXT = 'plain_text'
 	const DEFAULT_TEMPLATE_LOGO_URL = 'https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png'
 	const TEMPLATE_EDITOR_CONTENT_CSP = "default-src 'none'; img-src * data: blob:; style-src 'unsafe-inline';"
-	const TEMPLATE_PREVIEW_CSP = "default-src 'none'; img-src * data: blob: https: http:; style-src 'unsafe-inline';"
 	const TEMPLATE_EDITOR_SETTING_KEYS = new Set([
 		SHARE_HTML_TEMPLATE_KEY,
 		SHARE_PASSWORD_TEMPLATE_KEY,
@@ -71,26 +53,32 @@
 		[TALK_INVITATION_TEMPLATE_KEY]: ['MEETING_URL', 'PASSWORD'],
 		[EMAIL_SIGNATURE_TEMPLATE_KEY]: ['NAME', 'EMAIL', 'PHONE', 'PHONE_MOBILE', 'ABOUT', 'FUNCTION', 'ORGANISATION', 'CUSTOM1', 'CUSTOM2'],
 	}
-	const ADMIN_PERMISSION_MATRIX = [
-		{ area: 'share', label: 'Shares' },
-		{ area: 'talk', label: 'Talk' },
-		{ area: 'signature', label: 'Email signature' },
-	]
-	const ADMIN_PERMISSION_COLUMNS = [
-		{ suffix: 'policy', label: 'Policies' },
-		{ suffix: 'templates', label: 'Templates' },
-		{ suffix: 'group_overrides', label: 'Group overrides' },
-		{ suffix: 'user_overrides', label: 'User overrides' },
-	]
-	const TEMPLATE_DEFAULT_PERMISSION_BY_KEY = {
-		[SHARE_HTML_TEMPLATE_KEY]: 'share.templates',
-		[SHARE_PASSWORD_TEMPLATE_KEY]: 'share.templates',
-		language_share_html_block: 'share.templates',
-		[TALK_INVITATION_TEMPLATE_KEY]: 'talk.templates',
-		[TALK_INVITATION_TEMPLATE_FORMAT_KEY]: 'talk.templates',
-		language_talk_description: 'talk.templates',
-		[EMAIL_SIGNATURE_TEMPLATE_KEY]: 'signature.templates',
+	const adminPermissions = window.NCCBackendAdminPermissions
+	if (!adminPermissions) {
+		console.error('nccb admin permissions module missing')
+		return
 	}
+	const ADMIN_PERMISSION_MATRIX = adminPermissions.permissionMatrix
+	const ADMIN_PERMISSION_COLUMNS = adminPermissions.permissionColumns
+	const settingCategory = adminPermissions.settingCategory
+	const canEditDefaultSetting = adminPermissions.canEditDefaultSetting
+	const canEditUserOverrideSetting = adminPermissions.canEditUserOverrideSetting
+	const canEditGroupOverrideSetting = adminPermissions.canEditGroupOverrideSetting
+	const canReadAssignedSeatOverview = adminPermissions.canReadAssignedSeatOverview
+	const permissionsForCategory = adminPermissions.permissionsForCategory
+	const userOverridePermissionsForCategory = adminPermissions.userOverridePermissionsForCategory
+	const canUseAnyUserOverridePanel = adminPermissions.canUseAnyUserOverridePanel
+	const hasAnyAdminPermission = adminPermissions.hasAnyAdminPermission
+	const isUserOverrideOnlySettingKey = adminPermissions.isUserOverrideOnlySettingKey
+	const templatePreview = window.NCCBackendTemplatePreview
+	if (!templatePreview) {
+		console.error('nccb template preview module missing')
+		return
+	}
+	const buildTemplatePreviewDocument = templatePreview.buildTemplatePreviewDocument
+	const talkTemplateHtmlToPlainText = templatePreview.talkTemplateHtmlToPlainText
+	const plainTextToPreviewHtml = templatePreview.plainTextToPreviewHtml
+
 	function escapeHtml(value) {
 		return String(value)
 			.replaceAll('&', '&amp;')
@@ -433,96 +421,6 @@
 		})
 	}
 
-	function settingCategory(settingKey) {
-		if (String(settingKey).startsWith('email_signature_')) {
-			return 'email_signature'
-		}
-		if (settingKey === 'language_talk_description' || String(settingKey).startsWith('talk_')) {
-			return 'talk'
-		}
-		return 'share'
-	}
-
-	function adminPermissionAreaForSetting(settingKey) {
-		const category = settingCategory(settingKey)
-		return category === 'email_signature' ? 'signature' : category
-	}
-
-	function defaultAdminPermissionForSetting(settingKey) {
-		const key = String(settingKey || '')
-		return TEMPLATE_DEFAULT_PERMISSION_BY_KEY[key] || `${adminPermissionAreaForSetting(key)}.policy`
-	}
-
-	function userOverrideAdminPermissionForSetting(settingKey) {
-		const key = String(settingKey || '')
-		if (SIGNATURE_TEMPLATE_USER_SETTING_KEYS.has(key)) {
-			return 'signature.templates'
-		}
-		if (SIGNATURE_POLICY_USER_SETTING_KEYS.has(key)) {
-			return 'signature.policy'
-		}
-		return `${adminPermissionAreaForSetting(key)}.user_overrides`
-	}
-
-	function groupOverrideAdminPermissionForSetting(settingKey) {
-		return `${adminPermissionAreaForSetting(settingKey)}.group_overrides`
-	}
-
-	function hasAdminPermission(state, permission) {
-		if (state.admin?.is_nextcloud_admin) {
-			return true
-		}
-		return Array.isArray(state.admin?.permissions) && state.admin.permissions.includes(permission)
-	}
-
-	function hasAnyAdminPermission(state, permissions) {
-		if (state.admin?.is_nextcloud_admin) {
-			return true
-		}
-		return permissions.some((permission) => hasAdminPermission(state, permission))
-	}
-
-	function canEditDefaultSetting(state, settingKey) {
-		return hasAdminPermission(state, defaultAdminPermissionForSetting(settingKey))
-	}
-
-	function canEditUserOverrideSetting(state, settingKey) {
-		return hasAdminPermission(state, userOverrideAdminPermissionForSetting(settingKey))
-	}
-
-	function canEditGroupOverrideSetting(state, settingKey) {
-		return hasAdminPermission(state, groupOverrideAdminPermissionForSetting(settingKey))
-	}
-
-	function canReadAssignedSeatOverview(state) {
-		return Boolean(state.admin?.is_nextcloud_admin) || hasAnyAdminPermission(state, [
-			'share.group_overrides',
-			'share.user_overrides',
-			'talk.group_overrides',
-			'talk.user_overrides',
-			'signature.group_overrides',
-			'signature.user_overrides',
-			'signature.templates',
-		])
-	}
-
-	function permissionsForCategory(category, suffixes) {
-		const area = category === 'email_signature' ? 'signature' : category
-		return suffixes.map((suffix) => `${area}.${suffix}`)
-	}
-
-	function userOverridePermissionsForCategory(category) {
-		const suffixes = category === 'email_signature'
-			? ['user_overrides', 'templates']
-			: ['user_overrides']
-		return permissionsForCategory(category, suffixes)
-	}
-
-	function canUseAnyUserOverridePanel(state) {
-		return ['share', 'talk', 'email_signature'].some((category) => (
-			hasAnyAdminPermission(state, userOverridePermissionsForCategory(category))
-		))
-	}
 
 	function mergeSchema(state, schema) {
 		if (schema && typeof schema === 'object') {
@@ -575,10 +473,6 @@
 		return !isEmbeddedTalkTemplateSettingKey(settingKey)
 	}
 
-	function isUserOverrideOnlySettingKey(settingKey) {
-		return USER_OVERRIDE_ONLY_SETTING_KEYS.has(String(settingKey || ''))
-	}
-
 	function getTemplateModeControlKey(settingKey) {
 		return isEmbeddedTalkTemplateSettingKey(settingKey)
 			? TALK_INVITATION_TEMPLATE_KEY
@@ -613,99 +507,6 @@
 	 * @param {string} html
 	 * @returns {string}
 	 */
-	function buildTemplatePreviewDocument(html) {
-		return [
-			'<!DOCTYPE html>',
-			'<html>',
-			'<head>',
-			'<meta charset="utf-8">',
-			`<meta http-equiv="Content-Security-Policy" content="${escapeHtml(TEMPLATE_PREVIEW_CSP)}">`,
-			'<style>html,body{margin:0;padding:0;background:#fff}body{font-family:Arial,sans-serif;padding:16px;box-sizing:border-box}img{max-width:100%;height:auto}</style>',
-			'</head>',
-			`<body>${String(html || '')}</body>`,
-			'</html>',
-		].join('')
-	}
-
-	function normalizeTalkTemplatePlainText(value) {
-		let normalized = String(value ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n')
-		normalized = normalized.replace(/[ \t]+\n/g, '\n')
-		normalized = normalized.replace(/\n[ \t]+/g, '\n')
-		normalized = normalized.replace(/[ \t]{2,}/g, ' ')
-		normalized = normalized.replace(/\n{3,}/g, '\n\n')
-		return normalized.trim()
-	}
-
-	function renderTalkTemplateNodeAsPlainText(node) {
-		if (node.nodeType === Node.TEXT_NODE) {
-			return String(node.nodeValue || '')
-		}
-
-		if (node.nodeType !== Node.ELEMENT_NODE || !(node instanceof Element)) {
-			return ''
-		}
-
-		const tagName = String(node.tagName || '').toLowerCase()
-		if (tagName === 'br') {
-			return '\n'
-		}
-
-		if (tagName === 'a') {
-			const linkText = normalizeTalkTemplatePlainText(renderTalkTemplateNodesAsPlainText(node.childNodes))
-			const href = String(node.getAttribute('href') || node.getAttribute('data-mce-href') || '').trim()
-			if (!href) {
-				return linkText
-			}
-			if (!linkText || linkText === href) {
-				return href
-			}
-			return `${linkText}: ${href}`
-		}
-
-		const content = renderTalkTemplateNodesAsPlainText(node.childNodes)
-		if (['p', 'div', 'section', 'article', 'header', 'footer', 'aside', 'blockquote', 'pre', 'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
-			const normalized = normalizeTalkTemplatePlainText(content)
-			if (!normalized) {
-				return ''
-			}
-			if (tagName === 'li') {
-				return `- ${normalized}\n`
-			}
-			return `${normalized}\n\n`
-		}
-
-		return content
-	}
-
-	function renderTalkTemplateNodesAsPlainText(nodes) {
-		return Array.from(nodes || []).map((node) => renderTalkTemplateNodeAsPlainText(node)).join('')
-	}
-
-	function talkTemplateHtmlToPlainText(rawHtml) {
-		if (!String(rawHtml || '').trim()) {
-			return ''
-		}
-
-		const parser = new DOMParser()
-		const doc = parser.parseFromString(String(rawHtml || ''), 'text/html')
-		if (!doc.body) {
-			return normalizeTalkTemplatePlainText(String(rawHtml || ''))
-		}
-
-		return normalizeTalkTemplatePlainText(renderTalkTemplateNodesAsPlainText(doc.body.childNodes))
-	}
-
-	function plainTextToPreviewHtml(value) {
-		const parts = String(value || '').split(/(https?:\/\/[^\s<>"']+)/g)
-		const html = parts.map((part) => {
-			if (/^https?:\/\//i.test(part)) {
-				const href = escapeHtml(part)
-				return `<a href="${href}" target="_blank" rel="noopener noreferrer">${href}</a>`
-			}
-			return escapeHtml(part).replace(/\n/g, '<br>')
-		}).join('')
-		return `<div class="nccb-template-preview-plaintext">${html}</div>`
-	}
 
 	function ensureTemplatePreviewModal() {
 		let modal = document.getElementById('nccb-template-preview-modal')

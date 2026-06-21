@@ -122,6 +122,8 @@ Key paths inside the app folder:
 | `ncc_backend_4mc/js/ncc_backend_4mc-adminSettings.js` | Main admin UI logic |
 | `ncc_backend_4mc/js/adminApi.js` | Admin UI API client for backend endpoints |
 | `ncc_backend_4mc/js/adminSettingsMeta.js` | Static admin UI labels, enum labels, and built-in template translation fragments |
+| `ncc_backend_4mc/js/adminTemplatePreview.js` | Template preview document and Talk plain-text preview rendering |
+| `ncc_backend_4mc/js/adminPermissions.js` | Delegated admin permission mapping used by the admin UI |
 | `ncc_backend_4mc/js/ncc_backend_4mc-main.js` | Direct page UI under `/apps/ncc_backend_4mc` |
 | `ncc_backend_4mc/css/*` | Admin and direct-page styling |
 | `ncc_backend_4mc/templates/*` | Nextcloud-rendered PHP templates |
@@ -147,6 +149,8 @@ Main files:
 - `ncc_backend_4mc/js/ncc_backend_4mc-adminSettings.js`
 - `ncc_backend_4mc/js/adminApi.js`
 - `ncc_backend_4mc/js/adminSettingsMeta.js`
+- `ncc_backend_4mc/js/adminTemplatePreview.js`
+- `ncc_backend_4mc/js/adminPermissions.js`
 - `ncc_backend_4mc/css/adminSettings.css`
 - `ncc_backend_4mc/templates/adminSettings.php`
 
@@ -171,6 +175,8 @@ Important UI behaviors currently implemented there:
 - default settings row rendering stays separate because `Editable in add-on` is not the same UI model as `inherit` / `forced`
 - admin HTTP calls live in `adminApi.js`; `ncc_backend_4mc-adminSettings.js` should not grow new `fetch(...)` wrappers
 - static setting metadata and built-in template translation fragments live in `adminSettingsMeta.js`
+- preview-document and Talk plain-text preview rendering live in `adminTemplatePreview.js`
+- delegated admin permission mapping for the admin UI lives in `adminPermissions.js`
 
 ### 4.2 Controller layer
 
