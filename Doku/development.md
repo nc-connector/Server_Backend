@@ -227,7 +227,8 @@ Core services:
 |---|---|
 | `LicenseService` | License mode, credentials, sync, entitlement state |
 | `SeatService` | Seat assignment, seat-limit enforcement, and the explicit admin-seat override |
-| `ClientSettingsService` | Default values, group/user overrides, effective policy resolution, and template activation rules |
+| `ClientSettingsDefinitionService` | Client setting definitions, built-in defaults, value parsing, value serialization, and setting classification |
+| `ClientSettingsService` | Stored defaults, group/user overrides, effective policy resolution, and template activation rules |
 | `AccessService` | Access checks for direct page visibility and user-facing runtime state |
 | `AdminPermissionService` | Maps admin actions to delegated NC Connector permission scopes |
 | `AdminDelegationService` | Stores and normalizes delegated admin permissions |
@@ -240,12 +241,13 @@ Most important service in day-to-day maintenance:
 - `ClientSettingsService.php`
 
 That file is the core of the backend because it owns:
-- setting definitions
-- built-in defaults
+- stored default values
 - override modes
 - precedence resolution
 - template activation rules
 - seat-overview helper data for matching overrides
+
+`ClientSettingsDefinitionService.php` owns the static setting catalog and the value codec used by defaults, user overrides, and group overrides.
 
 Logging rule for service/controller work:
 - server-side logging uses `Psr\Log\LoggerInterface`
@@ -372,7 +374,7 @@ Important current API behavior:
 
 The editor path deserves its own section because it is more than simple form storage.
 
-Relevant responsibilities in `ClientSettingsService`, `TemplateAssetService`, `TalkTemplateRuntimeService`, and `ncc_backend_4mc-adminSettings.js`:
+Relevant responsibilities in `ClientSettingsService`, `ClientSettingsDefinitionService`, `TemplateAssetService`, `TalkTemplateRuntimeService`, and `ncc_backend_4mc-adminSettings.js`:
 - detect whether a template row is active at all
 - treat Share/Talk template rows as active only when the corresponding language is `custom`
 - keep the email signature template independent from template-language selection
