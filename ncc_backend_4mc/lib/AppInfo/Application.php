@@ -45,6 +45,7 @@ class Application extends App implements IBootstrap {
 			return;
 		}
 
+		// Delegated admins belong in Settings; the app bar would expose NC Connector as a regular app entry.
 		$settingsManager = $server->get(ISettingsManager::class);
 		$settingsManager->registerSection('personal', AdminSection::class);
 		$settingsManager->registerSetting('personal', DelegatedAdmin::class);

@@ -158,6 +158,7 @@ class EmailSignatureRuntimeService {
 	 * @param array<string, string> $variables
 	 */
 	private function removeEmptyVariableLines(string $template, array $variables): string {
+		// Empty values remove their visual line so signatures do not leave blank contact rows.
 		$emptyNames = array_keys(array_filter(
 			$variables,
 			static fn (string $value): bool => trim($value) === ''

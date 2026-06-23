@@ -15,6 +15,7 @@ class AdminPermissionService {
 	public const SETTING_LAYER_USER_OVERRIDE = 'user_override';
 	public const SETTING_LAYER_GROUP_OVERRIDE = 'group_override';
 
+	// Mobile/custom fields change rendered signature content, not whether signatures are inserted.
 	private const SIGNATURE_TEMPLATE_USER_SETTINGS = [
 		'email_signature_template' => true,
 		'email_signature_phone_mobile' => true,

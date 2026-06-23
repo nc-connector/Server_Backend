@@ -38,6 +38,7 @@ class TemplateAssetService {
 	 * @return array{assets:array<string, string>, warnings:list<array<string, mixed>>}
 	 */
 	public function buildAssetResult(string $contextKey, string $template): array {
+		// Editor previews use local image URLs so external logos work under the app CSP.
 		$sources = $this->extractExternalImageSources($template);
 		$assets = [];
 		$warnings = [];

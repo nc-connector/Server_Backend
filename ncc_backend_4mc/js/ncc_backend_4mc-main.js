@@ -15,12 +15,6 @@
 		return text
 	}
 
-	/**
-	 * Performs a GET request against the app API and returns parsed JSON.
-	 *
-	 * @param {string} path
-	 * @returns {Promise<any>}
-	 */
 	async function apiRequest(path) {
 		const url = OC.generateUrl('/apps/ncc_backend_4mc' + path)
 		const res = await fetch(url, {
@@ -42,13 +36,6 @@
 		return data
 	}
 
-	/**
-	 * Renders a compact status snapshot for end users.
-	 *
-	 * @param {HTMLElement} root
-	 * @param {any} status
-	 * @returns {void}
-	 */
 	function renderStatus(root, status) {
 		const statusBlock = status?.status || {}
 		const policyBlock = status?.policy || {}
@@ -73,11 +60,6 @@
 		`
 	}
 
-	/**
-	 * Initializes the user page and loads `/api/v1/status`.
-	 *
-	 * @returns {Promise<void>}
-	 */
 	async function main() {
 		const root = document.getElementById('nccb-app')
 		if (!root) return

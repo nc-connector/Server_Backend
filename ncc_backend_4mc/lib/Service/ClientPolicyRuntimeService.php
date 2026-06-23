@@ -101,6 +101,7 @@ class ClientPolicyRuntimeService {
 			return;
 		}
 
+		// Null tells clients Secrets is unavailable; they can warn and keep sending via plaintext.
 		$settings[ClientSettingsDefinitionService::SHARE_SEND_PASSWORD_MODE_KEY] = null;
 		$settings[ClientSettingsDefinitionService::SHARE_SECRETS_EXPIRE_DAYS_KEY] = null;
 		$addonEditable[ClientSettingsDefinitionService::SHARE_SEND_PASSWORD_MODE_KEY] = false;
