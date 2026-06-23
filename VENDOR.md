@@ -16,8 +16,8 @@
 ## DOMPurify
 
 - Package: `dompurify`
-- Version: `3.4.2`
-- Source: https://registry.npmjs.org/dompurify/-/dompurify-3.4.2.tgz
+- Version: `3.4.7`
+- Source: https://registry.npmjs.org/dompurify/-/dompurify-3.4.7.tgz
 - Upstream repository: https://github.com/cure53/DOMPurify
 - Included file: `ncc_backend_4mc/js/vendor/dompurify/purify.js`
 - License: Apache-2.0 OR MPL-2.0
