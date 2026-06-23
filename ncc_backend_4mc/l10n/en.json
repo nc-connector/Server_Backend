@@ -313,7 +313,8 @@
         "Search user": "Search user",
         "Select a user to edit delegation.": "Select a user to edit delegation.",
         "Select user": "Select user",
-        "Shows which users can administer NC Connector and which areas they can edit.": "Shows which users can administer NC Connector and which areas they can edit."
+        "Shows which users can administer NC Connector and which areas they can edit.": "Shows which users can administer NC Connector and which areas they can edit.",
+        "Template image was not cached.": "Template image was not cached."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }

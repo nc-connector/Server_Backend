@@ -315,7 +315,8 @@ OC.L10N.register(
   "Search user": "Hledat uživatele",
   "Select a user to edit delegation.": "Vyberte uživatele pro úpravu delegace.",
   "Select user": "Vybrat uživatele",
-  "Shows which users can administer NC Connector and which areas they can edit.": "Zobrazuje, kteří uživatelé mohou spravovat NC Connector a které oblasti mohou upravovat."
+  "Shows which users can administer NC Connector and which areas they can edit.": "Zobrazuje, kteří uživatelé mohou spravovat NC Connector a které oblasti mohou upravovat.",
+  "Template image was not cached.": "Obrázek šablony nebyl uložen do mezipaměti."
 },
     'nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;'
 );

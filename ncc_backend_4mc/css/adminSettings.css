@@ -141,6 +141,10 @@
 	color: var(--color-success, #2ea043);
 }
 
+.nccb-warning {
+	color: var(--color-warning, #d58f00);
+}
+
 .nccb-table {
 	width: 100%;
 	border-collapse: collapse;

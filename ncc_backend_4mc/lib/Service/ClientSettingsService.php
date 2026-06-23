@@ -79,9 +79,18 @@ class ClientSettingsService {
 	 * @return array<string, array<string, string>>
 	 */
 	public function getEditorTemplateAssetsForDefaults(?array $defaults = null, ?array $templateAssetPreview = null): array {
+		return $this->getEditorTemplateAssetDataForDefaults($defaults, $templateAssetPreview)['assets'];
+	}
+
+	/**
+	 * @param array<string, mixed>|null $defaults
+	 * @return array{assets:array<string, array<string, string>>, warnings:array<string, list<array<string, mixed>>>}
+	 */
+	public function getEditorTemplateAssetDataForDefaults(?array $defaults = null, ?array $templateAssetPreview = null): array {
 		$defaults ??= $this->getDefaults();
 		$templateAssetPreview = $this->settingDefinitions->normalizeTemplateAssetPreview($templateAssetPreview);
 		$assets = [];
+		$warnings = [];
 		foreach ($this->settingDefinitions->all() as $key => $definition) {
 			if (!$this->settingDefinitions->isTemplateEditorSetting($key)) {
 				continue;
@@ -89,23 +98,41 @@ class ClientSettingsService {
 			$value = array_key_exists($key, $templateAssetPreview)
 				? $templateAssetPreview[$key]
 				: (string)($defaults[$key] ?? $definition['default'] ?? '');
-			$assets[$key] = $this->templateAssets->buildAssetMap('default-' . $key, $value);
+			$result = $this->templateAssets->buildAssetResult('default-' . $key, $value);
+			$assets[$key] = $result['assets'];
+			$warnings[$key] = $result['warnings'];
 		}
-		return $assets;
+		return [
+			'assets' => $assets,
+			'warnings' => $warnings,
+		];
 	}
 
 	/**
 	 * @return array<string, array<string, string>>
 	 */
 	public function getEditorTemplateAssetsForSchemaDefaults(): array {
+		return $this->getEditorTemplateAssetDataForSchemaDefaults()['assets'];
+	}
+
+	/**
+	 * @return array{assets:array<string, array<string, string>>, warnings:array<string, list<array<string, mixed>>>}
+	 */
+	public function getEditorTemplateAssetDataForSchemaDefaults(): array {
 		$assets = [];
+		$warnings = [];
 		foreach ($this->settingDefinitions->all() as $key => $definition) {
 			if (!$this->settingDefinitions->isTemplateEditorSetting($key)) {
 				continue;
 			}
-			$assets[$key] = $this->templateAssets->buildAssetMap('schema-' . $key, (string)($definition['default'] ?? ''));
+			$result = $this->templateAssets->buildAssetResult('schema-' . $key, (string)($definition['default'] ?? ''));
+			$assets[$key] = $result['assets'];
+			$warnings[$key] = $result['warnings'];
 		}
-		return $assets;
+		return [
+			'assets' => $assets,
+			'warnings' => $warnings,
+		];
 	}
 
 	public function getDefaultModes(): array {
@@ -293,9 +320,18 @@ class ClientSettingsService {
 	 * @return array<string, array<string, string>>
 	 */
 	public function getEditorTemplateAssetsForUser(string $userId, ?array $items = null, ?array $templateAssetPreview = null): array {
+		return $this->getEditorTemplateAssetDataForUser($userId, $items, $templateAssetPreview)['assets'];
+	}
+
+	/**
+	 * @param array<string, array<string, mixed>>|null $items
+	 * @return array{assets:array<string, array<string, string>>, warnings:array<string, list<array<string, mixed>>>}
+	 */
+	public function getEditorTemplateAssetDataForUser(string $userId, ?array $items = null, ?array $templateAssetPreview = null): array {
 		$items ??= $this->getUserSettings($userId);
 		$templateAssetPreview = $this->settingDefinitions->normalizeTemplateAssetPreview($templateAssetPreview);
 		$assets = [];
+		$warnings = [];
 		foreach ($this->settingDefinitions->all() as $key => $definition) {
 			if (!$this->settingDefinitions->isTemplateEditorSetting($key)) {
 				continue;
@@ -303,6 +339,7 @@ class ClientSettingsService {
 			$item = $items[$key] ?? null;
 			if (!is_array($item)) {
 				$assets[$key] = [];
+				$warnings[$key] = [];
 				continue;
 			}
 			$currentValue = array_key_exists($key, $templateAssetPreview)
@@ -310,9 +347,14 @@ class ClientSettingsService {
 				: (($item['mode'] ?? 'inherit') === self::MODE_FORCED
 					? (string)($item['value'] ?? '')
 					: (string)($item['effective_value'] ?? $definition['default'] ?? ''));
-			$assets[$key] = $this->templateAssets->buildAssetMap('user-' . $userId . '-' . $key, $currentValue);
+			$result = $this->templateAssets->buildAssetResult('user-' . $userId . '-' . $key, $currentValue);
+			$assets[$key] = $result['assets'];
+			$warnings[$key] = $result['warnings'];
 		}
-		return $assets;
+		return [
+			'assets' => $assets,
+			'warnings' => $warnings,
+		];
 	}
 
 	/**
@@ -320,12 +362,21 @@ class ClientSettingsService {
 	 * @return array<string, array<string, string>>
 	 */
 	public function getEditorTemplateAssetsForGroup(string $groupId, ?array $items = null, ?array $templateAssetPreview = null): array {
+		return $this->getEditorTemplateAssetDataForGroup($groupId, $items, $templateAssetPreview)['assets'];
+	}
+
+	/**
+	 * @param array<string, array<string, mixed>>|null $items
+	 * @return array{assets:array<string, array<string, string>>, warnings:array<string, list<array<string, mixed>>>}
+	 */
+	public function getEditorTemplateAssetDataForGroup(string $groupId, ?array $items = null, ?array $templateAssetPreview = null): array {
 		if ($items === null) {
 			$groupSettings = $this->getGroupSettings($groupId);
 			$items = is_array($groupSettings['items'] ?? null) ? $groupSettings['items'] : [];
 		}
 		$templateAssetPreview = $this->settingDefinitions->normalizeTemplateAssetPreview($templateAssetPreview);
 		$assets = [];
+		$warnings = [];
 		foreach ($this->settingDefinitions->all() as $key => $definition) {
 			if (!$this->settingDefinitions->isTemplateEditorSetting($key)) {
 				continue;
@@ -333,6 +384,7 @@ class ClientSettingsService {
 			$item = $items[$key] ?? null;
 			if (!is_array($item)) {
 				$assets[$key] = [];
+				$warnings[$key] = [];
 				continue;
 			}
 			$currentValue = array_key_exists($key, $templateAssetPreview)
@@ -340,9 +392,14 @@ class ClientSettingsService {
 				: (($item['mode'] ?? 'inherit') === self::MODE_FORCED
 					? (string)($item['value'] ?? '')
 					: (string)($item['effective_value'] ?? $definition['default'] ?? ''));
-			$assets[$key] = $this->templateAssets->buildAssetMap('group-' . $groupId . '-' . $key, $currentValue);
+			$result = $this->templateAssets->buildAssetResult('group-' . $groupId . '-' . $key, $currentValue);
+			$assets[$key] = $result['assets'];
+			$warnings[$key] = $result['warnings'];
 		}
-		return $assets;
+		return [
+			'assets' => $assets,
+			'warnings' => $warnings,
+		];
 	}
 
 	public function setUserSettings(string $userId, array $overrides, ?string $updatedBy): array {

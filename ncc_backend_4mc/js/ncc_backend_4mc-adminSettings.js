@@ -297,8 +297,46 @@
 		if (!element) {
 			return
 		}
-		element.className = type === 'error' ? 'nccb-error' : type === 'success' ? 'nccb-success' : 'nccb-muted'
+		element.className = type === 'error'
+			? 'nccb-error'
+			: type === 'success'
+				? 'nccb-success'
+				: type === 'warning'
+					? 'nccb-warning'
+					: 'nccb-muted'
 		element.textContent = text || ''
+	}
+
+	function formatTemplateAssetWarning(warning) {
+		const details = [
+			warning?.reason,
+			warning?.detail,
+			warning?.status_code ? `HTTP ${warning.status_code}` : '',
+			warning?.content_type ? `Content-Type: ${warning.content_type}` : '',
+			warning?.max_mb ? `max ${warning.max_mb} MB` : '',
+			warning?.redirects ? `${warning.redirects} redirects` : '',
+			warning?.source,
+		].map((value) => String(value || '').trim()).filter(Boolean)
+		return details.join(' · ')
+	}
+
+	function templateAssetWarningsMessage(warnings) {
+		const visibleWarnings = Array.isArray(warnings) ? warnings.slice(0, 3) : []
+		if (visibleWarnings.length === 0) {
+			return ''
+		}
+		const suffix = warnings.length > visibleWarnings.length ? ` (+${warnings.length - visibleWarnings.length})` : ''
+		return `${tr('Template image was not cached.')} ${visibleWarnings.map(formatTemplateAssetWarning).join(' | ')}${suffix}`
+	}
+
+	function firstTemplateAssetWarningsMessage(warningsBySetting) {
+		for (const [settingKey, warnings] of Object.entries(warningsBySetting || {})) {
+			const message = templateAssetWarningsMessage(warnings)
+			if (message) {
+				return `${settingLabel(settingKey)}: ${message}`
+			}
+		}
+		return ''
 	}
 
 	function settingLabel(settingKey) {
@@ -1432,9 +1470,13 @@
 			groupOverrides: {},
 			groupOverridePriority: 100,
 			defaultTemplateAssets: {},
+			defaultTemplateAssetWarnings: {},
 			overrideTemplateAssets: {},
+			overrideTemplateAssetWarnings: {},
 			groupOverrideTemplateAssets: {},
+			groupOverrideTemplateAssetWarnings: {},
 			schemaTemplateAssets: {},
+			schemaTemplateAssetWarnings: {},
 			recommendedApps: [],
 			assignedSeats: [],
 			delegations: [],
@@ -1507,6 +1549,27 @@
 		let licenseSnapshot = null
 		let searchTimer = null
 		const fullAdminFallback = root.dataset.fullAdminFallback === '1'
+
+		const messageElementForTemplatePrefix = (prefix) => {
+			if (prefix === 'default') {
+				return refs.defaultMessage
+			}
+			if (prefix === 'override') {
+				return refs.overrideMessage
+			}
+			if (prefix === 'group-override') {
+				return refs.groupOverrideMessage
+			}
+			return null
+		}
+
+		const showTemplateAssetWarnings = (prefix, response, settingKey) => {
+			const warnings = response?.template_asset_warnings?.[settingKey]
+			const message = templateAssetWarningsMessage(warnings)
+			if (message) {
+				setMessage(messageElementForTemplatePrefix(prefix), message, 'warning')
+			}
+		}
 
 		const setTabVisibility = (buttonAttr, panelAttr, name, visible) => {
 			const button = root.querySelector(`[${buttonAttr}="${name}"]`)
@@ -1627,8 +1690,9 @@
 
 			wrapper.dataset.templateAssetSync = '1'
 			try {
+				let response = null
 				if (prefix === 'default') {
-					const response = isModalDraft
+					response = isModalDraft
 						? await api.previewDefaultTemplateAssets(settingKey, refreshValue)
 						: await api.saveDefaults({
 							[settingKey]: {
@@ -1641,6 +1705,8 @@
 						state.defaultModes = response.default_modes || state.defaultModes
 						state.defaultTemplateAssets = response.template_assets || state.defaultTemplateAssets
 						state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
+						state.defaultTemplateAssetWarnings = response.template_asset_warnings || state.defaultTemplateAssetWarnings
+						state.schemaTemplateAssetWarnings = response.schema_template_asset_warnings || state.schemaTemplateAssetWarnings
 						control.value = String(state.defaults?.[settingKey] ?? control.value)
 						templateEditor.setAssetMap(wrapper, state.defaultTemplateAssets?.[settingKey] || {})
 						templateEditor.setDefaultAssetMap(wrapper, state.schemaTemplateAssets?.[settingKey] || {})
@@ -1652,7 +1718,7 @@
 					if (!(modeSelect instanceof HTMLSelectElement) || modeSelect.value !== 'forced') {
 						return
 					}
-					const response = isModalDraft
+					response = isModalDraft
 						? await api.previewUserTemplateAssets(refs.overrideUser.value, settingKey, refreshValue)
 						: await api.saveUserOverrides(refs.overrideUser.value, {
 							[settingKey]: {
@@ -1665,6 +1731,8 @@
 						state.overrides = response.items || state.overrides
 						state.overrideTemplateAssets = response.template_assets || state.overrideTemplateAssets
 						state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
+						state.overrideTemplateAssetWarnings = response.template_asset_warnings || state.overrideTemplateAssetWarnings
+						state.schemaTemplateAssetWarnings = response.schema_template_asset_warnings || state.schemaTemplateAssetWarnings
 						const updatedItem = state.overrides?.[settingKey]
 						if (updatedItem?.mode === 'forced') {
 							control.value = String(updatedItem.value ?? control.value)
@@ -1680,7 +1748,7 @@
 						return
 					}
 					const priority = Number.parseInt(String(refs.groupOverridePriority.value || state.groupOverridePriority || 100), 10) || 100
-					const response = isModalDraft
+					response = isModalDraft
 						? await api.previewGroupTemplateAssets(refs.groupOverrideGroup.value, priority, settingKey, refreshValue)
 						: await api.saveGroupOverrides(refs.groupOverrideGroup.value, priority, {
 							[settingKey]: {
@@ -1695,6 +1763,8 @@
 						state.groupOverrides = response.items || state.groupOverrides
 						state.groupOverrideTemplateAssets = response.template_assets || state.groupOverrideTemplateAssets
 						state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
+						state.groupOverrideTemplateAssetWarnings = response.template_asset_warnings || state.groupOverrideTemplateAssetWarnings
+						state.schemaTemplateAssetWarnings = response.schema_template_asset_warnings || state.schemaTemplateAssetWarnings
 						const updatedItem = state.groupOverrides?.[settingKey]
 						if (updatedItem?.mode === 'forced') {
 							control.value = String(updatedItem.value ?? control.value)
@@ -1712,6 +1782,7 @@
 				if (editor) {
 					editor.setContent(templateEditor.toEditorHtml(refreshValue, templateEditor.getEffectiveAssetMap(wrapper)))
 				}
+				showTemplateAssetWarnings(prefix, response, settingKey)
 			} catch (error) {
 				console.error('nccb template asset refresh failed', settingKey, error)
 			} finally {
@@ -1942,6 +2013,8 @@
 			state.defaultModes = response.default_modes || {}
 			state.defaultTemplateAssets = response.template_assets || {}
 			state.schemaTemplateAssets = response.schema_template_assets || {}
+			state.defaultTemplateAssetWarnings = response.template_asset_warnings || {}
+			state.schemaTemplateAssetWarnings = response.schema_template_asset_warnings || {}
 			state.recommendedApps = response.recommended_apps || []
 			renderRecommendedApps(state.recommendedApps)
 			renderDefaultsRows(refs.defaultTableShare, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'share')
@@ -1957,27 +2030,39 @@
 			renderGroupOverrideTables(root, refs, state, refs.groupOverrideGroup.value)
 			renderOverrideTables(root, refs, state, refs.overrideUser.value)
 			applySettingRowVisibility()
+			const warningMessage = firstTemplateAssetWarningsMessage(state.defaultTemplateAssetWarnings)
+			if (warningMessage) {
+				setMessage(refs.defaultMessage, warningMessage, 'warning')
+			}
 		}
 
 		const refreshOverrides = async (userId) => {
 			if (!userId) {
 				state.overrides = {}
 				state.overrideTemplateAssets = {}
+				state.overrideTemplateAssetWarnings = {}
 			} else {
 				const response = await api.loadUserOverrides(userId)
 				mergeSchema(state, response.schema)
 				state.overrides = response.items || {}
 				state.overrideTemplateAssets = response.template_assets || {}
 				state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
+				state.overrideTemplateAssetWarnings = response.template_asset_warnings || {}
+				state.schemaTemplateAssetWarnings = response.schema_template_asset_warnings || state.schemaTemplateAssetWarnings
 			}
 			renderOverrideTables(root, refs, state, userId)
 			applySettingRowVisibility()
+			const warningMessage = firstTemplateAssetWarningsMessage(state.overrideTemplateAssetWarnings)
+			if (warningMessage) {
+				setMessage(refs.overrideMessage, warningMessage, 'warning')
+			}
 		}
 
 		const refreshGroupOverrides = async (groupId) => {
 			if (!groupId) {
 				state.groupOverrides = {}
 				state.groupOverrideTemplateAssets = {}
+				state.groupOverrideTemplateAssetWarnings = {}
 				state.groupOverridePriority = 100
 				refs.groupOverridePriority.value = '100'
 			} else {
@@ -1988,9 +2073,15 @@
 				state.groupOverrides = response.items || {}
 				state.groupOverrideTemplateAssets = response.template_assets || {}
 				state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
+				state.groupOverrideTemplateAssetWarnings = response.template_asset_warnings || {}
+				state.schemaTemplateAssetWarnings = response.schema_template_asset_warnings || state.schemaTemplateAssetWarnings
 			}
 			renderGroupOverrideTables(root, refs, state, groupId)
 			applySettingRowVisibility()
+			const warningMessage = firstTemplateAssetWarningsMessage(state.groupOverrideTemplateAssetWarnings)
+			if (warningMessage) {
+				setMessage(refs.groupOverrideMessage, warningMessage, 'warning')
+			}
 		}
 
 		const isAttachmentThresholdEnabled = (prefix) => {
@@ -2316,6 +2407,8 @@
 				state.defaultModes = response.default_modes || state.defaultModes
 				state.defaultTemplateAssets = response.template_assets || {}
 				state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
+				state.defaultTemplateAssetWarnings = response.template_asset_warnings || {}
+				state.schemaTemplateAssetWarnings = response.schema_template_asset_warnings || state.schemaTemplateAssetWarnings
 				state.recommendedApps = response.recommended_apps || state.recommendedApps
 				renderRecommendedApps(state.recommendedApps)
 				templateEditor.removeByPrefix('default')
@@ -2329,7 +2422,8 @@
 				attachTemplateLanguageDependencyHandlers(root, 'default')
 				attachEmailSignatureDependencyHandlers(root, 'default')
 				templateEditor.attachHandlers(root)
-				setMessage(refs.defaultMessage, tr('Default settings saved.'), 'success')
+				const warningMessage = firstTemplateAssetWarningsMessage(state.defaultTemplateAssetWarnings)
+				setMessage(refs.defaultMessage, warningMessage || tr('Default settings saved.'), warningMessage ? 'warning' : 'success')
 				if (refs.overrideUser.value) {
 					await refreshOverrides(refs.overrideUser.value)
 				}
@@ -2363,9 +2457,12 @@
 				state.groupOverrides = response.items || state.groupOverrides
 				state.groupOverrideTemplateAssets = response.template_assets || {}
 				state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
+				state.groupOverrideTemplateAssetWarnings = response.template_asset_warnings || {}
+				state.schemaTemplateAssetWarnings = response.schema_template_asset_warnings || state.schemaTemplateAssetWarnings
 				renderGroupOverrideTables(root, refs, state, refs.groupOverrideGroup.value)
 				await refreshSeatsAndUsers(false)
-				setMessage(refs.groupOverrideMessage, tr('Group overrides saved.'), 'success')
+				const warningMessage = firstTemplateAssetWarningsMessage(state.groupOverrideTemplateAssetWarnings)
+				setMessage(refs.groupOverrideMessage, warningMessage || tr('Group overrides saved.'), warningMessage ? 'warning' : 'success')
 			} catch (error) {
 				console.error('nccb group override save failed', refs.groupOverrideGroup.value, error)
 				setMessage(refs.groupOverrideMessage, error.message || tr('Failed to save group overrides.'), 'error')
@@ -2390,9 +2487,12 @@
 				state.overrides = response.items || state.overrides
 				state.overrideTemplateAssets = response.template_assets || {}
 				state.schemaTemplateAssets = response.schema_template_assets || state.schemaTemplateAssets
+				state.overrideTemplateAssetWarnings = response.template_asset_warnings || {}
+				state.schemaTemplateAssetWarnings = response.schema_template_asset_warnings || state.schemaTemplateAssetWarnings
 				renderOverrideTables(root, refs, state, refs.overrideUser.value)
 				await refreshSeatsAndUsers(false)
-				setMessage(refs.overrideMessage, tr('Overrides saved.'), 'success')
+				const warningMessage = firstTemplateAssetWarningsMessage(state.overrideTemplateAssetWarnings)
+				setMessage(refs.overrideMessage, warningMessage || tr('Overrides saved.'), warningMessage ? 'warning' : 'success')
 			} catch (error) {
 				console.error('nccb user override save failed', refs.overrideUser.value, error)
 				setMessage(refs.overrideMessage, error.message || tr('Failed to save overrides.'), 'error')

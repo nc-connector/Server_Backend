@@ -315,7 +315,8 @@ OC.L10N.register(
   "Search user": "Felhasználó keresése",
   "Select a user to edit delegation.": "Válasszon felhasználót a delegálás szerkesztéséhez.",
   "Select user": "Felhasználó kiválasztása",
-  "Shows which users can administer NC Connector and which areas they can edit.": "Megmutatja, mely felhasználók adminisztrálhatják az NC Connectort, és mely területeket szerkeszthetik."
+  "Shows which users can administer NC Connector and which areas they can edit.": "Megmutatja, mely felhasználók adminisztrálhatják az NC Connectort, és mely területeket szerkeszthetik.",
+  "Template image was not cached.": "A sablon képe nem került gyorsítótárba."
 },
     'nplurals=2; plural=(n != 1);'
 );

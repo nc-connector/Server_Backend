@@ -315,7 +315,8 @@ OC.L10N.register(
   "Search user": "搜索用户",
   "Select a user to edit delegation.": "请选择一个用户来编辑委派。",
   "Select user": "选择用户",
-  "Shows which users can administer NC Connector and which areas they can edit.": "显示哪些用户可以管理 NC Connector 以及他们可以编辑哪些区域。"
+  "Shows which users can administer NC Connector and which areas they can edit.": "显示哪些用户可以管理 NC Connector 以及他们可以编辑哪些区域。",
+  "Template image was not cached.": "模板图片未缓存。"
 },
     'nplurals=1; plural=0;'
 );

@@ -315,7 +315,8 @@ OC.L10N.register(
   "Search user": "Szukaj użytkownika",
   "Select a user to edit delegation.": "Wybierz użytkownika, aby edytować delegację.",
   "Select user": "Wybierz użytkownika",
-  "Shows which users can administer NC Connector and which areas they can edit.": "Pokazuje, którzy użytkownicy mogą administrować NC Connector i które obszary mogą edytować."
+  "Shows which users can administer NC Connector and which areas they can edit.": "Pokazuje, którzy użytkownicy mogą administrować NC Connector i które obszary mogą edytować.",
+  "Template image was not cached.": "Obraz szablonu nie został zapisany w pamięci podręcznej."
 },
     'nplurals=3; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4 && (n%100<12 || n%100>14)) ? 1 : 2);'
 );

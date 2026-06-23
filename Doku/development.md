@@ -404,6 +404,8 @@ Current implementation model:
 - Saving the modal remains the only real commit path.
 - Custom Share, Talk, password-mail, and email-signature HTML is sanitized in the admin editor with bundled DOMPurify before preview and save.
 - `TemplateSanitizerService` applies the matching server-side allowlist before template values are stored and before stored values are returned.
+- `TemplateAssetService` only mirrors HTTPS images, rejects private/reserved targets, follows a small redirect chain, limits each image to 4 MB, and verifies content type plus image magic bytes.
+- Rejected preview images are returned as `template_asset_warnings` so the admin UI can show the reason instead of failing silently.
 - The runtime API returns the stored template values after normal policy resolution and variable replacement.
 
 Talk plain-text rendering intentionally exists in two places:

@@ -315,7 +315,8 @@ OC.L10N.register(
   "Search user": "Найти пользователя",
   "Select a user to edit delegation.": "Выберите пользователя для редактирования делегирования.",
   "Select user": "Выбрать пользователя",
-  "Shows which users can administer NC Connector and which areas they can edit.": "Показывает, какие пользователи могут администрировать NC Connector и какие области они могут редактировать."
+  "Shows which users can administer NC Connector and which areas they can edit.": "Показывает, какие пользователи могут администрировать NC Connector и какие области они могут редактировать.",
+  "Template image was not cached.": "Изображение шаблона не было сохранено в кэше."
 },
     'nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2));'
 );

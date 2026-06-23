@@ -313,7 +313,8 @@
         "Search user": "ユーザーを検索",
         "Select a user to edit delegation.": "委任を編集するユーザーを選択してください。",
         "Select user": "ユーザーを選択",
-        "Shows which users can administer NC Connector and which areas they can edit.": "NC Connector を管理できるユーザーと編集可能な領域を表示します。"
+        "Shows which users can administer NC Connector and which areas they can edit.": "NC Connector を管理できるユーザーと編集可能な領域を表示します。",
+        "Template image was not cached.": "テンプレート画像はキャッシュされませんでした。"
     },
     "pluralForm": "nplurals=1; plural=0;"
 }

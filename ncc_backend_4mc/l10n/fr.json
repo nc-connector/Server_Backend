@@ -313,7 +313,8 @@
         "Search user": "Rechercher un utilisateur",
         "Select a user to edit delegation.": "Sélectionnez un utilisateur pour modifier la délégation.",
         "Select user": "Sélectionner un utilisateur",
-        "Shows which users can administer NC Connector and which areas they can edit.": "Affiche les utilisateurs qui peuvent administrer NC Connector et les zones qu’ils peuvent modifier."
+        "Shows which users can administer NC Connector and which areas they can edit.": "Affiche les utilisateurs qui peuvent administrer NC Connector et les zones qu’ils peuvent modifier.",
+        "Template image was not cached.": "L’image du modèle n’a pas été mise en cache."
     },
     "pluralForm": "nplurals=2; plural=(n > 1);"
 }

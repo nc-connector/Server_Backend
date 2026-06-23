@@ -315,7 +315,8 @@ OC.L10N.register(
   "Search user": "Gebruiker zoeken",
   "Select a user to edit delegation.": "Selecteer een gebruiker om de delegatie te bewerken.",
   "Select user": "Gebruiker selecteren",
-  "Shows which users can administer NC Connector and which areas they can edit.": "Toont welke gebruikers NC Connector kunnen beheren en welke gebieden zij mogen bewerken."
+  "Shows which users can administer NC Connector and which areas they can edit.": "Toont welke gebruikers NC Connector kunnen beheren en welke gebieden zij mogen bewerken.",
+  "Template image was not cached.": "De sjabloonafbeelding is niet in de cache opgeslagen."
 },
     'nplurals=2; plural=(n != 1);'
 );

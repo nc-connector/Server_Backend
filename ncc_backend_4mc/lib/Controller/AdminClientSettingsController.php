@@ -52,12 +52,16 @@ class AdminClientSettingsController extends Controller {
 			return $accessDenied;
 		}
 
+		$templateAssetData = $this->clientSettings->getEditorTemplateAssetDataForDefaults();
+		$schemaTemplateAssetData = $this->clientSettings->getEditorTemplateAssetDataForSchemaDefaults();
 		return new DataResponse($this->filterDefaultPayload([
 			'schema' => $this->clientSettings->getSchema(),
 			'defaults' => $this->clientSettings->getDefaults(),
 			'default_modes' => $this->clientSettings->getDefaultModes(),
-			'template_assets' => $this->clientSettings->getEditorTemplateAssetsForDefaults(),
-			'schema_template_assets' => $this->clientSettings->getEditorTemplateAssetsForSchemaDefaults(),
+			'template_assets' => $templateAssetData['assets'],
+			'template_asset_warnings' => $templateAssetData['warnings'],
+			'schema_template_assets' => $schemaTemplateAssetData['assets'],
+			'schema_template_asset_warnings' => $schemaTemplateAssetData['warnings'],
 			'recommended_apps' => $this->clientSettings->getRecommendedApps(),
 		]));
 	}
@@ -97,12 +101,16 @@ class AdminClientSettingsController extends Controller {
 			return new DataResponse(['error' => 'Failed to save defaults'], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
+		$templateAssetData = $this->clientSettings->getEditorTemplateAssetDataForDefaults($stored['defaults'] ?? [], $templateAssetPreview);
+		$schemaTemplateAssetData = $this->clientSettings->getEditorTemplateAssetDataForSchemaDefaults();
 		return new DataResponse($this->filterDefaultPayload([
 			'schema' => $this->clientSettings->getSchema(),
 			'defaults' => $stored['defaults'] ?? [],
 			'default_modes' => $stored['default_modes'] ?? [],
-			'template_assets' => $this->clientSettings->getEditorTemplateAssetsForDefaults($stored['defaults'] ?? [], $templateAssetPreview),
-			'schema_template_assets' => $this->clientSettings->getEditorTemplateAssetsForSchemaDefaults(),
+			'template_assets' => $templateAssetData['assets'],
+			'template_asset_warnings' => $templateAssetData['warnings'],
+			'schema_template_assets' => $schemaTemplateAssetData['assets'],
+			'schema_template_asset_warnings' => $schemaTemplateAssetData['warnings'],
 			'recommended_apps' => $this->clientSettings->getRecommendedApps(),
 		]));
 	}
@@ -138,12 +146,16 @@ class AdminClientSettingsController extends Controller {
 		}
 
 		$items = $this->clientSettings->getUserSettings($targetUserId);
+		$templateAssetData = $this->clientSettings->getEditorTemplateAssetDataForUser($targetUserId, $items);
+		$schemaTemplateAssetData = $this->clientSettings->getEditorTemplateAssetDataForSchemaDefaults();
 		return new DataResponse($this->filterUserPayload([
 			'user_id' => $targetUserId,
 			'schema' => $this->clientSettings->getSchema(),
 			'items' => $items,
-			'template_assets' => $this->clientSettings->getEditorTemplateAssetsForUser($targetUserId, $items),
-			'schema_template_assets' => $this->clientSettings->getEditorTemplateAssetsForSchemaDefaults(),
+			'template_assets' => $templateAssetData['assets'],
+			'template_asset_warnings' => $templateAssetData['warnings'],
+			'schema_template_assets' => $schemaTemplateAssetData['assets'],
+			'schema_template_asset_warnings' => $schemaTemplateAssetData['warnings'],
 		]));
 	}
 
@@ -178,13 +190,17 @@ class AdminClientSettingsController extends Controller {
 
 		$groupSettings = $this->clientSettings->getGroupSettings($targetGroupId);
 		$items = is_array($groupSettings['items'] ?? null) ? $groupSettings['items'] : [];
+		$templateAssetData = $this->clientSettings->getEditorTemplateAssetDataForGroup($targetGroupId, $items);
+		$schemaTemplateAssetData = $this->clientSettings->getEditorTemplateAssetDataForSchemaDefaults();
 		return new DataResponse($this->filterGroupPayload([
 			'group_id' => $targetGroupId,
 			'priority' => (int)($groupSettings['priority'] ?? 100),
 			'schema' => $this->clientSettings->getSchema(),
 			'items' => $items,
-			'template_assets' => $this->clientSettings->getEditorTemplateAssetsForGroup($targetGroupId, $items),
-			'schema_template_assets' => $this->clientSettings->getEditorTemplateAssetsForSchemaDefaults(),
+			'template_assets' => $templateAssetData['assets'],
+			'template_asset_warnings' => $templateAssetData['warnings'],
+			'schema_template_assets' => $schemaTemplateAssetData['assets'],
+			'schema_template_asset_warnings' => $schemaTemplateAssetData['warnings'],
 		]));
 	}
 
@@ -243,12 +259,16 @@ class AdminClientSettingsController extends Controller {
 			return new DataResponse(['error' => 'Failed to save user settings'], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
+		$templateAssetData = $this->clientSettings->getEditorTemplateAssetDataForUser($targetUserId, $items, $templateAssetPreview);
+		$schemaTemplateAssetData = $this->clientSettings->getEditorTemplateAssetDataForSchemaDefaults();
 		return new DataResponse($this->filterUserPayload([
 			'user_id' => $targetUserId,
 			'schema' => $this->clientSettings->getSchema(),
 			'items' => $items,
-			'template_assets' => $this->clientSettings->getEditorTemplateAssetsForUser($targetUserId, $items, $templateAssetPreview),
-			'schema_template_assets' => $this->clientSettings->getEditorTemplateAssetsForSchemaDefaults(),
+			'template_assets' => $templateAssetData['assets'],
+			'template_asset_warnings' => $templateAssetData['warnings'],
+			'schema_template_assets' => $schemaTemplateAssetData['assets'],
+			'schema_template_asset_warnings' => $schemaTemplateAssetData['warnings'],
 		]));
 	}
 
@@ -308,13 +328,17 @@ class AdminClientSettingsController extends Controller {
 		}
 
 		$items = is_array($groupSettings['items'] ?? null) ? $groupSettings['items'] : [];
+		$templateAssetData = $this->clientSettings->getEditorTemplateAssetDataForGroup($targetGroupId, $items, $templateAssetPreview);
+		$schemaTemplateAssetData = $this->clientSettings->getEditorTemplateAssetDataForSchemaDefaults();
 		return new DataResponse($this->filterGroupPayload([
 			'group_id' => $targetGroupId,
 			'priority' => (int)($groupSettings['priority'] ?? 100),
 			'schema' => $this->clientSettings->getSchema(),
 			'items' => $items,
-			'template_assets' => $this->clientSettings->getEditorTemplateAssetsForGroup($targetGroupId, $items, $templateAssetPreview),
-			'schema_template_assets' => $this->clientSettings->getEditorTemplateAssetsForSchemaDefaults(),
+			'template_assets' => $templateAssetData['assets'],
+			'template_asset_warnings' => $templateAssetData['warnings'],
+			'schema_template_assets' => $schemaTemplateAssetData['assets'],
+			'schema_template_asset_warnings' => $schemaTemplateAssetData['warnings'],
 		]));
 	}
 
@@ -359,7 +383,7 @@ class AdminClientSettingsController extends Controller {
 			return $payload;
 		}
 
-		foreach (['schema', 'defaults', 'default_modes', 'items', 'template_assets', 'schema_template_assets'] as $field) {
+		foreach (['schema', 'defaults', 'default_modes', 'items', 'template_assets', 'template_asset_warnings', 'schema_template_assets', 'schema_template_asset_warnings'] as $field) {
 			if (is_array($payload[$field] ?? null)) {
 				$payload[$field] = $this->filterSettingMap($payload[$field], $scopeForKey);
 			}

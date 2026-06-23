@@ -719,6 +719,8 @@ Deletion on full remove includes:
 - local runtime image cache
 - background job entry for license sync
 
+Template editor image previews use this runtime cache only for HTTPS images. The backend rejects unsupported schemes, private or reserved target addresses, oversized files above 4 MB, unsupported image types, and image responses whose content type does not match the file signature. If an image cannot be cached, the admin UI shows the rejection reason next to the editor message area.
+
 This distinction matters for real-world operations:
 - `disable` / `enable` is the safe maintenance path
 - `remove --keep-data` is the safe reinstall path
