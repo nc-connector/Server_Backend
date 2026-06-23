@@ -243,6 +243,7 @@ Core services:
 | `AccessService` | Access checks for direct page visibility and user-facing runtime state |
 | `AdminPermissionService` | Maps admin actions to delegated NC Connector permission scopes |
 | `AdminDelegationService` | Stores and normalizes delegated admin permissions |
+| `TemplateSanitizerService` | Sanitizes template-editor HTML before storage and before stored values are returned |
 | `TemplateAssetService` | Mirrors external template images into local runtime assets for editor rendering |
 | `TalkTemplateRuntimeService` | Renders Talk invitation templates as HTML or cleaned plain text for policy responses |
 | `EmailSignatureRuntimeService` | Resolves email signature profile variables, user overrides, empty-variable cleanup, and HTML escaping |
@@ -402,6 +403,7 @@ Current implementation model:
 - New image URLs inserted in the modal are refreshed into the runtime cache immediately for the current draft.
 - Saving the modal remains the only real commit path.
 - Custom Share, Talk, password-mail, and email-signature HTML is sanitized in the admin editor with bundled DOMPurify before preview and save.
+- `TemplateSanitizerService` applies the matching server-side allowlist before template values are stored and before stored values are returned.
 - The runtime API returns the stored template values after normal policy resolution and variable replacement.
 
 Talk plain-text rendering intentionally exists in two places:

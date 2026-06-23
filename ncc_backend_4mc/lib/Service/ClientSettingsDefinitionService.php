@@ -168,6 +168,11 @@ HTML;
 </div>
 HTML;
 
+	public function __construct(
+		private TemplateSanitizerService $templateSanitizer,
+	) {
+	}
+
 	/**
 	 * @var array<string, array<string, mixed>>
 	 */
@@ -331,8 +336,9 @@ HTML;
 		if ($maxLength !== null && strlen($normalized) > $maxLength) {
 			throw new \InvalidArgumentException(sprintf('Setting "%s" is too long', $key));
 		}
-		if ($key === 'share_html_block_template' || $key === 'share_password_template') {
-			$normalized = $this->normalizeTemplateBranding($normalized);
+		$normalized = $this->normalizeTemplateEditorValue($key, $normalized);
+		if ($maxLength !== null && strlen($normalized) > $maxLength) {
+			throw new \InvalidArgumentException(sprintf('Setting "%s" is too long', $key));
 		}
 
 		return $normalized;
@@ -352,8 +358,8 @@ HTML;
 		if ($type === 'int' && $key === 'attachments_min_size_mb' && trim($stored) === '') {
 			return null;
 		}
-		if ($key === 'share_html_block_template' || $key === 'share_password_template') {
-			$stored = $this->normalizeTemplateBranding($stored);
+		if ($this->isTemplateEditorSetting($key)) {
+			$stored = $this->normalizeTemplateEditorValue($key, $stored);
 		}
 		return match ($type) {
 			'bool' => $stored === '1',
@@ -378,15 +384,22 @@ HTML;
 				continue;
 			}
 
-			$template = (string)$value;
-			if ($key === 'share_html_block_template' || $key === 'share_password_template') {
-				$template = $this->normalizeTemplateBranding($template);
-			}
-
-			$normalized[$key] = $template;
+			$normalized[$key] = $this->normalizeTemplateEditorValue($key, (string)$value);
 		}
 
 		return $normalized;
+	}
+
+	private function normalizeTemplateEditorValue(string $key, string $value): string {
+		if (!$this->isTemplateEditorSetting($key)) {
+			return $value;
+		}
+
+		if ($key === 'share_html_block_template' || $key === 'share_password_template') {
+			$value = $this->normalizeTemplateBranding($value);
+		}
+
+		return $this->templateSanitizer->sanitizeHtml($value);
 	}
 
 	private function normalizeTemplateBranding(string $template): string {
