@@ -129,6 +129,7 @@ Key paths inside the app folder:
 | `ncc_backend_4mc/js/adminTemplateEditor.js` | Template editor modal, TinyMCE wiring, draft asset maps, and editor translations |
 | `ncc_backend_4mc/js/adminSeatReport.js` | Assigned-seat table rendering and seat-report CSV export |
 | `ncc_backend_4mc/js/adminTabs.js` | Shared admin tab switching |
+| `ncc_backend_4mc/js/adminVisibility.js` | Permission-based admin tab and settings row visibility |
 | `ncc_backend_4mc/js/adminSeatUi.js` | Seat assignment table, usage, and pager rendering |
 | `ncc_backend_4mc/js/adminGeneralStatusUi.js` | General-tab license, Pro hint, update status, and recommended-app rendering |
 | `ncc_backend_4mc/js/adminOverridesUi.js` | User and group override selection and table rendering |
@@ -170,6 +171,7 @@ Main files:
 - `ncc_backend_4mc/js/adminTemplateEditor.js`
 - `ncc_backend_4mc/js/adminSeatReport.js`
 - `ncc_backend_4mc/js/adminTabs.js`
+- `ncc_backend_4mc/js/adminVisibility.js`
 - `ncc_backend_4mc/js/adminSeatUi.js`
 - `ncc_backend_4mc/js/adminGeneralStatusUi.js`
 - `ncc_backend_4mc/js/adminOverridesUi.js`
@@ -206,6 +208,7 @@ Important UI behaviors currently implemented there:
 - template editor modal, TinyMCE setup, draft asset maps, and editor-only template translations live in `adminTemplateEditor.js`
 - assigned-seat table rendering and seat-report CSV export live in `adminSeatReport.js`
 - repeated tab switching logic lives in `adminTabs.js`
+- permission-based admin tab and settings row visibility lives in `adminVisibility.js`
 - seat assignment table, usage, and pager rendering live in `adminSeatUi.js`
 - General-tab license, Pro hint, update status, and recommended-app rendering live in `adminGeneralStatusUi.js`
 - user and group override selection and table rendering live in `adminOverridesUi.js`

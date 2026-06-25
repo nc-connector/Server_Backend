@@ -36,6 +36,7 @@ Util::addScript($appId, 'adminTemplateImages');
 Util::addScript($appId, 'adminTemplateEditor');
 Util::addScript($appId, 'adminSeatReport');
 Util::addScript($appId, 'adminTabs');
+Util::addScript($appId, 'adminVisibility');
 Util::addScript($appId, 'adminSeatUi');
 Util::addScript($appId, 'adminGeneralStatusUi');
 Util::addScript($appId, 'adminOverridesUi');

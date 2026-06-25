@@ -120,6 +120,11 @@
 		console.error('nccb admin tabs module missing')
 		return
 	}
+	const adminVisibility = window.NCCBackendAdminVisibility
+	if (!adminVisibility) {
+		console.error('nccb admin visibility module missing')
+		return
+	}
 	const seatUi = window.NCCBackendSeatUi
 	if (!seatUi) {
 		console.error('nccb seat UI module missing')
@@ -1589,93 +1594,30 @@
 			}
 		}
 
-		const setTabVisibility = (buttonAttr, panelAttr, name, visible) => {
-			const button = root.querySelector(`[${buttonAttr}="${name}"]`)
-			const panel = root.querySelector(`[${panelAttr}="${name}"]`)
-			if (button instanceof HTMLElement) {
-				button.hidden = !visible
-			}
-			if (panel instanceof HTMLElement) {
-				if (!visible) {
-					panel.hidden = true
-				} else if (button instanceof HTMLElement && button.classList.contains('active')) {
-					panel.hidden = false
-				}
-			}
-		}
-
-		const setFirstVisibleTab = (buttonAttr, setTab) => {
-			const button = Array.from(root.querySelectorAll(`[${buttonAttr}]`))
-				.find((candidate) => candidate instanceof HTMLElement && !candidate.hidden)
-			if (button instanceof HTMLElement) {
-				setTab(root, button.getAttribute(buttonAttr))
-			}
-		}
-
 		const applySettingRowVisibility = () => {
-			if (state.admin?.is_nextcloud_admin) {
-				root.querySelectorAll('[data-default-setting-key], [data-user-setting-key], [data-group-setting-key]').forEach((row) => {
-					if (row instanceof HTMLElement) {
-						row.hidden = false
-					}
-				})
-				return
-			}
-			root.querySelectorAll('[data-default-setting-key]').forEach((row) => {
-				if (row instanceof HTMLElement) {
-					row.hidden = !canEditDefaultSetting(state, row.dataset.defaultSettingKey || '')
-				}
-			})
-			root.querySelectorAll('[data-user-setting-key]').forEach((row) => {
-				if (row instanceof HTMLElement) {
-					row.hidden = !canEditUserOverrideSetting(state, row.dataset.userSettingKey || '')
-				}
-			})
-			root.querySelectorAll('[data-group-setting-key]').forEach((row) => {
-				if (row instanceof HTMLElement) {
-					row.hidden = !canEditGroupOverrideSetting(state, row.dataset.groupSettingKey || '')
-				}
+			adminVisibility.applySettingRowVisibility(root, state, {
+				canEditDefaultSetting,
+				canEditGroupOverrideSetting,
+				canEditUserOverrideSetting,
 			})
 		}
 
 		const applyAdminUiVisibility = () => {
-			const isFullAdmin = Boolean(state.admin?.is_nextcloud_admin)
-			setTabVisibility('data-main-tab-button', 'data-main-tab-panel', 'general', isFullAdmin)
-			setTabVisibility('data-main-tab-button', 'data-main-tab-panel', 'advanced', isFullAdmin)
-			if (!isFullAdmin) {
-				setMainTab(root, 'group')
-			}
-
-			const defaultCategories = ['share', 'talk', 'email_signature']
-			defaultCategories.forEach((category) => {
-				setTabVisibility(
-					'data-default-tab-button',
-					'data-default-tab-panel',
-					category,
-					hasAnyAdminPermission(state, permissionsForCategory(category, ['policy', 'templates']))
-				)
+			adminVisibility.applyAdminUiVisibility(root, refs, state, {
+				canEditDefaultSetting,
+				canEditGroupOverrideSetting,
+				canEditUserOverrideSetting,
+				canReadAssignedSeatOverview,
+				canUseAnyUserOverridePanel,
+				hasAnyAdminPermission,
+				permissionsForCategory,
+				setDefaultsTab,
+				setGroupOverrideTab,
+				setGroupTab,
+				setMainTab,
+				setOverrideTab,
+				userOverridePermissionsForCategory,
 			})
-			setTabVisibility('data-group-tab-button', 'data-group-tab-panel', 'defaults', defaultCategories.some((category) => hasAnyAdminPermission(state, permissionsForCategory(category, ['policy', 'templates']))))
-			setTabVisibility('data-group-tab-button', 'data-group-tab-panel', 'seats', isFullAdmin)
-			setTabVisibility('data-group-tab-button', 'data-group-tab-panel', 'assigned', canReadAssignedSeatOverview(state))
-			setTabVisibility('data-group-tab-button', 'data-group-tab-panel', 'group-overrides', defaultCategories.some((category) => hasAnyAdminPermission(state, permissionsForCategory(category, ['group_overrides']))))
-			setTabVisibility('data-group-tab-button', 'data-group-tab-panel', 'overrides', canUseAnyUserOverridePanel(state))
-			if (refs.seatReportDownload instanceof HTMLButtonElement) {
-				const reportRow = refs.seatReportDownload.closest('.nccb-row')
-				if (reportRow instanceof HTMLElement) {
-					reportRow.hidden = !isFullAdmin
-				}
-			}
-			setFirstVisibleTab('data-group-tab-button', setGroupTab)
-
-			defaultCategories.forEach((category) => {
-				setTabVisibility('data-group-override-tab-button', 'data-group-override-tab-panel', category, hasAnyAdminPermission(state, permissionsForCategory(category, ['group_overrides'])))
-				setTabVisibility('data-override-tab-button', 'data-override-tab-panel', category, hasAnyAdminPermission(state, userOverridePermissionsForCategory(category)))
-			})
-			setFirstVisibleTab('data-default-tab-button', setDefaultsTab)
-			setFirstVisibleTab('data-group-override-tab-button', setGroupOverrideTab)
-			setFirstVisibleTab('data-override-tab-button', setOverrideTab)
-			applySettingRowVisibility()
 		}
 
 		templateEditor.setAssetRefreshHandler(async (wrapper) => {
