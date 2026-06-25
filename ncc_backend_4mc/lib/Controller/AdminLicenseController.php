@@ -63,13 +63,13 @@ class AdminLicenseController extends Controller {
 
 		try {
 			$this->license->setCredentials($email, $licenseKey);
-		} catch (\InvalidArgumentException $e) {
-			return $this->warningResponse($e->getMessage(), Http::STATUS_UNPROCESSABLE_ENTITY, [
+		} catch (\InvalidArgumentException $exception) {
+			return $this->warningResponse($exception->getMessage(), Http::STATUS_UNPROCESSABLE_ENTITY, [
 				'actor_user_id' => $this->userId,
-				'exception' => $e,
+				'exception' => $exception,
 			]);
-		} catch (\Throwable $e) {
-			$this->logError('Saving license credentials failed', $e);
+		} catch (\Throwable $exception) {
+			$this->logError('Saving license credentials failed', $exception);
 			return new DataResponse(['error' => 'Failed to save credentials'], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
@@ -89,14 +89,14 @@ class AdminLicenseController extends Controller {
 
 		try {
 			$this->license->setMode($mode);
-		} catch (\InvalidArgumentException $e) {
-			return $this->warningResponse($e->getMessage(), Http::STATUS_UNPROCESSABLE_ENTITY, [
+		} catch (\InvalidArgumentException $exception) {
+			return $this->warningResponse($exception->getMessage(), Http::STATUS_UNPROCESSABLE_ENTITY, [
 				'actor_user_id' => $this->userId,
 				'requested_mode' => $mode,
-				'exception' => $e,
+				'exception' => $exception,
 			]);
-		} catch (\Throwable $e) {
-			$this->logError('Saving license mode failed', $e);
+		} catch (\Throwable $exception) {
+			$this->logError('Saving license mode failed', $exception);
 			return new DataResponse(['error' => 'Failed to save mode'], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
@@ -115,13 +115,13 @@ class AdminLicenseController extends Controller {
 
 		try {
 			return new DataResponse($this->license->syncNow());
-		} catch (\RuntimeException $e) {
-			return $this->warningResponse($e->getMessage(), Http::STATUS_CONFLICT, [
+		} catch (\RuntimeException $exception) {
+			return $this->warningResponse($exception->getMessage(), Http::STATUS_CONFLICT, [
 				'actor_user_id' => $this->userId,
-				'exception' => $e,
+				'exception' => $exception,
 			]);
-		} catch (\Throwable $e) {
-			$this->logError('License sync failed', $e);
+		} catch (\Throwable $exception) {
+			$this->logError('License sync failed', $exception);
 			return new DataResponse(['error' => 'License sync failed'], Http::STATUS_BAD_GATEWAY);
 		}
 	}

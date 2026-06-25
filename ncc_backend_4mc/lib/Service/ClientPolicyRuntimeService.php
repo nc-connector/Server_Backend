@@ -183,10 +183,10 @@ class ClientPolicyRuntimeService {
 	private function isSecretsAppAvailable(): bool {
 		try {
 			return $this->appManager->isEnabledForUser(self::SECRETS_APP_ID);
-		} catch (\Throwable $e) {
+		} catch (\Throwable $exception) {
 			$this->logger->warning('Unable to check Nextcloud Secrets app state.', [
 				'app' => Application::APP_ID,
-				'exception' => $e,
+				'exception' => $exception,
 			]);
 			return false;
 		}

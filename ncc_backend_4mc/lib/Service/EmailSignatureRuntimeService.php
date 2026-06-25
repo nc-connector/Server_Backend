@@ -92,10 +92,10 @@ class EmailSignatureRuntimeService {
 
 		try {
 			$account = $this->accountManager->getAccount($user);
-		} catch (\Throwable $error) {
+		} catch (\Throwable $exception) {
 			$this->logger->error('Email signature profile lookup failed.', [
 				'userId' => $userId,
-				'exception' => $error,
+				'exception' => $exception,
 			]);
 			return $this->applyUserOverrides($variables, $userId);
 		}

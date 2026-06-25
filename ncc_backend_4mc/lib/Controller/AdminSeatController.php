@@ -137,12 +137,12 @@ class AdminSeatController extends Controller {
 			} else {
 				$this->seats->unassignSeat($targetUserId);
 			}
-		} catch (SeatLimitExceededException $e) {
-			return $this->warningResponse($e->getMessage(), Http::STATUS_CONFLICT, [
+		} catch (SeatLimitExceededException $exception) {
+			return $this->warningResponse($exception->getMessage(), Http::STATUS_CONFLICT, [
 				'actor_user_id' => $this->userId,
 				'target_user_id' => $targetUserId,
 				'requested_assigned' => $assigned,
-				'exception' => $e,
+				'exception' => $exception,
 			]);
 		}
 

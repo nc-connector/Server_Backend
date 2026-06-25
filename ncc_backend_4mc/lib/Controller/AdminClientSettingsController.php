@@ -91,13 +91,13 @@ class AdminClientSettingsController extends Controller {
 
 		try {
 			$stored = $this->clientSettings->setDefaults($defaultsPayload);
-		} catch (\InvalidArgumentException $e) {
-			return $this->warningResponse($e->getMessage(), Http::STATUS_UNPROCESSABLE_ENTITY, [
+		} catch (\InvalidArgumentException $exception) {
+			return $this->warningResponse($exception->getMessage(), Http::STATUS_UNPROCESSABLE_ENTITY, [
 				'actor_user_id' => $this->userId,
-				'exception' => $e,
+				'exception' => $exception,
 			]);
-		} catch (\Throwable $e) {
-			$this->logError('Saving default client settings failed', $e);
+		} catch (\Throwable $exception) {
+			$this->logError('Saving default client settings failed', $exception);
 			return new DataResponse(['error' => 'Failed to save defaults'], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
@@ -248,14 +248,14 @@ class AdminClientSettingsController extends Controller {
 
 		try {
 			$items = $this->clientSettings->setUserSettings($targetUserId, $overridePayload, $this->userId);
-		} catch (\InvalidArgumentException $e) {
-			return $this->warningResponse($e->getMessage(), Http::STATUS_UNPROCESSABLE_ENTITY, [
+		} catch (\InvalidArgumentException $exception) {
+			return $this->warningResponse($exception->getMessage(), Http::STATUS_UNPROCESSABLE_ENTITY, [
 				'actor_user_id' => $this->userId,
 				'target_user_id' => $targetUserId,
-				'exception' => $e,
+				'exception' => $exception,
 			]);
-		} catch (\Throwable $e) {
-			$this->logError('Saving user client settings failed', $e);
+		} catch (\Throwable $exception) {
+			$this->logError('Saving user client settings failed', $exception);
 			return new DataResponse(['error' => 'Failed to save user settings'], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
@@ -316,14 +316,14 @@ class AdminClientSettingsController extends Controller {
 		try {
 			$priority = (int)$this->request->getParam('priority', 100);
 			$groupSettings = $this->clientSettings->setGroupSettings($targetGroupId, $priority, $overridePayload, $this->userId);
-		} catch (\InvalidArgumentException $e) {
-			return $this->warningResponse($e->getMessage(), Http::STATUS_UNPROCESSABLE_ENTITY, [
+		} catch (\InvalidArgumentException $exception) {
+			return $this->warningResponse($exception->getMessage(), Http::STATUS_UNPROCESSABLE_ENTITY, [
 				'actor_user_id' => $this->userId,
 				'group_id' => $targetGroupId,
-				'exception' => $e,
+				'exception' => $exception,
 			]);
-		} catch (\Throwable $e) {
-			$this->logError('Saving group client settings failed', $e);
+		} catch (\Throwable $exception) {
+			$this->logError('Saving group client settings failed', $exception);
 			return new DataResponse(['error' => 'Failed to save group settings'], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 

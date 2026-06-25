@@ -208,10 +208,10 @@ class LicenseService {
 			$this->settings->setValue(self::KEY_LICENSE_EXPIRES_AT, $expiresAt !== null ? (string)$expiresAt : '', $now);
 			$this->settings->setValue(self::KEY_LICENSE_LAST_SYNC_AT, (string)$now, $now);
 			$this->settings->setValue(self::KEY_LICENSE_LAST_ERROR, '', $now);
-		} catch (\Throwable $e) {
-			$this->logError('License sync failed', $e);
-			$this->settings->setValue(self::KEY_LICENSE_LAST_ERROR, $e->getMessage(), $now);
-			throw $e;
+		} catch (\Throwable $exception) {
+			$this->logError('License sync failed', $exception);
+			$this->settings->setValue(self::KEY_LICENSE_LAST_ERROR, $exception->getMessage(), $now);
+			throw $exception;
 		}
 
 		return $this->getSnapshot();
