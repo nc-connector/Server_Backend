@@ -137,7 +137,7 @@ class TemplateAssetService {
 
 			$statusCode = $response->getStatusCode();
 			if ($statusCode < 200 || $statusCode >= 300) {
-				$this->logWarning('Template image cache received non-success response', [
+				$this->logger->warning('Template image cache received non-success response', [
 					'app' => Application::APP_ID,
 					'context_key' => $contextKey,
 					'src' => $source,
@@ -151,7 +151,7 @@ class TemplateAssetService {
 			$headers = $response->getHeaders();
 			$contentLength = $this->firstHeaderValue($headers, 'Content-Length');
 			if ($contentLength !== '' && (int)$contentLength > self::MAX_IMAGE_BYTES) {
-				$this->logWarning('Template image cache rejected oversized image by content length', [
+				$this->logger->warning('Template image cache rejected oversized image by content length', [
 					'app' => Application::APP_ID,
 					'context_key' => $contextKey,
 					'src' => $source,
@@ -167,7 +167,7 @@ class TemplateAssetService {
 			$contentType = strtolower(trim(explode(';', (string)$contentTypeHeader)[0]));
 			$extension = $this->mapImageContentTypeToExtension($contentType);
 			if ($extension === null) {
-				$this->logWarning('Template image cache received unsupported content type', [
+				$this->logger->warning('Template image cache received unsupported content type', [
 					'app' => Application::APP_ID,
 					'context_key' => $contextKey,
 					'src' => $source,
@@ -180,7 +180,7 @@ class TemplateAssetService {
 
 			$bodyResult = $this->readImageBody($response->getBody());
 			if (is_array($bodyResult['warning'] ?? null)) {
-				$this->logWarning('Template image cache rejected image body', [
+				$this->logger->warning('Template image cache rejected image body', [
 					'app' => Application::APP_ID,
 					'context_key' => $contextKey,
 					'src' => $source,
@@ -195,7 +195,7 @@ class TemplateAssetService {
 
 			$actualExtension = $this->detectImageExtension($body);
 			if ($actualExtension !== $extension) {
-				$this->logWarning('Template image cache rejected image body with mismatching magic bytes', [
+				$this->logger->warning('Template image cache rejected image body with mismatching magic bytes', [
 					'app' => Application::APP_ID,
 					'context_key' => $contextKey,
 					'src' => $source,
@@ -210,7 +210,7 @@ class TemplateAssetService {
 
 			$runtimeDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'runtime';
 			if (!is_dir($runtimeDir) && !mkdir($runtimeDir, 0775, true) && !is_dir($runtimeDir)) {
-				$this->logError('Template image cache failed to create runtime directory', [
+				$this->logger->error('Template image cache failed to create runtime directory', [
 					'app' => Application::APP_ID,
 					'runtime_dir' => $runtimeDir,
 				]);
@@ -234,7 +234,7 @@ class TemplateAssetService {
 			$fileName = $fileBaseName . '.' . $extension;
 			$filePath = $runtimeDir . DIRECTORY_SEPARATOR . $fileName;
 			if (file_put_contents($filePath, $body) === false) {
-				$this->logError('Template image cache failed to write runtime file', [
+				$this->logger->error('Template image cache failed to write runtime file', [
 					'app' => Application::APP_ID,
 					'file_path' => $filePath,
 					'src' => $source,
@@ -248,7 +248,7 @@ class TemplateAssetService {
 				'warning' => null,
 			];
 		} catch (\Throwable $exception) {
-			$this->logError('Template image cache failed', [
+			$this->logger->error('Template image cache failed', [
 				'app' => Application::APP_ID,
 				'context_key' => $contextKey,
 				'src' => $source,
@@ -451,11 +451,4 @@ class TemplateAssetService {
 		];
 	}
 
-	private function logError(string $message, array $context = []): void {
-		$this->logger->error($message, $context);
-	}
-
-	private function logWarning(string $message, array $context = []): void {
-		$this->logger->warning($message, $context);
-	}
 }

@@ -209,7 +209,9 @@ class LicenseService {
 			$this->settings->setValue(self::KEY_LICENSE_LAST_SYNC_AT, (string)$now, $now);
 			$this->settings->setValue(self::KEY_LICENSE_LAST_ERROR, '', $now);
 		} catch (\Throwable $exception) {
-			$this->logError('License sync failed', $exception);
+			$this->logger->error('License sync failed', [
+				'exception' => $exception,
+			]);
 			$this->settings->setValue(self::KEY_LICENSE_LAST_ERROR, $exception->getMessage(), $now);
 			throw $exception;
 		}
@@ -312,9 +314,4 @@ class LicenseService {
 		return gmdate('c', $ts);
 	}
 
-	private function logError(string $message, \Throwable $exception): void {
-		$this->logger->error($message, [
-			'exception' => $exception,
-		]);
-	}
 }

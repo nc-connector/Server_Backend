@@ -69,7 +69,9 @@ class AdminLicenseController extends Controller {
 				'exception' => $exception,
 			]);
 		} catch (\Throwable $exception) {
-			$this->logError('Saving license credentials failed', $exception);
+			$this->logger->error('Saving license credentials failed', [
+				'exception' => $exception,
+			]);
 			return new DataResponse(['error' => 'Failed to save credentials'], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
@@ -96,7 +98,9 @@ class AdminLicenseController extends Controller {
 				'exception' => $exception,
 			]);
 		} catch (\Throwable $exception) {
-			$this->logError('Saving license mode failed', $exception);
+			$this->logger->error('Saving license mode failed', [
+				'exception' => $exception,
+			]);
 			return new DataResponse(['error' => 'Failed to save mode'], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
@@ -121,15 +125,11 @@ class AdminLicenseController extends Controller {
 				'exception' => $exception,
 			]);
 		} catch (\Throwable $exception) {
-			$this->logError('License sync failed', $exception);
+			$this->logger->error('License sync failed', [
+				'exception' => $exception,
+			]);
 			return new DataResponse(['error' => 'License sync failed'], Http::STATUS_BAD_GATEWAY);
 		}
-	}
-
-	private function logError(string $message, \Throwable $exception): void {
-		$this->logger->error($message, [
-			'exception' => $exception,
-		]);
 	}
 
 }

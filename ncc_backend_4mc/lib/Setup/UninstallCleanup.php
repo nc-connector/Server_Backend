@@ -51,7 +51,7 @@ class UninstallCleanup implements IRepairStep {
 			$this->purgeRuntimeImageCache();
 			$output->info('NC Connector data removed');
 		} catch (\Throwable $exception) {
-			$this->logError('NC Connector uninstall cleanup failed', [
+			$this->logger->error('NC Connector uninstall cleanup failed', [
 				'app' => Application::APP_ID,
 				'exception' => $exception,
 			]);
@@ -127,7 +127,4 @@ class UninstallCleanup implements IRepairStep {
 		}
 	}
 
-	private function logError(string $message, array $context = []): void {
-		$this->logger->error($message, $context);
-	}
 }

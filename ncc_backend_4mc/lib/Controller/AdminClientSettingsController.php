@@ -97,7 +97,9 @@ class AdminClientSettingsController extends Controller {
 				'exception' => $exception,
 			]);
 		} catch (\Throwable $exception) {
-			$this->logError('Saving default client settings failed', $exception);
+			$this->logger->error('Saving default client settings failed', [
+				'exception' => $exception,
+			]);
 			return new DataResponse(['error' => 'Failed to save defaults'], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
@@ -255,7 +257,9 @@ class AdminClientSettingsController extends Controller {
 				'exception' => $exception,
 			]);
 		} catch (\Throwable $exception) {
-			$this->logError('Saving user client settings failed', $exception);
+			$this->logger->error('Saving user client settings failed', [
+				'exception' => $exception,
+			]);
 			return new DataResponse(['error' => 'Failed to save user settings'], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
@@ -323,7 +327,9 @@ class AdminClientSettingsController extends Controller {
 				'exception' => $exception,
 			]);
 		} catch (\Throwable $exception) {
-			$this->logError('Saving group client settings failed', $exception);
+			$this->logger->error('Saving group client settings failed', [
+				'exception' => $exception,
+			]);
 			return new DataResponse(['error' => 'Failed to save group settings'], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
@@ -405,12 +411,6 @@ class AdminClientSettingsController extends Controller {
 			}
 		}
 		return $filtered;
-	}
-
-	private function logError(string $message, \Throwable $exception): void {
-		$this->logger->error($message, [
-			'exception' => $exception,
-		]);
 	}
 
 	/**

@@ -114,7 +114,9 @@ class AdminDelegationController extends Controller {
 				$this->userId
 			);
 		} catch (\Throwable $exception) {
-			$this->logError('Saving NC Connector admin delegation failed', $exception);
+			$this->logger->error('Saving NC Connector admin delegation failed', [
+				'exception' => $exception,
+			]);
 			return new DataResponse(['error' => 'Failed to save delegation'], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
@@ -157,12 +159,6 @@ class AdminDelegationController extends Controller {
 			'updated_by' => $delegation->getUpdatedBy(),
 			'is_nextcloud_admin' => $this->access->isAdmin($userId),
 		];
-	}
-
-	private function logError(string $message, \Throwable $exception): void {
-		$this->logger->error($message, [
-			'exception' => $exception,
-		]);
 	}
 
 }
