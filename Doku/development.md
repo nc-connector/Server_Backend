@@ -132,6 +132,7 @@ Key paths inside the app folder:
 | `ncc_backend_4mc/js/adminSeatUi.js` | Seat assignment table, usage, and pager rendering |
 | `ncc_backend_4mc/js/adminGeneralStatusUi.js` | General-tab license, Pro hint, update status, and recommended-app rendering |
 | `ncc_backend_4mc/js/adminOverridesUi.js` | User and group override selection and table rendering |
+| `ncc_backend_4mc/js/adminSettingsPayload.js` | Save-payload collection for default, group override, and user override setting layers |
 | `ncc_backend_4mc/js/ncc_backend_4mc-main.js` | Direct page UI under `/apps/ncc_backend_4mc` |
 | `ncc_backend_4mc/css/adminSettings.css` | Base admin layout, tabs, forms, tables, and shared help styles |
 | `ncc_backend_4mc/css/adminStatus.css` | General-tab status cards, Pro hint, backend update status, and recommended-app styles |
@@ -172,6 +173,7 @@ Main files:
 - `ncc_backend_4mc/js/adminSeatUi.js`
 - `ncc_backend_4mc/js/adminGeneralStatusUi.js`
 - `ncc_backend_4mc/js/adminOverridesUi.js`
+- `ncc_backend_4mc/js/adminSettingsPayload.js`
 - `ncc_backend_4mc/css/adminSettings.css`
 - `ncc_backend_4mc/css/adminStatus.css`
 - `ncc_backend_4mc/css/adminSeatOverview.css`
@@ -207,6 +209,7 @@ Important UI behaviors currently implemented there:
 - seat assignment table, usage, and pager rendering live in `adminSeatUi.js`
 - General-tab license, Pro hint, update status, and recommended-app rendering live in `adminGeneralStatusUi.js`
 - user and group override selection and table rendering live in `adminOverridesUi.js`
+- default, group override, and user override save-payload collection lives in `adminSettingsPayload.js`
 - admin styles follow the same UI-area split: base styles stay in `adminSettings.css`, while status, seat overview, templates, and delegation styles live in their matching CSS files
 
 ### 4.2 Controller layer

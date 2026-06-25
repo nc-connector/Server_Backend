@@ -135,6 +135,11 @@
 		console.error('nccb overrides UI module missing')
 		return
 	}
+	const settingsPayloadModule = window.NCCBackendSettingsPayload
+	if (!settingsPayloadModule) {
+		console.error('nccb settings payload module missing')
+		return
+	}
 
 	function escapeHtml(value) {
 		return String(value)
@@ -1549,6 +1554,19 @@
 		let licenseSnapshot = null
 		let searchTimer = null
 		const fullAdminFallback = root.dataset.fullAdminFallback === '1'
+		const settingsPayload = settingsPayloadModule.createPayloadHelpers({
+			root,
+			state,
+			settingLayerUi: SETTING_LAYER_UI,
+			canEditDefaultSetting,
+			canEditGroupOverrideSetting,
+			canEditUserOverrideSetting,
+			getModeControlKey: getTemplateModeControlKey,
+			isTemplateEditorSettingKey,
+			isUserOverrideOnlySettingKey,
+			readSettingControl,
+			sortedSettingKeys,
+		})
 
 		const messageElementForTemplatePrefix = (prefix) => {
 			if (prefix === 'default') {
@@ -2084,67 +2102,6 @@
 			}
 		}
 
-		const isAttachmentThresholdEnabled = (prefix) => {
-			const alwaysViaConnector = root.querySelector(`.nccb-setting-control[data-prefix="${prefix}"][data-setting-key="attachments_always_via_ncconnector"]`)
-			if (alwaysViaConnector?.checked) {
-				return false
-			}
-			const toggle = root.querySelector(`.nccb-threshold-enabled[data-prefix="${prefix}"][data-setting-key="attachments_min_size_mb"]`)
-			return toggle ? Boolean(toggle.checked) : true
-		}
-
-		const readLayerValue = (prefix, key) => key === 'attachments_min_size_mb'
-			&& !isAttachmentThresholdEnabled(prefix)
-			? null
-			: readSettingControl(root, prefix, key, state.schema[key])
-
-		const collectSettingLayerPayload = (config, options = {}) => {
-			const payload = {}
-			sortedSettingKeys(state.schema).forEach((key) => {
-				if (options.skipUserOverrideOnly && isUserOverrideOnlySettingKey(key)) {
-					return
-				}
-				if (!options.canEditSetting?.(state, key)) {
-					return
-				}
-				if (options.defaultLayer) {
-					const addonToggle = root.querySelector(`.nccb-addon-changeable[data-setting-key="${key}"]`)
-					const isAddonChangeable = !isTemplateEditorSettingKey(key) && Boolean(addonToggle?.checked)
-					payload[key] = {
-						mode: isAddonChangeable ? 'user_choice' : 'default',
-						value: readLayerValue(config.prefix, key),
-					}
-					return
-				}
-				const modeKey = getTemplateModeControlKey(key)
-				const mode = root.querySelector(`${config.modeSelector}[data-setting-key="${modeKey}"]`)?.value || 'inherit'
-				if (mode !== 'forced') {
-					payload[key] = { mode: 'inherit' }
-					return
-				}
-				payload[key] = {
-					mode: 'forced',
-					value: readLayerValue(config.prefix, key),
-				}
-			})
-			return payload
-		}
-
-		const collectDefaultPayload = () => collectSettingLayerPayload(SETTING_LAYER_UI.defaults, {
-			skipUserOverrideOnly: true,
-			canEditSetting: canEditDefaultSetting,
-			defaultLayer: true,
-		})
-
-		const collectOverridePayload = () => collectSettingLayerPayload(SETTING_LAYER_UI.userOverride, {
-			canEditSetting: canEditUserOverrideSetting,
-		})
-
-		const collectGroupOverridePayload = () => collectSettingLayerPayload(SETTING_LAYER_UI.groupOverride, {
-			skipUserOverrideOnly: true,
-			canEditSetting: canEditGroupOverrideSetting,
-		})
-
 		const loadAllUsersInScope = async () => {
 			const users = []
 			let offset = 0
@@ -2401,7 +2358,7 @@
 		refs.defaultSave.addEventListener('click', async () => {
 			setMessage(refs.defaultMessage, '', '')
 			try {
-				const response = await api.saveDefaults(collectDefaultPayload())
+				const response = await api.saveDefaults(settingsPayload.collectDefaultPayload())
 				state.defaults = response.defaults || state.defaults
 				state.schema = response.schema || state.schema
 				state.defaultModes = response.default_modes || state.defaultModes
@@ -2450,7 +2407,7 @@
 			setMessage(refs.groupOverrideMessage, '', '')
 			try {
 				const priority = Number.parseInt(String(refs.groupOverridePriority.value || state.groupOverridePriority || 100), 10) || 100
-				const response = await api.saveGroupOverrides(refs.groupOverrideGroup.value, priority, collectGroupOverridePayload())
+				const response = await api.saveGroupOverrides(refs.groupOverrideGroup.value, priority, settingsPayload.collectGroupOverridePayload())
 				mergeSchema(state, response.schema)
 				state.groupOverridePriority = Number.parseInt(String(response.priority ?? priority), 10) || priority
 				refs.groupOverridePriority.value = String(state.groupOverridePriority)
@@ -2482,7 +2439,7 @@
 			}
 			setMessage(refs.overrideMessage, '', '')
 			try {
-				const response = await api.saveUserOverrides(refs.overrideUser.value, collectOverridePayload())
+				const response = await api.saveUserOverrides(refs.overrideUser.value, settingsPayload.collectOverridePayload())
 				mergeSchema(state, response.schema)
 				state.overrides = response.items || state.overrides
 				state.overrideTemplateAssets = response.template_assets || {}

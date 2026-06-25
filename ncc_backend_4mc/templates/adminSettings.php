@@ -39,6 +39,7 @@ Util::addScript($appId, 'adminTabs');
 Util::addScript($appId, 'adminSeatUi');
 Util::addScript($appId, 'adminGeneralStatusUi');
 Util::addScript($appId, 'adminOverridesUi');
+Util::addScript($appId, 'adminSettingsPayload');
 Util::addScript($appId, $appId . '-adminSettings');
 Util::addStyle($appId, 'tinymceSkin');
 Util::addStyle($appId, 'adminSettings');
