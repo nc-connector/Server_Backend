@@ -127,6 +127,7 @@ Key paths inside the app folder:
 | `ncc_backend_4mc/js/adminDelegationUi.js` | Delegation permission matrix and delegated-admin overview rendering |
 | `ncc_backend_4mc/js/adminTemplateImages.js` | Template image source rewriting and admin-template sanitizing |
 | `ncc_backend_4mc/js/adminTemplateEditor.js` | Template editor modal, TinyMCE wiring, draft asset maps, and editor translations |
+| `ncc_backend_4mc/js/adminTemplateAssetRefresh.js` | Template editor asset refresh calls for default, group override, and user override layers |
 | `ncc_backend_4mc/js/adminSeatReport.js` | Assigned-seat table rendering and seat-report CSV export |
 | `ncc_backend_4mc/js/adminTabs.js` | Shared admin tab switching |
 | `ncc_backend_4mc/js/adminVisibility.js` | Permission-based admin tab and settings row visibility |
@@ -169,6 +170,7 @@ Main files:
 - `ncc_backend_4mc/js/adminDelegationUi.js`
 - `ncc_backend_4mc/js/adminTemplateImages.js`
 - `ncc_backend_4mc/js/adminTemplateEditor.js`
+- `ncc_backend_4mc/js/adminTemplateAssetRefresh.js`
 - `ncc_backend_4mc/js/adminSeatReport.js`
 - `ncc_backend_4mc/js/adminTabs.js`
 - `ncc_backend_4mc/js/adminVisibility.js`
@@ -206,6 +208,7 @@ Important UI behaviors currently implemented there:
 - delegation permission matrix and delegated-admin overview rendering live in `adminDelegationUi.js`
 - template image source rewriting and admin-template sanitizing live in `adminTemplateImages.js`
 - template editor modal, TinyMCE setup, draft asset maps, and editor-only template translations live in `adminTemplateEditor.js`
+- template editor asset refresh calls for default, group override, and user override layers live in `adminTemplateAssetRefresh.js`
 - assigned-seat table rendering and seat-report CSV export live in `adminSeatReport.js`
 - repeated tab switching logic lives in `adminTabs.js`
 - permission-based admin tab and settings row visibility lives in `adminVisibility.js`

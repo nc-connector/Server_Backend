@@ -34,6 +34,7 @@ Util::addScript($appId, 'adminPermissions');
 Util::addScript($appId, 'adminDelegationUi');
 Util::addScript($appId, 'adminTemplateImages');
 Util::addScript($appId, 'adminTemplateEditor');
+Util::addScript($appId, 'adminTemplateAssetRefresh');
 Util::addScript($appId, 'adminSeatReport');
 Util::addScript($appId, 'adminTabs');
 Util::addScript($appId, 'adminVisibility');
