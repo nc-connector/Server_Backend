@@ -62,9 +62,47 @@
     anchor.setAttribute('rel', rel.join(' '));
   }
 
-  function normalizeLinks(html) {
+  function sanitizeStyleValue(value) {
+    const clean = [];
+    String(value || '').split(';').forEach((declaration) => {
+      const trimmed = declaration.trim();
+      if (trimmed === '' || !trimmed.includes(':')) {
+        return;
+      }
+
+      const separator = trimmed.indexOf(':');
+      const property = trimmed.slice(0, separator).trim();
+      const propertyValue = trimmed.slice(separator + 1).trim();
+      if (!/^-?[a-z][a-z0-9-]*$/i.test(property)) {
+        return;
+      }
+
+      const schemeCheckValue = propertyValue.toLowerCase().replace(/[\x00-\x20]+/g, '');
+      // Real template images must use <img>; CSS URLs bypass the local image cache.
+      if (/(?:expression\(|behavior:|-moz-binding:|javascript:|vbscript:|url\()/i.test(schemeCheckValue)) {
+        return;
+      }
+
+      clean.push(`${property}: ${propertyValue}`);
+    });
+    return clean.join('; ');
+  }
+
+  function normalizeStyles(doc) {
+    doc.querySelectorAll('[style]').forEach((element) => {
+      const style = sanitizeStyleValue(element.getAttribute('style') || '');
+      if (style === '') {
+        element.removeAttribute('style');
+        return;
+      }
+      element.setAttribute('style', style);
+    });
+  }
+
+  function normalizeTemplateHtml(html) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(String(html || ''), 'text/html');
+    normalizeStyles(doc);
     doc.querySelectorAll('a[target="_blank"]').forEach((anchor) => {
       addRelToken(anchor, 'noopener');
       addRelToken(anchor, 'noreferrer');
@@ -84,7 +122,7 @@
       ADD_ATTR,
       ADD_TAGS,
     });
-    return normalizeLinks(String(clean || ''));
+    return normalizeTemplateHtml(String(clean || ''));
   }
 
   window.NCCBTemplateSanitizer = {

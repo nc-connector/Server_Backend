@@ -303,7 +303,8 @@ class TemplateSanitizerService {
 
 			$decodedValue = strtolower(html_entity_decode($propertyValue, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 			$schemeCheckValue = preg_replace('/[\x00-\x20]+/', '', $decodedValue) ?? $decodedValue;
-			if (preg_match('/(?:expression\(|behavior:|-moz-binding:|javascript:|vbscript:|url\([\'"]?data:image\/svg\+xml)/i', $schemeCheckValue)) {
+			// Real template images must use <img>; CSS URLs bypass the local image cache.
+			if (preg_match('/(?:expression\(|behavior:|-moz-binding:|javascript:|vbscript:|url\()/i', $schemeCheckValue)) {
 				continue;
 			}
 
