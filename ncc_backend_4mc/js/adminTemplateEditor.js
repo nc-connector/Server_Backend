@@ -25,7 +25,7 @@
 		const translationPhrases = options.templateTranslationPhrases && typeof options.templateTranslationPhrases === 'object'
 			? options.templateTranslationPhrases
 			: {}
-		const contentSecurityPolicy = String(options.contentSecurityPolicy || "default-src 'none'; img-src * data: blob:; style-src 'unsafe-inline';")
+		const contentSecurityPolicy = String(options.contentSecurityPolicy || "default-src 'none'; img-src 'self' data: blob:; style-src 'unsafe-inline';")
 		const saveButtonIds = {
 			default: 'nccb-default-save',
 			override: 'nccb-override-save',
