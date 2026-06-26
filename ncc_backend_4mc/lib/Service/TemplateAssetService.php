@@ -353,7 +353,8 @@ class TemplateAssetService {
 		if ($addresses === []) {
 			return ['reason' => 'download_failed', 'detail' => 'dns'];
 		}
-		// Template image URLs are admin-entered; block private targets before the server fetches them.
+		// DNS can change between this check and the HTTP fetch. Template image URLs are admin-controlled,
+		// and redirect targets are checked again before the next request.
 		foreach ($addresses as $address) {
 			if (!filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
 				return ['reason' => 'blocked_address'];
