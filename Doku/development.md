@@ -216,6 +216,7 @@ Important UI behaviors currently implemented there:
 - General-tab license, Pro hint, update status, and recommended-app rendering live in `adminGeneralStatusUi.js`
 - user and group override selection and table rendering live in `adminOverridesUi.js`
 - default, group override, and user override save-payload collection lives in `adminSettingsPayload.js`
+- default settings orchestration stays in `ncc_backend_4mc-adminSettings.js` until it has enough independent state and events for a cohesive `adminDefaultsUi.js`
 - admin styles follow the same UI-area split: base styles stay in `adminSettings.css`, while status, seat overview, templates, and delegation styles live in their matching CSS files
 
 ### 4.2 Controller layer
