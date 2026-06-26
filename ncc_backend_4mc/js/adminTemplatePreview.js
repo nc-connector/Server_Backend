@@ -7,7 +7,7 @@
 (() => {
 	'use strict'
 
-	const TEMPLATE_PREVIEW_CSP = "default-src 'none'; img-src * data: blob: https: http:; style-src 'unsafe-inline';"
+	const TEMPLATE_PREVIEW_CSP = "default-src 'none'; img-src 'self' data: blob:; style-src 'unsafe-inline';"
 
 	function escapeHtml(value) {
 		return String(value)

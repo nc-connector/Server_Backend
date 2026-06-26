@@ -39,7 +39,7 @@
 	const EMAIL_SIGNATURE_CUSTOM2_KEY = 'email_signature_custom2'
 	const TALK_TEMPLATE_FORMAT_HTML = 'html'
 	const TALK_TEMPLATE_FORMAT_PLAIN_TEXT = 'plain_text'
-	const TEMPLATE_EDITOR_CONTENT_CSP = "default-src 'none'; img-src * data: blob:; style-src 'unsafe-inline';"
+	const TEMPLATE_EDITOR_CONTENT_CSP = "default-src 'none'; img-src 'self' data: blob:; style-src 'unsafe-inline';"
 	const TEMPLATE_EDITOR_SETTING_KEYS = new Set([
 		SHARE_HTML_TEMPLATE_KEY,
 		SHARE_PASSWORD_TEMPLATE_KEY,

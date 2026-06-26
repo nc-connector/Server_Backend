@@ -20,7 +20,6 @@ class AdminSettingsResponseFactory {
 			'fullAdminFallback' => $fullAdminFallback,
 		]);
 		$policy = new ContentSecurityPolicy();
-		$policy->addAllowedImageDomain('*');
 		$policy->addAllowedImageDomain('data:');
 		$policy->addAllowedImageDomain('blob:');
 		$response->setContentSecurityPolicy($policy);
