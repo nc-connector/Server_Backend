@@ -24,6 +24,7 @@ The mail add-ons can work directly with a Nextcloud account. The backend is used
 - define which settings users may still change in the add-on
 - manage Share, password-mail, Talk invitation, and email-signature templates
 - provide user and group overrides for teams with different rules
+- delegate NC Connector administration without making users full Nextcloud admins
 - control separate password delivery as plaintext mail or Nextcloud Secret link
 - expose setup state so Thunderbird and Outlook can explain backend problems clearly
 
@@ -37,8 +38,22 @@ The mail add-ons can work directly with a Nextcloud account. The backend is used
 | Admin-locked Share/Talk defaults | No | Yes |
 | Central email signatures | No | Yes |
 | Custom templates for Share, Talk, and password mails | No | Yes |
+| Delegated NC Connector admins | No | Yes |
 | Separate password delivery policies | No | Yes |
 | Nextcloud Secret links for password delivery | No | Yes, with the Secrets app |
+
+## Admin Delegation
+
+Full Nextcloud admins can delegate NC Connector administration to selected users without giving them full Nextcloud admin rights.
+
+Delegations are scoped by area and task:
+
+- Share, Talk, and email-signature policies
+- templates
+- group overrides
+- user overrides
+
+Delegated admins see NC Connector in their personal Nextcloud settings and only see the tabs and rows covered by their permissions.
 
 ## Policy Model
 

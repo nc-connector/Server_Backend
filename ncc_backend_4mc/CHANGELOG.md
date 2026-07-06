@@ -4,6 +4,20 @@ All notable changes to this repository are documented in this file.
 
 The format is based on **Keep a Changelog** and uses a simple version-first structure.
 
+## [1.2.1] - 2026-07-06
+
+### Added
+- Add NC Connector admin delegation with separate permissions for policies, templates, group overrides, and user overrides
+- Add a delegation overview for audits and support
+- Add automated backend checks for static rules, schema mapping, translations, JavaScript syntax, and service/controller behavior
+
+### Changed
+- Update the supported platform target to Nextcloud 32 through 35 and PHP 8.3 or newer
+- Sanitize backend template HTML before storage and before stored templates are returned
+- Tighten template preview image handling with HTTPS-only fetching, private-network blocking, size limits, content checks, and clearer admin warnings
+- Update bundled DOMPurify to 3.4.11
+- Split the admin UI code by maintained UI areas while keeping settings behavior unchanged
+
 ## [1.2.0] - 2026-06-15
 
 ### Added
