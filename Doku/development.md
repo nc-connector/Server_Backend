@@ -70,10 +70,10 @@ What this backend is **not** responsible for:
 ## 2. Supported versions & prerequisites
 
 Nextcloud:
-- Supported: **31–34**
+- Supported: **32–35**
 
 PHP:
-- Required: **8.1+**
+- Required: **8.3+**
 
 Background job:
 - `OCA\NcConnector\Cron\LicenseSyncJob`
@@ -596,16 +596,26 @@ Maintenance rule:
 ## 11. Local development and validation
 
 Typical local checks used in this repository:
+- PHP test tools:
+  - `composer install`
+- PHP syntax:
+  - `find ncc_backend_4mc -name "*.php" -print0 | xargs -0 -n1 php -l`
+- backend static checks:
+  - `php scripts/check-backend-static.php`
+- backend schema checks:
+  - `php scripts/check-backend-schema.php`
+- PHPUnit:
+  - `vendor/bin/phpunit`
 - JS syntax:
-  - `node --check ncc_backend_4mc/js/ncc_backend_4mc-adminSettings.js`
+  - `node scripts/check-backend-js.mjs`
 - translation JS syntax:
   - syntax-check `ncc_backend_4mc/l10n/*.js`
 - XML sanity:
-  - validate `appinfo/info.xml`
+  - covered by `php scripts/check-backend-static.php`
 
 Environment note from this workspace:
-- `php` is not available in the local PATH here.
-- Real PHP linting and `occ`-based verification must therefore happen on the Nextcloud instance.
+- Local validation uses PHP 8.3 or newer.
+- `occ`-based verification still happens on a Nextcloud instance.
 
 ### 11.1 Logging and error-handling rules
 
@@ -630,12 +640,24 @@ Practical audit checks:
 - `rg -n "catch \\(" ncc_backend_4mc -g '!js/vendor/**' -g '!l10n/**'`
 
 Good practical validation order:
-1. JS syntax
-2. translation syntax
-3. install / enable on Nextcloud
-4. admin UI smoke test
-5. runtime `/api/v1/status` check
-6. logging audit grep checks
+1. PHP syntax
+2. backend static checks
+3. backend schema checks
+4. backend l10n checks
+5. JS syntax
+6. PHPUnit
+7. install / enable on Nextcloud
+8. admin UI smoke test
+9. runtime `/api/v1/status` check
+10. logging audit grep checks
+
+Local commands:
+- `composer run check:static`
+- `composer run check:schema`
+- `composer run check:l10n`
+- `composer run check:js`
+- `composer test`
+- `composer run check`
 
 ---
 

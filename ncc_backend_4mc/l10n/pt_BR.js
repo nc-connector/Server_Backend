@@ -14,6 +14,7 @@ OC.L10N.register(
   "Assigned seats": "Seats atribuídos",
   "Assigned Seats": "Seats atribuídos",
   "Automatically generates a password when a Talk room is created.": "Gera automaticamente uma senha quando uma sala de conversação é criada.",
+  "NC Connector Backend": "NC Connector Backend",
   "available": "disponível",
   "Base directory": "Diretório base",
   "Bulk assignment failed.": "Falha na atribuição em massa.",

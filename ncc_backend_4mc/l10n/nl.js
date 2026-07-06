@@ -14,6 +14,7 @@ OC.L10N.register(
   "Assigned seats": "Toegewezen licenties",
   "Assigned Seats": "Toegewezen licenties",
   "Automatically generates a password when a Talk room is created.": "Genereert automatisch een wachtwoord wanneer een spreekkamer wordt aangemaakt.",
+  "NC Connector Backend": "NC Connector Backend",
   "available": "beschikbaar",
   "Base directory": "Basismap",
   "Bulk assignment failed.": "Bulktoewijzing mislukt.",

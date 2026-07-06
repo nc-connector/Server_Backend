@@ -1,0 +1,10 @@
+release/signing/*.key
+release/signing/*.csr
+release/signing/*.pem
+release/signing/*.crt
+release/signing/*.cert
+release/*.tar.gz
+release/stage/
+vendor/
+.phpunit.cache/
+.phpunit.result.cache

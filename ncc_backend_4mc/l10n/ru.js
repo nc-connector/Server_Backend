@@ -14,6 +14,7 @@ OC.L10N.register(
   "Assigned seats": "Назначенные лицензии",
   "Assigned Seats": "Назначенные лицензии",
   "Automatically generates a password when a Talk room is created.": "Автоматически генерирует пароль при создании комнаты разговора.",
+  "NC Connector Backend": "NC Connector Backend",
   "available": "доступный",
   "Base directory": "Базовый каталог",
   "Bulk assignment failed.": "Массовое назначение не удалось.",

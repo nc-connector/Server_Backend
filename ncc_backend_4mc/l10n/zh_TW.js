@@ -14,6 +14,7 @@ OC.L10N.register(
   "Assigned seats": "已指派席位",
   "Assigned Seats": "已指派席位",
   "Automatically generates a password when a Talk room is created.": "建立聊天室時自動產生密碼。",
+  "NC Connector Backend": "NC Connector Backend",
   "available": "可用的",
   "Base directory": "基目錄",
   "Bulk assignment failed.": "批量分配失敗。",

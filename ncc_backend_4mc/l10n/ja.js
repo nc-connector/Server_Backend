@@ -14,6 +14,7 @@ OC.L10N.register(
   "Assigned seats": "割り当て済みライセンス枠",
   "Assigned Seats": "割り当て済みライセンス枠",
   "Automatically generates a password when a Talk room is created.": "トークルーム作成時にパスワードを自動生成します。",
+  "NC Connector Backend": "NC Connector Backend",
   "available": "利用可能",
   "Base directory": "ベースディレクトリ",
   "Bulk assignment failed.": "一括割り当てに失敗しました。",

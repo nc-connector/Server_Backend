@@ -1,0 +1,39 @@
+{
+  "name": "nc-connector/server-backend",
+  "description": "NC Connector Backend for Nextcloud",
+  "type": "project",
+  "license": "AGPL-3.0-or-later",
+  "require": {
+    "php": ">=8.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "OCA\\NcConnector\\": "ncc_backend_4mc/lib/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "OCA\\NcConnector\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "@php vendor/bin/phpunit",
+    "check": [
+      "@check:static",
+      "@check:schema",
+      "@check:l10n",
+      "@check:js",
+      "@test"
+    ],
+    "check:static": "@php scripts/check-backend-static.php",
+    "check:schema": "@php scripts/check-backend-schema.php",
+    "check:l10n": "node scripts/check-backend-l10n.mjs",
+    "check:js": "node scripts/check-backend-js.mjs"
+  },
+  "config": {
+    "sort-packages": true
+  }
+}

@@ -14,6 +14,7 @@ OC.L10N.register(
   "Assigned seats": "Hozzárendelt licencek",
   "Assigned Seats": "Hozzárendelt licencek",
   "Automatically generates a password when a Talk room is created.": "Automatikusan jelszót generál, amikor egy beszélgetőszoba jön létre.",
+  "NC Connector Backend": "NC Connector Backend",
   "available": "elérhető",
   "Base directory": "Alapkönyvtár",
   "Bulk assignment failed.": "A tömeges hozzárendelés nem sikerült.",

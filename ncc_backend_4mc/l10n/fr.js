@@ -14,6 +14,7 @@ OC.L10N.register(
   "Assigned seats": "Seats attribués",
   "Assigned Seats": "Seats attribués",
   "Automatically generates a password when a Talk room is created.": "Génère automatiquement un mot de passe lors de la création d'une salle de discussion.",
+  "NC Connector Backend": "NC Connector Backend",
   "available": "disponible",
   "Base directory": "Répertoire de base",
   "Bulk assignment failed.": "L'attribution groupée a échoué.",
