@@ -52,8 +52,8 @@ Related docs:
 ## 1. Audience, prerequisites, and scope
 
 Supported versions:
-- **Nextcloud 31–34**
-- **PHP 8.1+**
+- **Nextcloud 32–35**
+- **PHP 8.3+**
 
 Operational scope:
 - The backend is the central policy source for the NC Connector mail add-ons.

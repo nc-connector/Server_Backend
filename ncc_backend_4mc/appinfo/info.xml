@@ -130,14 +130,15 @@ Einzelne Nutzer können die Mail-Add-ons weiterhin ohne dieses Backend verwenden
 	<bugs>https://nc-connector.de/kontakt/</bugs>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/appsettings.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/AdminDelegation.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/TemplateEditor.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/email_sig.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/NC_Connector_for_Thunderbird/main/screenshots/talk_wizzard1.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/NC_Connector_for_Thunderbird/main/screenshots/filelink_wizzard1.png</screenshot>
 
 	<dependencies>
-		<nextcloud min-version="31" max-version="34"/>
-		<php min-version="8.1"/>
+		<nextcloud min-version="32" max-version="35"/>
+		<php min-version="8.3"/>
 	</dependencies>
 
 	<background-jobs>
