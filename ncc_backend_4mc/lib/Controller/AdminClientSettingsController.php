@@ -125,7 +125,6 @@ class AdminClientSettingsController extends Controller {
 			'share.user_overrides',
 			'talk.user_overrides',
 			'signature.user_overrides',
-			'signature.templates',
 		], [
 			'target_user_id' => $targetUserId,
 		]);
@@ -377,7 +376,7 @@ class AdminClientSettingsController extends Controller {
 	 * @return array<string, mixed>
 	 */
 	private function filterPayloadForLayer(array $payload, string $layer): array {
-		return $this->filterPayload($payload, fn (string $key): string => $this->adminPermissions->scopeForSettingLayer($layer, $key));
+		return $this->filterPayload($payload, fn (string $key): array => $this->adminPermissions->scopesForSettingLayer($layer, $key));
 	}
 
 	/**
@@ -405,12 +404,24 @@ class AdminClientSettingsController extends Controller {
 	private function filterSettingMap(array $items, callable $scopeForKey): array {
 		$filtered = [];
 		foreach ($items as $key => $value) {
-			$scope = $scopeForKey((string)$key);
-			if ($this->adminPermissions->hasScope($this->userId, $scope)) {
+			$scopes = $scopeForKey((string)$key);
+			if ($this->hasAllScopes($scopes)) {
 				$filtered[$key] = $value;
 			}
 		}
 		return $filtered;
+	}
+
+	/**
+	 * @param string[] $scopes
+	 */
+	private function hasAllScopes(array $scopes): bool {
+		foreach ($scopes as $scope) {
+			if (!$this->adminPermissions->hasScope($this->userId, $scope)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**

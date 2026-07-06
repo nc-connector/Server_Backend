@@ -116,10 +116,10 @@ class AdminPermissionService {
 	public function scopesForSettingsPayload(string $layer, array $settings, array $templateAssetPreview = []): array {
 		$scopes = [];
 		foreach (array_keys($settings) as $key) {
-			$scopes[] = $this->scopeForSettingLayer($layer, (string)$key);
+			array_push($scopes, ...$this->scopesForSettingLayer($layer, (string)$key));
 		}
 		foreach (array_keys($templateAssetPreview) as $key) {
-			$scopes[] = $this->scopeForSettingLayer($layer, (string)$key);
+			array_push($scopes, ...$this->scopesForSettingLayer($layer, (string)$key));
 		}
 		return $this->uniqueScopes($scopes);
 	}
@@ -133,6 +133,18 @@ class AdminPermissionService {
 		};
 	}
 
+	/**
+	 * @return string[]
+	 */
+	public function scopesForSettingLayer(string $layer, string $key): array {
+		return match ($layer) {
+			self::SETTING_LAYER_DEFAULT => [$this->scopeForDefaultSetting($key)],
+			self::SETTING_LAYER_USER_OVERRIDE => $this->requiredOverrideScopes($key, 'user_overrides'),
+			self::SETTING_LAYER_GROUP_OVERRIDE => $this->requiredOverrideScopes($key, 'group_overrides'),
+			default => throw new \InvalidArgumentException('Unknown settings layer'),
+		};
+	}
+
 	public function scopeForDefaultSetting(string $key): string {
 		if (isset(self::TEMPLATE_DEFAULT_SETTINGS[$key])) {
 			return self::TEMPLATE_DEFAULT_SETTINGS[$key];
@@ -141,17 +153,35 @@ class AdminPermissionService {
 	}
 
 	public function scopeForUserOverrideSetting(string $key): string {
+		return $this->contentScopeForOverrideSetting($key);
+	}
+
+	public function scopeForGroupOverrideSetting(string $key): string {
+		return $this->contentScopeForOverrideSetting($key);
+	}
+
+	/**
+	 * @return string[]
+	 */
+	private function requiredOverrideScopes(string $key, string $overrideSuffix): array {
+		$domain = $this->settingDomain($key);
+		return $this->uniqueScopes([
+			$domain . '.' . $overrideSuffix,
+			$this->contentScopeForOverrideSetting($key),
+		]);
+	}
+
+	private function contentScopeForOverrideSetting(string $key): string {
+		if (isset(self::TEMPLATE_DEFAULT_SETTINGS[$key])) {
+			return self::TEMPLATE_DEFAULT_SETTINGS[$key];
+		}
 		if (isset(self::SIGNATURE_TEMPLATE_USER_SETTINGS[$key])) {
 			return 'signature.templates';
 		}
 		if (isset(self::SIGNATURE_POLICY_USER_SETTINGS[$key])) {
 			return 'signature.policy';
 		}
-		return $this->settingDomain($key) . '.user_overrides';
-	}
-
-	public function scopeForGroupOverrideSetting(string $key): string {
-		return $this->settingDomain($key) . '.group_overrides';
+		return $this->settingDomain($key) . '.policy';
 	}
 
 	/**

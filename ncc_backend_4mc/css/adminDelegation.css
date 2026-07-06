@@ -37,6 +37,10 @@
 	min-width: 0 !important;
 }
 
+.nccb-permission-card__option--disabled {
+	opacity: .55;
+}
+
 .nccb-delegation-permission-group {
 	display: grid;
 	grid-template-columns: 140px 1fr;

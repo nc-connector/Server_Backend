@@ -38,6 +38,35 @@ final class AdminPermissionServiceTest extends TestCase {
 		self::assertSame('share.policy', $service->scopeForDefaultSetting('share_send_password_mode'));
 	}
 
+	public function testOverridePayloadRequiresOverrideAndContentScope(): void {
+		$service = self::service();
+
+		self::assertSame(
+			['signature.user_overrides', 'signature.templates'],
+			$service->scopesForUserOverridePayload([
+				EmailSignatureRuntimeService::PHONE_MOBILE_KEY => ['mode' => 'forced', 'value' => '0160 / 123'],
+			])
+		);
+		self::assertSame(
+			['signature.user_overrides', 'signature.policy'],
+			$service->scopesForUserOverridePayload([
+				'email_signature_on_reply' => ['mode' => 'forced', 'value' => true],
+			])
+		);
+		self::assertSame(
+			['talk.group_overrides', 'talk.policy'],
+			$service->scopesForGroupOverridePayload([
+				'talk_lobby_enabled' => ['mode' => 'forced', 'value' => true],
+			])
+		);
+		self::assertSame(
+			['share.group_overrides', 'share.templates'],
+			$service->scopesForGroupOverridePayload([
+				'share_html_block_template' => ['mode' => 'forced', 'value' => '<p>x</p>'],
+			])
+		);
+	}
+
 	public function testPayloadScopesAreUniqueAcrossSettingsAndTemplateAssetPreview(): void {
 		$service = self::service();
 

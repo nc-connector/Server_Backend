@@ -195,6 +195,10 @@
 		return delegationUi.renderPermissionMatrix(selectedPermissions, getDelegationUiHelpers())
 	}
 
+	function bindPermissionMatrix(root) {
+		delegationUi.bindPermissionMatrix?.(root)
+	}
+
 	function renderDelegationOverview(container, delegations) {
 		delegationUi.renderDelegationOverview(container, delegations, getDelegationUiHelpers())
 	}
@@ -1700,6 +1704,7 @@
 			const delegation = selectedDelegation()
 			const permissions = delegation?.permissions || []
 			root.querySelector('[data-delegation-permissions]')?.replaceWith(htmlToElement(renderPermissionMatrix(permissions)))
+			bindPermissionMatrix(root)
 			refs.delegationSave.disabled = !refs.delegationUser.value
 			refs.delegationRemove.disabled = !refs.delegationUser.value || !delegation
 		}

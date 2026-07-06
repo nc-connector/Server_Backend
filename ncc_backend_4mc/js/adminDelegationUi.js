@@ -15,11 +15,23 @@
 		const { tr, escapeHtml } = helpers
 		const selected = new Set(Array.isArray(selectedPermissions) ? selectedPermissions : [])
 		const cards = ADMIN_PERMISSION_MATRIX.map((area) => {
+			const hasContentPermission = selected.has(`${area.area}.policy`) || selected.has(`${area.area}.templates`)
 			const options = ADMIN_PERMISSION_COLUMNS.map((column) => {
 				const permission = `${area.area}.${column.suffix}`
+				const isOverridePermission = column.suffix === 'group_overrides' || column.suffix === 'user_overrides'
+				const disabled = isOverridePermission && !hasContentPermission
+				const checked = selected.has(permission) && !disabled
 				return `
-					<label class="nccb-permission-card__option">
-						<input type="checkbox" class="nccb-delegation-permission" value="${escapeHtml(permission)}" ${selected.has(permission) ? 'checked' : ''}>
+					<label class="nccb-permission-card__option ${disabled ? 'nccb-permission-card__option--disabled' : ''}">
+						<input
+							type="checkbox"
+							class="nccb-delegation-permission"
+							value="${escapeHtml(permission)}"
+							data-permission-area="${escapeHtml(area.area)}"
+							data-permission-suffix="${escapeHtml(column.suffix)}"
+							${checked ? 'checked' : ''}
+							${disabled ? 'disabled' : ''}
+						>
 						<span>${escapeHtml(tr(column.label))}</span>
 					</label>
 				`
@@ -37,6 +49,44 @@
 				${cards}
 			</div>
 		`
+	}
+
+	function syncPermissionDependencies(root) {
+		const container = root.querySelector('[data-delegation-permissions]')
+		if (!(container instanceof HTMLElement)) {
+			return
+		}
+
+		ADMIN_PERMISSION_MATRIX.forEach((area) => {
+			const policy = container.querySelector(`.nccb-delegation-permission[data-permission-area="${area.area}"][data-permission-suffix="policy"]`)
+			const templates = container.querySelector(`.nccb-delegation-permission[data-permission-area="${area.area}"][data-permission-suffix="templates"]`)
+			const hasContentPermission = Boolean(policy?.checked || templates?.checked)
+			container
+				.querySelectorAll(`.nccb-delegation-permission[data-permission-area="${area.area}"][data-permission-suffix$="_overrides"]`)
+				.forEach((input) => {
+					input.disabled = !hasContentPermission
+					if (!hasContentPermission) {
+						input.checked = false
+					}
+					input.closest('.nccb-permission-card__option')
+						?.classList.toggle('nccb-permission-card__option--disabled', !hasContentPermission)
+				})
+		})
+	}
+
+	function bindPermissionMatrix(root) {
+		const container = root.querySelector('[data-delegation-permissions]')
+		if (!(container instanceof HTMLElement)) {
+			return
+		}
+		syncPermissionDependencies(root)
+		container.addEventListener('change', (event) => {
+			const input = event.target
+			if (!(input instanceof HTMLInputElement) || !input.classList.contains('nccb-delegation-permission')) {
+				return
+			}
+			syncPermissionDependencies(root)
+		})
 	}
 
 	function groupedDelegationPermissions(permissions) {
@@ -116,13 +166,16 @@
 
 	function readDelegationPermissions(root) {
 		return Array.from(root.querySelectorAll('.nccb-delegation-permission:checked'))
+			.filter((input) => !input.disabled)
 			.map((input) => String(input.value || ''))
 			.filter((value) => value !== '')
 	}
 
 	window.NCCBackendDelegationUi = {
+		bindPermissionMatrix,
 		readDelegationPermissions,
 		renderDelegationOverview,
 		renderPermissionMatrix,
+		syncPermissionDependencies,
 	}
 })()

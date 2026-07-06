@@ -79,19 +79,42 @@
 		return TEMPLATE_DEFAULT_PERMISSION_BY_KEY[key] || `${adminPermissionAreaForSetting(key)}.policy`
 	}
 
-	function userOverrideAdminPermissionForSetting(settingKey) {
+	function overrideContentAdminPermissionForSetting(settingKey) {
 		const key = String(settingKey || '')
+		if (TEMPLATE_DEFAULT_PERMISSION_BY_KEY[key]) {
+			return TEMPLATE_DEFAULT_PERMISSION_BY_KEY[key]
+		}
 		if (SIGNATURE_TEMPLATE_USER_SETTING_KEYS.has(key)) {
 			return 'signature.templates'
 		}
 		if (SIGNATURE_POLICY_USER_SETTING_KEYS.has(key)) {
 			return 'signature.policy'
 		}
-		return `${adminPermissionAreaForSetting(key)}.user_overrides`
+		return `${adminPermissionAreaForSetting(key)}.policy`
+	}
+
+	function userOverrideAdminPermissionsForSetting(settingKey) {
+		const key = String(settingKey || '')
+		return Array.from(new Set([
+			`${adminPermissionAreaForSetting(key)}.user_overrides`,
+			overrideContentAdminPermissionForSetting(key),
+		]))
+	}
+
+	function groupOverrideAdminPermissionsForSetting(settingKey) {
+		const key = String(settingKey || '')
+		return Array.from(new Set([
+			`${adminPermissionAreaForSetting(key)}.group_overrides`,
+			overrideContentAdminPermissionForSetting(key),
+		]))
+	}
+
+	function userOverrideAdminPermissionForSetting(settingKey) {
+		return overrideContentAdminPermissionForSetting(settingKey)
 	}
 
 	function groupOverrideAdminPermissionForSetting(settingKey) {
-		return `${adminPermissionAreaForSetting(settingKey)}.group_overrides`
+		return overrideContentAdminPermissionForSetting(settingKey)
 	}
 
 	function hasAdminPermission(state, permission) {
@@ -113,11 +136,13 @@
 	}
 
 	function canEditUserOverrideSetting(state, settingKey) {
-		return hasAdminPermission(state, userOverrideAdminPermissionForSetting(settingKey))
+		return userOverrideAdminPermissionsForSetting(settingKey)
+			.every((permission) => hasAdminPermission(state, permission))
 	}
 
 	function canEditGroupOverrideSetting(state, settingKey) {
-		return hasAdminPermission(state, groupOverrideAdminPermissionForSetting(settingKey))
+		return groupOverrideAdminPermissionsForSetting(settingKey)
+			.every((permission) => hasAdminPermission(state, permission))
 	}
 
 	function canReadAssignedSeatOverview(state) {
@@ -138,10 +163,7 @@
 	}
 
 	function userOverridePermissionsForCategory(category) {
-		const suffixes = category === 'email_signature'
-			? ['user_overrides', 'templates']
-			: ['user_overrides']
-		return permissionsForCategory(category, suffixes)
+		return permissionsForCategory(category, ['user_overrides'])
 	}
 
 	function canUseAnyUserOverridePanel(state) {
@@ -161,6 +183,8 @@
 		defaultAdminPermissionForSetting,
 		userOverrideAdminPermissionForSetting,
 		groupOverrideAdminPermissionForSetting,
+		userOverrideAdminPermissionsForSetting,
+		groupOverrideAdminPermissionsForSetting,
 		hasAdminPermission,
 		hasAnyAdminPermission,
 		canEditDefaultSetting,
