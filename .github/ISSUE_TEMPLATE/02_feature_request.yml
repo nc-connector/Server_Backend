@@ -1,0 +1,64 @@
+name: Feature request
+description: Suggest an improvement for the Backend
+title: "[Feature]: "
+labels: ["enhancement", "roadmap", "product: backend"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea.
+
+        Please describe the admin or client workflow you want to improve. If Thunderbird and Outlook should behave the same way, mention it here.
+
+        Public roadmap: https://github.com/orgs/nc-connector/projects/1
+  - type: checkboxes
+    id: quick-checks
+    attributes:
+      label: Quick checks
+      options:
+        - label: I searched existing issues and the public roadmap first.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      placeholder: I am always frustrated when ...
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: What should happen?
+      placeholder: I would like NC Connector Backend to ...
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Admin UI
+        - Seats / Licensing
+        - Sharing policies / templates
+        - Talk policies / templates
+        - Email signatures
+        - Admin delegation
+        - Update check
+        - API
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    id: client-impact
+    attributes:
+      label: Client impact
+      description: Select what should also be considered.
+      options:
+        - label: Thunderbird needs matching support.
+        - label: Outlook needs matching support.
+        - label: This is backend-only.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add screenshots, examples, or notes if helpful.
