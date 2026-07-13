@@ -1,7 +1,7 @@
 name: "🚀 Feature request"
 description: Suggest an improvement for the Backend
-title: "[Feature]: "
-labels: ["enhancement", "roadmap", "product: backend"]
+labels: ["product: backend"]
+type: feature
 body:
   - type: markdown
     attributes:

@@ -1,7 +1,7 @@
 name: "🐞 Bug report"
 description: Report a reproducible Backend problem
-title: "[Bug]: "
-labels: ["bug", "product: backend"]
+labels: ["product: backend"]
+type: bug
 body:
   - type: markdown
     attributes:
