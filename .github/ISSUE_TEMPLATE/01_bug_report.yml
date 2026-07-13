@@ -97,5 +97,5 @@ body:
     id: logs
     attributes:
       label: Logs or screenshots
-      description: Add relevant Nextcloud logs, browser console output, or screenshots. Remove passwords, tokens, and private data.
+      description: See https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#11-logs-and-support-data for how to collect backend logs. Remove passwords, tokens, and private data.
       render: text

@@ -46,6 +46,7 @@ Related docs:
 - [8. What mail clients read from the backend](#8-what-mail-clients-read-from-the-backend)
 - [9. Install, disable, remove, keep-data](#9-install-disable-remove-keep-data)
 - [10. Operational recommendations](#10-operational-recommendations)
+- [11. Logs and support data](#11-logs-and-support-data)
 
 ---
 
@@ -755,3 +756,26 @@ Logging note:
 - Browser-side admin UI failures are additionally written to the browser console.
 
 If you follow that order, most support cases become straightforward instead of guesswork.
+
+---
+
+## 11. Logs and support data
+
+For backend bug reports, include the shortest useful log excerpt instead of a full server log.
+
+Nextcloud server log:
+1. Reproduce the problem in the admin UI or from the affected mail client.
+2. Open **Administration settings -> Logging** in Nextcloud and filter for `ncc_backend_4mc`, or use shell access to inspect the Nextcloud `nextcloud.log`.
+3. If you have shell access, `php occ log:watch` can be useful while reproducing the issue.
+4. Copy the relevant `warning` or `error` entries around the failing action.
+
+Browser console for admin UI problems:
+1. Open the NC Connector Backend admin page.
+2. Open the browser developer tools console.
+3. Reproduce the problem.
+4. Copy the failing request path, HTTP status, and console error text.
+
+Before sharing logs:
+- remove license keys, app passwords, tokens, private links, and customer data
+- keep HTTP status codes, endpoint paths, backend version, Nextcloud version, PHP version, and the affected UI area
+- include whether the affected user is a full Nextcloud admin or a delegated NC Connector admin
