@@ -140,6 +140,10 @@ The default Secrets link lifetime is 7 days.
 - [Translations](Translations.md)
 - [Third-party licenses](VENDOR.md)
 
+## Roadmap
+
+Planned work across Thunderbird, Outlook, and the Backend is tracked in the public [NC Connector Roadmap](https://github.com/orgs/nc-connector/projects/1).
+
 ## Screenshots
 
 <details open>
