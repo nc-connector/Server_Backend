@@ -568,6 +568,9 @@ Important distinction:
 
 Current template-language rules:
 - `share_html_block_template` and `share_password_template` are relevant only when `language_share_html_block = custom`
+- the built-in Share template uses `{LINK_INTRO}` and `{LINK_LABEL}` so the mail clients can distinguish a normal Nextcloud share page from an attachment ZIP download without another policy setting
+- stored customer templates are never rewritten to add these variables; older templates keep working with their existing placeholders
+- legacy Share phrases remain in `TEMPLATE_TRANSLATION_PHRASES` so the editor can still translate templates saved before the mode-aware placeholders were introduced
 - `share_send_password_mode = null` means plain password mail fallback because the Secrets app is unavailable
 - `share_secrets_expire_days = null` means no Secrets link expiry can be used
 - `talk_invitation_template` is relevant only when `language_talk_description = custom`

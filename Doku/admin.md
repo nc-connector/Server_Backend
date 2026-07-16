@@ -282,11 +282,15 @@ Template details:
 - The admin template editor sanitizes custom HTML with bundled DOMPurify before preview and save. Scripts, inline event handlers, unsafe URL protocols, and unsupported form/embed elements are removed there.
 
 Template variables used by Share templates:
-- `{URL}`
+- `{URL}` → final share URL; normal shares use `/s/<token>`, attachment mode uses `/s/<token>/download`
+- `{LINK_INTRO}` → localized, mode-specific explanation supplied by the mail client
+- `{LINK_LABEL}` → localized `Nextcloud link` or `ZIP download` label supplied by the mail client
 - `{PASSWORD}`
 - `{EXPIRATIONDATE}`
 - `{RIGHTS}`
 - `{NOTE}`
+
+The built-in default Share template uses `{LINK_INTRO}` and `{LINK_LABEL}`. Existing custom templates stored by customers are not migrated or rewritten; templates that only use the older variables remain valid.
 
 Important dependency:
 - If `Send password separately` is disabled, `Password mode` and `Nextcloud Secrets link expiry (days)` are inactive.

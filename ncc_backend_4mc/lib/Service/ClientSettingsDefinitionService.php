@@ -52,11 +52,11 @@ class ClientSettingsDefinitionService {
 						</table>
 						<div style="padding:18px 18px 12px 18px;">
 							<p style="margin:0 0 14px 0;line-height:1.4;">{NOTE}</p>
-							<p style="margin:0 0 14px 0;line-height:1.4;">The files have been provided securely and in a privacy-compliant manner via Nextcloud. You can download them using the link below.</p>
+							<p style="margin:0 0 14px 0;line-height:1.4;">{LINK_INTRO}</p>
 							<table style="width:100%;border-collapse:collapse;margin-bottom:10px;">
 								<tbody>
 									<tr>
-										<th style="text-align:left;width:13ch;vertical-align:top;padding:6px 10px 6px 0;">Download link</th>
+										<th style="text-align:left;width:13ch;vertical-align:top;padding:6px 10px 6px 0;">{LINK_LABEL}</th>
 										<td style="padding:6px 0;max-width:50ch;word-break:break-word;"><a href="{URL}" style="color:#0082C9;text-decoration:none;">{URL}</a></td>
 									</tr>
 									<tr>

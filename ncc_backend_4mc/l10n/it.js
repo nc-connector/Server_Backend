@@ -185,7 +185,7 @@ OC.L10N.register(
   "Unknown": "Sconosciuto",
   "Unknown error": "Errore sconosciuto",
   "Upload/Create": "Carica/Crea",
-  "Use variables like {URL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.": "Usa variabili come {URL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.",
+  "Use variables like {URL}, {LINK_INTRO}, {LINK_LABEL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.": "Usa variabili come {URL}, {LINK_INTRO}, {LINK_LABEL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.",
   "Useful to prevent participants from joining too early.": "Utile per evitare che i partecipanti si uniscano troppo presto.",
   "User": "Utente",
   "User Choice": "Scelta dell'utente",

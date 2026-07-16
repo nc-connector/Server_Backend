@@ -183,7 +183,7 @@
         "Unknown": "未知",
         "Unknown error": "不明なエラー",
         "Upload/Create": "アップロード/作成",
-        "Use variables like {URL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.": "{URL}、{PASSWORD}、{EXPIRATIONDATE}、{RIGHTS}、{NOTE} などの変数を使用します。",
+        "Use variables like {URL}, {LINK_INTRO}, {LINK_LABEL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.": "{URL}、{LINK_INTRO}、{LINK_LABEL}、{PASSWORD}、{EXPIRATIONDATE}、{RIGHTS}、{NOTE} などの変数を使用します。",
         "Useful to prevent participants from joining too early.": "参加者が早すぎる参加を防ぐのに役立ちます。",
         "User": "ユーザー",
         "User Choice": "ユーザーの選択",

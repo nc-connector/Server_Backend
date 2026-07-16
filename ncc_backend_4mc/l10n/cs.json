@@ -183,7 +183,7 @@
         "Unknown": "Neznámý",
         "Unknown error": "Neznámá chyba",
         "Upload/Create": "Nahrát/Vytvořit",
-        "Use variables like {URL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.": "Použijte proměnné jako {URL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.",
+        "Use variables like {URL}, {LINK_INTRO}, {LINK_LABEL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.": "Použijte proměnné jako {URL}, {LINK_INTRO}, {LINK_LABEL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.",
         "Useful to prevent participants from joining too early.": "Užitečné, aby se účastníci nepřipojili příliš brzy.",
         "User": "Uživatel",
         "User Choice": "Uživatelská volba",

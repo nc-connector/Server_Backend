@@ -183,7 +183,7 @@
         "Unknown": "Nieznany",
         "Unknown error": "Nieznany błąd",
         "Upload/Create": "Prześlij/Utwórz",
-        "Use variables like {URL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.": "Użyj zmiennych takich jak {URL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.",
+        "Use variables like {URL}, {LINK_INTRO}, {LINK_LABEL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.": "Użyj zmiennych takich jak {URL}, {LINK_INTRO}, {LINK_LABEL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.",
         "Useful to prevent participants from joining too early.": "Przydatne, aby uniemożliwić uczestnikom dołączenie zbyt wcześnie.",
         "User": "Użytkownik",
         "User Choice": "Wybór użytkownika",

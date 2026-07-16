@@ -92,7 +92,7 @@
 			label: 'Email share template',
 			tooltip: [
 				'HTML template used for the share block inserted by mail clients.',
-				'Use variables like {URL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.',
+				'Use variables like {URL}, {LINK_INTRO}, {LINK_LABEL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.',
 			],
 		},
 		share_password_template: {
@@ -288,6 +288,7 @@
 	]
 	const TEMPLATE_TRANSLATION_PHRASES = {
 		[SHARE_HTML_TEMPLATE_KEY]: {
+			// Legacy phrases stay available so existing stored templates remain translatable.
 			share_intro_1: {
 				en: 'The files have been provided securely and in a privacy-compliant manner via Nextcloud.',
 				de: 'Die Dateien wurden sicher und datenschutzkonform über Nextcloud bereitgestellt.',

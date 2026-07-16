@@ -58,6 +58,28 @@ final class ClientSettingsDefinitionServiceTest extends TestCase {
 		}
 	}
 
+	public function testDefaultShareTemplateUsesClientResolvedLinkVariables(): void {
+		$default = (string)$this->definitions->get('share_html_block_template')['default'];
+
+		self::assertStringContainsString('{LINK_INTRO}', $default);
+		self::assertStringContainsString('{LINK_LABEL}', $default);
+		self::assertStringContainsString('{URL}', $default);
+		self::assertStringNotContainsString('>Download link<', $default);
+	}
+
+	public function testLegacyStoredShareTemplateIsNotRewrittenWithNewVariables(): void {
+		$legacy = '<p>Legacy link: {URL}</p>';
+
+		foreach ([
+			$this->definitions->normalizeValue('share_html_block_template', $legacy),
+			$this->definitions->parseStoredValue('share_html_block_template', $legacy),
+		] as $value) {
+			self::assertStringContainsString('Legacy link: {URL}', $value);
+			self::assertStringNotContainsString('{LINK_INTRO}', $value);
+			self::assertStringNotContainsString('{LINK_LABEL}', $value);
+		}
+	}
+
 	public function testUserOverrideOnlySignatureFieldsAreNotAddonControllable(): void {
 		self::assertSame([
 			EmailSignatureRuntimeService::EMAIL_ADDRESS_KEY,

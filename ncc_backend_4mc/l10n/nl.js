@@ -185,7 +185,7 @@ OC.L10N.register(
   "Unknown": "Onbekend",
   "Unknown error": "Onbekende fout",
   "Upload/Create": "Uploaden/creëren",
-  "Use variables like {URL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.": "Gebruik variabelen zoals {URL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.",
+  "Use variables like {URL}, {LINK_INTRO}, {LINK_LABEL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.": "Gebruik variabelen zoals {URL}, {LINK_INTRO}, {LINK_LABEL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.",
   "Useful to prevent participants from joining too early.": "Handig om te voorkomen dat deelnemers te vroeg meedoen.",
   "User": "Gebruiker",
   "User Choice": "Gebruikerskeuze",
