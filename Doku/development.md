@@ -568,6 +568,9 @@ Important distinction:
 
 Current template-language rules:
 - `share_html_block_template` and `share_password_template` are relevant only when `language_share_html_block = custom`
+- the built-in Share template uses `{LINK_INTRO}` and `{LINK_LABEL}` so the mail clients can distinguish a normal Nextcloud share page from an attachment ZIP download without another policy setting
+- stored customer templates are never rewritten to add these variables; older templates keep working with their existing placeholders
+- legacy Share phrases remain in `TEMPLATE_TRANSLATION_PHRASES` so the editor can still translate templates saved before the mode-aware placeholders were introduced
 - `share_send_password_mode = null` means plain password mail fallback because the Secrets app is unavailable
 - `share_secrets_expire_days = null` means no Secrets link expiry can be used
 - `talk_invitation_template` is relevant only when `language_talk_description = custom`
@@ -584,6 +587,9 @@ Current template-language rules:
 - `{ABOUT}` is the only multiline-capable email signature variable: it is HTML-escaped, CRLF/CR line endings are normalized, and line breaks are rendered as `<br>`
 - empty signature placeholders remove their surrounding line or table row before the rendered HTML is returned
 - the built-in default email signature template is intentionally table-free and does not rely on `<style>` tags, because mail clients may sanitize style blocks before inserting the signature
+- changes to the built-in email signature template only affect the schema fallback; stored default, group, and user templates are never migrated or rewritten
+- template variables are protected while `DOMDocument` sanitizes HTML so placeholders inside `href` attributes are not URL-encoded before runtime rendering
+- rendered email signatures pass through the sanitizer again because profile and user-override values are inserted after the stored template was sanitized
 - otherwise those template values are effectively inactive for runtime use
 
 Maintenance rule:

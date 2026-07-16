@@ -44,6 +44,8 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
   - `policy.talk.event_description_type` is always either `"html"` or `"plain_text"`.
   - `policy_editable` does not contain `event_description_type`, because it is derived from the effective talk template mode and is not directly editable in mail clients.
   - If `custom` is active, `policy.share.share_html_block_template` contains the stored HTML template with the direct logo URL.
+  - Share templates may contain `{LINK_INTRO}` and `{LINK_LABEL}`. Thunderbird and Outlook resolve them according to the existing share mode: normal share page or attachment ZIP download.
+  - Existing stored templates are returned as stored and sanitized; the backend does not inject the new variables into customer templates or migrate older template HTML.
   - If `policy.talk.talk_invitation_template_format = "html"`, `policy.talk.talk_invitation_template` contains the stored HTML template.
   - If `policy.talk.talk_invitation_template_format = "plain_text"`, `policy.talk.talk_invitation_template` contains cleaned plain text with preserved raw URLs and preserved template variables such as `{MEETING_URL}` or `{PASSWORD}`.
   - If `policy.talk.language_talk_description != "custom"`, `policy.talk.talk_invitation_template_format` is `null` and `policy.talk.event_description_type` falls back to `"plain_text"`.

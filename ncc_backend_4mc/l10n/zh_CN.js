@@ -185,7 +185,7 @@ OC.L10N.register(
   "Unknown": "未知",
   "Unknown error": "未知错误",
   "Upload/Create": "上传/创建",
-  "Use variables like {URL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.": "可使用变量：{URL}、{PASSWORD}、{EXPIRATIONDATE}、{RIGHTS}、{NOTE}。",
+  "Use variables like {URL}, {LINK_INTRO}, {LINK_LABEL}, {PASSWORD}, {EXPIRATIONDATE}, {RIGHTS}, {NOTE}.": "可使用变量：{URL}、{LINK_INTRO}、{LINK_LABEL}、{PASSWORD}、{EXPIRATIONDATE}、{RIGHTS}、{NOTE}。",
   "Useful to prevent participants from joining too early.": "有助于防止参与者过早加入。",
   "User": "用户",
   "User Choice": "用户选择",

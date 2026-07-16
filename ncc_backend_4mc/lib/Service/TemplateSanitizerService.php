@@ -153,6 +153,7 @@ class TemplateSanitizerService {
 			return '';
 		}
 		$dirty = $this->normalizeDocumentFragment($dirty);
+		[$dirty, $protectedVariables] = $this->protectTemplateVariables($dirty);
 
 		$previousUseInternalErrors = libxml_use_internal_errors(true);
 		$document = new \DOMDocument('1.0', 'UTF-8');
@@ -173,7 +174,31 @@ class TemplateSanitizerService {
 		}
 
 		$this->sanitizeChildren($root);
-		return $this->innerHtml($root);
+		return strtr($this->innerHtml($root), $protectedVariables);
+	}
+
+	/**
+	 * @return array{0:string, 1:array<string, string>}
+	 */
+	private function protectTemplateVariables(string $html): array {
+		// DOMDocument URL-encodes braces in attributes, which would make stored variables impossible to resolve later.
+		$prefix = 'NCCBTEMPLATE' . hash('sha256', $html);
+		while (str_contains($html, $prefix)) {
+			$prefix .= 'X';
+		}
+
+		$restoreMap = [];
+		$protected = preg_replace_callback(
+			'/\{[A-Z][A-Z0-9_]*\}/',
+			static function (array $match) use (&$restoreMap, $prefix): string {
+				$token = $prefix . count($restoreMap);
+				$restoreMap[$token] = $match[0];
+				return $token;
+			},
+			$html
+		);
+
+		return [$protected ?? $html, $restoreMap];
 	}
 
 	private function normalizeDocumentFragment(string $html): string {

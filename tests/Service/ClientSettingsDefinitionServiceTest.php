@@ -58,6 +58,74 @@ final class ClientSettingsDefinitionServiceTest extends TestCase {
 		}
 	}
 
+	public function testDefaultShareTemplateUsesClientResolvedLinkVariables(): void {
+		$default = (string)$this->definitions->get('share_html_block_template')['default'];
+
+		self::assertStringContainsString('{LINK_INTRO}', $default);
+		self::assertStringContainsString('{LINK_LABEL}', $default);
+		self::assertStringContainsString('{URL}', $default);
+		self::assertStringNotContainsString('>Download link<', $default);
+	}
+
+	public function testLegacyStoredShareTemplateIsNotRewrittenWithNewVariables(): void {
+		$legacy = '<p>Legacy link: {URL}</p>';
+
+		foreach ([
+			$this->definitions->normalizeValue('share_html_block_template', $legacy),
+			$this->definitions->parseStoredValue('share_html_block_template', $legacy),
+		] as $value) {
+			self::assertStringContainsString('Legacy link: {URL}', $value);
+			self::assertStringNotContainsString('{LINK_INTRO}', $value);
+			self::assertStringNotContainsString('{LINK_LABEL}', $value);
+		}
+	}
+
+	public function testDefaultEmailSignatureIncludesAllSupportedContactVariables(): void {
+		$default = (string)$this->definitions->get('email_signature_template')['default'];
+		$sanitized = (string)$this->definitions->normalizeValue('email_signature_template', $default);
+
+		foreach ([
+			'{NAME}',
+			'{FUNCTION}',
+			'{ABOUT}',
+			'{ORGANISATION}',
+			'{PHONE}',
+			'{PHONE_MOBILE}',
+			'{EMAIL}',
+			'{CUSTOM1}',
+			'{CUSTOM2}',
+		] as $variable) {
+			self::assertStringContainsString($variable, $default);
+		}
+
+		self::assertStringContainsString('Musterstra&szlig;e 1', $default);
+		self::assertStringContainsString('9999 Musterort', $default);
+		self::assertStringContainsString(
+			'https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/ncc_backend_4mc/img/header.png',
+			$default
+		);
+		self::assertStringNotContainsString('/img/runtime/', $default);
+		self::assertStringContainsString('href="tel:{PHONE}"', $sanitized);
+		self::assertStringContainsString('href="tel:{PHONE_MOBILE}"', $sanitized);
+		self::assertStringContainsString('href="mailto:{EMAIL}"', $sanitized);
+		self::assertStringContainsString('href="{CUSTOM1}"', $sanitized);
+		self::assertStringContainsString('href="{CUSTOM2}"', $sanitized);
+		self::assertStringContainsString('src="https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/ncc_backend_4mc/img/header.png"', $sanitized);
+	}
+
+	public function testStoredEmailSignatureTemplateIsNotReplacedByNewDefault(): void {
+		$customerTemplate = '<div>Customer signature for {NAME}</div>';
+
+		foreach ([
+			$this->definitions->normalizeValue('email_signature_template', $customerTemplate),
+			$this->definitions->parseStoredValue('email_signature_template', $customerTemplate),
+		] as $value) {
+			self::assertSame($customerTemplate, $value);
+			self::assertStringNotContainsString('Musterort', $value);
+			self::assertStringNotContainsString('{PHONE_MOBILE}', $value);
+		}
+	}
+
 	public function testUserOverrideOnlySignatureFieldsAreNotAddonControllable(): void {
 		self::assertSame([
 			EmailSignatureRuntimeService::EMAIL_ADDRESS_KEY,
