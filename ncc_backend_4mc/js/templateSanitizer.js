@@ -35,6 +35,8 @@
     'cellspacing',
     'align',
     'valign',
+    'data-nccb-legacy-link-intro',
+    'data-nccb-legacy-link-label',
   ];
 
   const ADD_TAGS = [

@@ -570,7 +570,8 @@ Current template-language rules:
 - the stored `share_html_block_template` and `share_password_template` are relevant only when `language_share_html_block = custom`
 - the built-in Share template uses `{LINK_INTRO}` and `{LINK_LABEL}` so the mail clients can distinguish a normal Nextcloud share page from an attachment ZIP download without another policy setting
 - after global, group, and user settings have been resolved, the status endpoint exposes the canonical Share template as output-only `share_html_block_template_v2`
-- the existing `share_html_block_template` response key replaces the two mode-aware variables with the historical generic wording so clients that do not know them never render literal placeholders
+- the existing `share_html_block_template` response key replaces the two mode-aware variables with the generic wording recorded by the template editor for the selected template language; templates without that metadata use the historical English fallback
+- the compatibility metadata is removed from both API response templates and is never inserted into outgoing mail
 - `share_html_block_template_v2` is not part of the settings schema or `policy_editable`; the admin still edits one canonical template
 - stored customer templates are never rewritten to add these variables; older templates keep working with their existing placeholders and produce identical legacy and V2 output
 - legacy Share phrases remain in `TEMPLATE_TRANSLATION_PHRASES` so the editor can still translate templates saved before the mode-aware placeholders were introduced

@@ -4,6 +4,8 @@
  */
 (() => {
 	'use strict'
+	const LEGACY_LINK_INTRO_ATTRIBUTE = 'data-nccb-legacy-link-intro'
+	const LEGACY_LINK_LABEL_ATTRIBUTE = 'data-nccb-legacy-link-label'
 
 	function createTemplateEditor(options = {}) {
 		const tr = typeof options.tr === 'function' ? options.tr : (text) => text
@@ -111,6 +113,43 @@
 				})
 		}
 
+		function applyLegacyShareCopyMetadata(body, settingKey, targetLocale) {
+			const phrases = translationPhrases[String(settingKey || '')]
+			const root = body.firstElementChild
+			if (!phrases?.share_intro_1 || !phrases?.share_intro_2 || !phrases?.download_link || !root) {
+				return false
+			}
+
+			const locale = String(targetLocale || '')
+			const intro = [phrases.share_intro_1[locale], phrases.share_intro_2[locale]]
+				.map((value) => String(value || '').trim())
+				.filter(Boolean)
+				.join(' ')
+			const label = String(phrases.download_link[locale] || '').trim()
+			if (!intro || !label) {
+				return false
+			}
+
+			const languageTag = locale
+				.split('_')
+				.map((part, index) => index === 0 ? part.toLowerCase() : part.toUpperCase())
+				.join('-')
+			const attributes = {
+				lang: languageTag,
+				[LEGACY_LINK_INTRO_ATTRIBUTE]: intro,
+				[LEGACY_LINK_LABEL_ATTRIBUTE]: label,
+			}
+			let changed = false
+			for (const [name, value] of Object.entries(attributes)) {
+				if (root.getAttribute(name) === value) {
+					continue
+				}
+				root.setAttribute(name, value)
+				changed = true
+			}
+			return changed
+		}
+
 		function isTranslationToken(segment) {
 			return /^\{[A-Z0-9_]+\}$/.test(segment) || /^https?:\/\//i.test(segment)
 		}
@@ -175,6 +214,7 @@
 					changed = true
 				}
 			}
+			changed = applyLegacyShareCopyMetadata(body, settingKey, targetLocale) || changed
 
 			return {
 				html: body.innerHTML,
@@ -399,20 +439,23 @@
 
 			const defaultControl = wrapper.querySelector('.nccb-template-default')
 			const defaultValue = String(defaultControl?.value ?? '')
+			const targetLocale = modalState.languageSelect instanceof HTMLSelectElement
+				? modalState.languageSelect.value
+				: ''
+			const resetValue = targetLocale
+				? translateTemplateHtml(defaultValue, String(wrapper.dataset.settingKey || ''), targetLocale).html
+				: defaultValue
 			modalState.assetMap = { ...getDefaultAssetMap(wrapper) }
-			if (modalState.languageSelect instanceof HTMLSelectElement) {
-				modalState.languageSelect.value = ''
-			}
 			const editor = getModalEditor()
 			if (editor) {
-				editor.setContent(toEditorHtml(defaultValue, modalState.assetMap))
+				editor.setContent(toEditorHtml(resetValue, modalState.assetMap))
 				if (modalState.textarea instanceof HTMLTextAreaElement) {
-					modalState.textarea.value = defaultValue
+					modalState.textarea.value = resetValue
 				}
 				return
 			}
 			if (modalState.textarea instanceof HTMLTextAreaElement) {
-				modalState.textarea.value = defaultValue
+				modalState.textarea.value = resetValue
 			}
 		}
 

@@ -45,6 +45,18 @@ final class TemplateSanitizerServiceTest extends TestCase {
 		self::assertStringNotContainsString('<iframe', $html);
 	}
 
+	public function testOnlyInternalShareCompatibilityDataAttributesStay(): void {
+		$html = $this->sanitizer->sanitizeHtml(
+			'<div data-nccb-legacy-link-intro="Sicher bereitgestellt."'
+			. ' data-nccb-legacy-link-label="Download-Link"'
+			. ' data-untrusted="remove">Text</div>'
+		);
+
+		self::assertStringContainsString('data-nccb-legacy-link-intro="Sicher bereitgestellt."', $html);
+		self::assertStringContainsString('data-nccb-legacy-link-label="Download-Link"', $html);
+		self::assertStringNotContainsString('data-untrusted', $html);
+	}
+
 	public function testHttpImageSourcesStayForTemplateAssetCache(): void {
 		$html = $this->sanitizer->sanitizeHtml(
 			'<img src="https://example.invalid/logo.png" alt="Logo" width="120" height="40">'

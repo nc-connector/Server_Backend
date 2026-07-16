@@ -128,6 +128,8 @@ class TemplateSanitizerService {
 		'colspan' => true,
 		'color' => true,
 		'dir' => true,
+		'data-nccb-legacy-link-intro' => true,
+		'data-nccb-legacy-link-label' => true,
 		'face' => true,
 		'height' => true,
 		'href' => true,
@@ -301,7 +303,10 @@ class TemplateSanitizerService {
 	}
 
 	private function shouldRemoveAttribute(string $name): bool {
-		if ($name === '' || str_starts_with($name, 'on') || str_starts_with($name, 'data-') || str_starts_with($name, 'xmlns')) {
+		if ($name === '' || str_starts_with($name, 'on') || str_starts_with($name, 'xmlns')) {
+			return true;
+		}
+		if (str_starts_with($name, 'data-') && !isset(self::ALLOWED_ATTRIBUTES[$name])) {
 			return true;
 		}
 

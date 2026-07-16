@@ -24,6 +24,8 @@ use OCP\IRequest;
 class StatusController extends Controller {
 	private const SHARE_HTML_BLOCK_TEMPLATE_KEY = 'share_html_block_template';
 	private const SHARE_HTML_BLOCK_TEMPLATE_V2_KEY = 'share_html_block_template_v2';
+	private const LEGACY_SHARE_LINK_INTRO_ATTRIBUTE = 'data-nccb-legacy-link-intro';
+	private const LEGACY_SHARE_LINK_LABEL_ATTRIBUTE = 'data-nccb-legacy-link-label';
 	private const LEGACY_SHARE_LINK_INTRO = 'The files have been provided securely and in a privacy-compliant manner via Nextcloud. You can download them using the link below.';
 	private const LEGACY_SHARE_LINK_LABEL = 'Download link';
 
@@ -106,19 +108,53 @@ class StatusController extends Controller {
 		}
 
 		$template = $settings[self::SHARE_HTML_BLOCK_TEMPLATE_KEY];
-		$settings[self::SHARE_HTML_BLOCK_TEMPLATE_V2_KEY] = $template;
 		if (!is_string($template)) {
+			$settings[self::SHARE_HTML_BLOCK_TEMPLATE_V2_KEY] = $template;
 			return $settings;
 		}
+
+		$legacyIntro = $this->readLegacyShareCopy(
+			$template,
+			self::LEGACY_SHARE_LINK_INTRO_ATTRIBUTE,
+			self::LEGACY_SHARE_LINK_INTRO
+		);
+		$legacyLabel = $this->readLegacyShareCopy(
+			$template,
+			self::LEGACY_SHARE_LINK_LABEL_ATTRIBUTE,
+			self::LEGACY_SHARE_LINK_LABEL
+		);
+		$template = $this->stripLegacyShareCopyMetadata($template);
+		$settings[self::SHARE_HTML_BLOCK_TEMPLATE_V2_KEY] = $template;
 
 		// Older clients render unknown placeholders literally, so the existing API key must remain placeholder-free.
 		$settings[self::SHARE_HTML_BLOCK_TEMPLATE_KEY] = str_replace(
 			['{LINK_INTRO}', '{LINK_LABEL}'],
-			[self::LEGACY_SHARE_LINK_INTRO, self::LEGACY_SHARE_LINK_LABEL],
+			[$legacyIntro, $legacyLabel],
 			$template
 		);
 
 		return $settings;
+	}
+
+	private function readLegacyShareCopy(string $template, string $attribute, string $fallback): string {
+		$pattern = '/\b' . preg_quote($attribute, '/') . '\s*=\s*(["\'])(.*?)\1/is';
+		if (preg_match($pattern, $template, $matches) !== 1) {
+			return $fallback;
+		}
+
+		$value = trim(html_entity_decode((string)($matches[2] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+		return $value !== ''
+			? htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8')
+			: $fallback;
+	}
+
+	private function stripLegacyShareCopyMetadata(string $template): string {
+		$attributes = implode('|', array_map(
+			static fn(string $attribute): string => preg_quote($attribute, '/'),
+			[self::LEGACY_SHARE_LINK_INTRO_ATTRIBUTE, self::LEGACY_SHARE_LINK_LABEL_ATTRIBUTE]
+		));
+		$clean = preg_replace('/\s+(?:' . $attributes . ')\s*=\s*(?:"[^"]*"|\'[^\']*\')/i', '', $template);
+		return is_string($clean) ? $clean : $template;
 	}
 
 	/**

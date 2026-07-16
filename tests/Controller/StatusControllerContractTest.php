@@ -94,6 +94,36 @@ final class StatusControllerContractTest extends TestCase {
 		self::assertSame($legacyTemplate, $policy['share_html_block_template_v2']);
 	}
 
+	public function testStatusApiUsesTranslatedCompatibilityCopyForOlderClients(): void {
+		$template = '<div lang="de"'
+			. ' data-nccb-legacy-link-intro="Die Dateien wurden sicher und datenschutzkonform über Nextcloud bereitgestellt. Der Download ist über den untenstehenden Link möglich."'
+			. ' data-nccb-legacy-link-label="Download-Link">'
+			. '<p>{LINK_INTRO}</p><p>{LINK_LABEL}: {URL}</p></div>';
+		$controller = new StatusController(
+			'ncc_backend_4mc',
+			new TestRequest(),
+			new TestAccessService(validSeatUsers: ['customer']),
+			new TestSeatService(['customer']),
+			new TestLicenseService(),
+			new TestClientSettingsService(
+				effectiveSettings: ['share_html_block_template' => $template],
+				effectiveEditable: ['share_html_block_template' => false]
+			),
+			'customer'
+		);
+
+		$policy = $controller->status()->getData()['policy']['share'];
+
+		self::assertStringContainsString('{LINK_INTRO}', $policy['share_html_block_template_v2']);
+		self::assertStringContainsString('{LINK_LABEL}', $policy['share_html_block_template_v2']);
+		self::assertStringContainsString('Die Dateien wurden sicher und datenschutzkonform', $policy['share_html_block_template']);
+		self::assertStringContainsString('Download-Link', $policy['share_html_block_template']);
+		self::assertStringNotContainsString('{LINK_INTRO}', $policy['share_html_block_template']);
+		self::assertStringNotContainsString('{LINK_LABEL}', $policy['share_html_block_template']);
+		self::assertStringNotContainsString('data-nccb-legacy-link-', $policy['share_html_block_template']);
+		self::assertStringNotContainsString('data-nccb-legacy-link-', $policy['share_html_block_template_v2']);
+	}
+
 	public function testStatusApiProjectsNullTemplateForNonCustomLanguage(): void {
 		$controller = new StatusController(
 			'ncc_backend_4mc',

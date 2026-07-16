@@ -64,6 +64,8 @@ final class ClientSettingsDefinitionServiceTest extends TestCase {
 		self::assertStringContainsString('{LINK_INTRO}', $default);
 		self::assertStringContainsString('{LINK_LABEL}', $default);
 		self::assertStringContainsString('{URL}', $default);
+		self::assertStringContainsString('data-nccb-legacy-link-intro=', $default);
+		self::assertStringContainsString('data-nccb-legacy-link-label=', $default);
 		self::assertStringNotContainsString('>Download link<', $default);
 	}
 

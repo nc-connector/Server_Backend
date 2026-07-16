@@ -277,6 +277,7 @@ Template details:
 - The editor is opened in a modal, not inline.
 - The modal offers preview, source-code view, and variable insertion.
 - The **Languages** dropdown rewrites the built-in text fragments to supported locales.
+- **Reset to default** keeps the language currently selected in the editor and applies it to the default template.
 - Variables and links stay untouched during translation.
 - Runtime image rendering inside the editor uses locally mirrored app files, while the stored template still keeps the original image URL.
 - The admin template editor sanitizes custom HTML with bundled DOMPurify before preview and save. Scripts, inline event handlers, unsafe URL protocols, and unsupported form/embed elements are removed there.
@@ -290,7 +291,7 @@ Template variables used by Share templates:
 - `{RIGHTS}`
 - `{NOTE}`
 
-The built-in default Share template uses `{LINK_INTRO}` and `{LINK_LABEL}`. The admin still maintains one template: the backend derives a versioned response for current clients and a placeholder-free compatibility response for older clients. Existing custom templates stored by customers are not migrated or rewritten; templates that only use the older variables remain valid.
+The built-in default Share template uses `{LINK_INTRO}` and `{LINK_LABEL}`. The admin still maintains one template: the backend derives a versioned response for current clients and a placeholder-free compatibility response for older clients. The compatibility response uses the language selected in the template editor. Existing custom templates stored by customers are not migrated or rewritten; templates that only use the older variables remain valid.
 
 Important dependency:
 - If `Send password separately` is disabled, `Password mode` and `Nextcloud Secrets link expiry (days)` are inactive.

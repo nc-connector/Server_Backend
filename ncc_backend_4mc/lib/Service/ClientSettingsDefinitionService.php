@@ -34,7 +34,7 @@ class ClientSettingsDefinitionService {
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 </head>
 <body>
-	<div style="font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;margin:16px 0;">
+	<div lang="en" data-nccb-legacy-link-intro="The files have been provided securely and in a privacy-compliant manner via Nextcloud. You can download them using the link below." data-nccb-legacy-link-label="Download link" style="font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;margin:16px 0;">
 		<table role="presentation" width="640" style="border-collapse:separate;border-spacing:0;width:640px;margin:0;background-color:transparent;border:1px solid #d7d7db;border-radius:8px;overflow:hidden;">
 			<tbody>
 				<tr>
