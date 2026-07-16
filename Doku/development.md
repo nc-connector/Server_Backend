@@ -587,6 +587,9 @@ Current template-language rules:
 - `{ABOUT}` is the only multiline-capable email signature variable: it is HTML-escaped, CRLF/CR line endings are normalized, and line breaks are rendered as `<br>`
 - empty signature placeholders remove their surrounding line or table row before the rendered HTML is returned
 - the built-in default email signature template is intentionally table-free and does not rely on `<style>` tags, because mail clients may sanitize style blocks before inserting the signature
+- changes to the built-in email signature template only affect the schema fallback; stored default, group, and user templates are never migrated or rewritten
+- template variables are protected while `DOMDocument` sanitizes HTML so placeholders inside `href` attributes are not URL-encoded before runtime rendering
+- rendered email signatures pass through the sanitizer again because profile and user-override values are inserted after the stored template was sanitized
 - otherwise those template values are effectively inactive for runtime use
 
 Maintenance rule:

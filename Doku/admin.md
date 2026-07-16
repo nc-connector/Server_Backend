@@ -343,6 +343,8 @@ Email signature runtime behavior:
 - If `Add signature when composing` is disabled, the reply setting, forward setting, and template are inactive and the runtime API returns `null` for each dependent value.
 - The template is rendered for the resolved Seat user before it is returned by `/api/v1/status`.
 - The built-in default signature template avoids layout tables and `<style>` tags so mail clients can sanitize it without reintroducing Thunderbird composer table guides.
+- The built-in template is an editable example. Replace its sample postal address and legal text before assigning it as the organisation signature.
+- Updating the app-provided default does not rewrite an email signature template that an administrator already stored at the default, group, or user layer.
 - The runtime API also returns `policy.email_signature.user_email`. Mail clients use it to apply the central signature only to matching sender identities.
 - Signature variables are filled from the assigned Seat user's **Nextcloud user profile settings** before the template is sent to Thunderbird or Outlook.
 - Example: if the Seat belongs to `alex@example.com`, `{PHONE}`, `{ABOUT}`, `{FUNCTION}`, and `{ORGANISATION}` are read from that Nextcloud user's profile fields.

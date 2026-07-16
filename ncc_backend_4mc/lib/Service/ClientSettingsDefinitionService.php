@@ -137,34 +137,22 @@ HTML;
 <p><a href="https://docs.nextcloud.com/server/latest/user_manual/en/talk/guest.html">https://docs.nextcloud.com/server/latest/user_manual/en/talk/guest.html</a></p>
 HTML;
 	private const DEFAULT_EMAIL_SIGNATURE_TEMPLATE = <<<'HTML'
-<div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px">
-  <div style="margin:0 0 12px 0">
-    Kind regards,<br>
-    <strong style="font-size:12px">{NAME}</strong><br>
-    <em>{FUNCTION}</em>
-  </div>
-  <div style="margin:0 0 8px 0;font-size:11px;line-height:15px">
-    {ORGANISATION}<br>
-    {ABOUT}
-  </div>
-  <div style="margin:0 0 2px 0">
-    Phone: <a href="tel:{PHONE}" style="color:windowtext;text-decoration:none">{PHONE}</a>
-  </div>
-  <div style="margin:0 0 10px 0">
-    Email: <a href="mailto:{EMAIL}" style="color:windowtext;text-decoration:none">{EMAIL}</a>
-  </div>
-  <div style="margin:0 0 14px 0">
-    <a href="https://nc-connector.de" style="display:inline-block;text-decoration:none;line-height:0" target="_blank" rel="noopener">
-      <img src="https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/ncc_backend_4mc/img/header.png" height="48" alt="NC Connector" style="display:block;height:48px;width:auto;border:0">
-    </a>
-  </div>
-  <div style="margin:10px 0 0 0;font-size:11px;line-height:15px">
-    This email and any attachments may contain confidential and/or legally protected information. If you are not the intended recipient or have received this email in error,<br>
-    please inform the sender immediately and delete this email. Any use, reproduction, or distribution is not permitted.
-  </div>
-  <div style="margin:6px 0 0 0;font-size:11px;line-height:15px">
-    <em><font color="#2e7d32">Please consider the environment before printing this email.</font></em>
-  </div>
+<div style="font-family: Arial,sans-serif; font-size: 12px; line-height: 16px;">
+<div style="margin: 0 0 12px 0;">Kind regards,<br><strong style="font-size: 12px;">{NAME}</strong><br><em>{FUNCTION}</em></div>
+<div style="margin: 0 0 12px 0;">{ABOUT}</div>
+<div style="margin: 0 0 2px 0;">{ORGANISATION}</div>
+<div style="margin: 0 0 2px 0;">Musterstra&szlig;e 1</div>
+<div style="margin: 0 0 2px 0;">9999 Musterort</div>
+<div style="margin: 0 0 2px 0;">&nbsp;</div>
+<div style="margin: 0 0 2px 0;">Phone:&nbsp;<a style="color: windowtext; text-decoration: none;" href="tel:{PHONE}">{PHONE}</a></div>
+<div style="margin: 0 0 10px 0;">Mobile: <a style="color: windowtext; text-decoration: none;" href="tel:{PHONE_MOBILE}">{PHONE_MOBILE}</a></div>
+<div style="margin: 0 0 2px 0;">Email: <a style="color: windowtext; text-decoration: none;" href="mailto:{EMAIL}">{EMAIL}</a></div>
+<div style="margin: 0 0 2px 0;">Custom1: <a style="color: windowtext; text-decoration: none;" href="{CUSTOM1}">{CUSTOM1}</a></div>
+<div style="margin: 0 0 2px 0;">Custom2: <a style="color: windowtext; text-decoration: none;" href="{CUSTOM2}">{CUSTOM2}</a></div>
+<div style="margin: 0 0 10px 0;">&nbsp;</div>
+<div style="margin: 0 0 14px 0;"><a style="display: inline-block; text-decoration: none; line-height: 0;" href="https://nc-connector.de" target="_blank" rel="noopener noreferrer"><img style="display: block; height: 48px; width: auto; border: 0;" src="https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/ncc_backend_4mc/img/header.png" alt="NC Connector" height="48"></a></div>
+<div style="margin: 10px 0 0 0; font-size: 11px; line-height: 15px;">This email and any attachments may contain confidential and/or legally protected information. If you are not the intended recipient or have received this email in error,<br>please inform the sender immediately and delete this email. Any use, reproduction, or distribution is not permitted.</div>
+<div style="margin: 6px 0 0 0; font-size: 11px; line-height: 15px;"><em><span style="color: #2e7d32;">Please consider the environment before printing this email.</span></em></div>
 </div>
 HTML;
 

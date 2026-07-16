@@ -47,6 +47,7 @@ class EmailSignatureRuntimeService {
 		private IUserManager $userManager,
 		private IAccountManager $accountManager,
 		private LoggerInterface $logger,
+		private TemplateSanitizerService $templateSanitizer,
 	) {
 	}
 
@@ -61,7 +62,8 @@ class EmailSignatureRuntimeService {
 				: $this->escapeValue($value);
 		}
 
-		return strtr($template, $replacements);
+		// Profile and override values enter after storage sanitizing, so validate the rendered links once more.
+		return $this->templateSanitizer->sanitizeHtml(strtr($template, $replacements));
 	}
 
 	public function getUserEmail(string $userId): string {

@@ -80,6 +80,52 @@ final class ClientSettingsDefinitionServiceTest extends TestCase {
 		}
 	}
 
+	public function testDefaultEmailSignatureIncludesAllSupportedContactVariables(): void {
+		$default = (string)$this->definitions->get('email_signature_template')['default'];
+		$sanitized = (string)$this->definitions->normalizeValue('email_signature_template', $default);
+
+		foreach ([
+			'{NAME}',
+			'{FUNCTION}',
+			'{ABOUT}',
+			'{ORGANISATION}',
+			'{PHONE}',
+			'{PHONE_MOBILE}',
+			'{EMAIL}',
+			'{CUSTOM1}',
+			'{CUSTOM2}',
+		] as $variable) {
+			self::assertStringContainsString($variable, $default);
+		}
+
+		self::assertStringContainsString('Musterstra&szlig;e 1', $default);
+		self::assertStringContainsString('9999 Musterort', $default);
+		self::assertStringContainsString(
+			'https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/ncc_backend_4mc/img/header.png',
+			$default
+		);
+		self::assertStringNotContainsString('/img/runtime/', $default);
+		self::assertStringContainsString('href="tel:{PHONE}"', $sanitized);
+		self::assertStringContainsString('href="tel:{PHONE_MOBILE}"', $sanitized);
+		self::assertStringContainsString('href="mailto:{EMAIL}"', $sanitized);
+		self::assertStringContainsString('href="{CUSTOM1}"', $sanitized);
+		self::assertStringContainsString('href="{CUSTOM2}"', $sanitized);
+		self::assertStringContainsString('src="https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/ncc_backend_4mc/img/header.png"', $sanitized);
+	}
+
+	public function testStoredEmailSignatureTemplateIsNotReplacedByNewDefault(): void {
+		$customerTemplate = '<div>Customer signature for {NAME}</div>';
+
+		foreach ([
+			$this->definitions->normalizeValue('email_signature_template', $customerTemplate),
+			$this->definitions->parseStoredValue('email_signature_template', $customerTemplate),
+		] as $value) {
+			self::assertSame($customerTemplate, $value);
+			self::assertStringNotContainsString('Musterort', $value);
+			self::assertStringNotContainsString('{PHONE_MOBILE}', $value);
+		}
+	}
+
 	public function testUserOverrideOnlySignatureFieldsAreNotAddonControllable(): void {
 		self::assertSame([
 			EmailSignatureRuntimeService::EMAIL_ADDRESS_KEY,

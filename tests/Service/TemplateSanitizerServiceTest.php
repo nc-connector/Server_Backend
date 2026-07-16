@@ -64,6 +64,28 @@ final class TemplateSanitizerServiceTest extends TestCase {
 		self::assertStringContainsString('rel="noopener noreferrer"', $html);
 	}
 
+	public function testTemplateVariablesStayResolvableInsideLinkAttributes(): void {
+		$html = $this->sanitizer->sanitizeHtml(
+			'<a href="tel:{PHONE}">{PHONE}</a>'
+			. '<a href="mailto:{EMAIL}">{EMAIL}</a>'
+			. '<a href="{CUSTOM1}">{CUSTOM1}</a>'
+		);
+
+		self::assertStringContainsString('href="tel:{PHONE}"', $html);
+		self::assertStringContainsString('href="mailto:{EMAIL}"', $html);
+		self::assertStringContainsString('href="{CUSTOM1}"', $html);
+		self::assertStringNotContainsString('%7B', $html);
+	}
+
+	public function testRenderedTemplateValuesCannotIntroduceUnsafeLinkSchemes(): void {
+		$template = $this->sanitizer->sanitizeHtml('<a href="{CUSTOM1}">{CUSTOM1}</a>');
+		$rendered = strtr($template, ['{CUSTOM1}' => 'javascript:alert(1)']);
+		$html = $this->sanitizer->sanitizeHtml($rendered);
+
+		self::assertSame('<a>javascript:alert(1)</a>', $html);
+		self::assertStringNotContainsString('href=', $html);
+	}
+
 	public function testUnsafeUrlSchemesAreRemoved(): void {
 		$html = $this->sanitizer->sanitizeHtml(
 			'<a href="java&#x0A;script:alert(1)">Bad</a><img src="vbscript:alert(1)" alt="Bad">'
