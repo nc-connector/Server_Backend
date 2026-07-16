@@ -290,7 +290,7 @@ Template variables used by Share templates:
 - `{RIGHTS}`
 - `{NOTE}`
 
-The built-in default Share template uses `{LINK_INTRO}` and `{LINK_LABEL}`. Existing custom templates stored by customers are not migrated or rewritten; templates that only use the older variables remain valid.
+The built-in default Share template uses `{LINK_INTRO}` and `{LINK_LABEL}`. The admin still maintains one template: the backend derives a versioned response for current clients and a placeholder-free compatibility response for older clients. Existing custom templates stored by customers are not migrated or rewritten; templates that only use the older variables remain valid.
 
 Important dependency:
 - If `Send password separately` is disabled, `Password mode` and `Nextcloud Secrets link expiry (days)` are inactive.

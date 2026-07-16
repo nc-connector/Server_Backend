@@ -22,6 +22,11 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 
 class StatusController extends Controller {
+	private const SHARE_HTML_BLOCK_TEMPLATE_KEY = 'share_html_block_template';
+	private const SHARE_HTML_BLOCK_TEMPLATE_V2_KEY = 'share_html_block_template_v2';
+	private const LEGACY_SHARE_LINK_INTRO = 'The files have been provided securely and in a privacy-compliant manner via Nextcloud. You can download them using the link below.';
+	private const LEGACY_SHARE_LINK_LABEL = 'Download link';
+
 	public function __construct(
 		string $appName,
 		IRequest $request,
@@ -68,7 +73,8 @@ class StatusController extends Controller {
 		];
 		if (!$overlicensed && $seatAssigned && $canReadPolicies) {
 			$effective = $this->clientSettings->getEffectiveForUser($targetUserId);
-			$policy = $this->groupPolicyByAddonArea($effective['settings'] ?? []);
+			$policySettings = $this->projectShareTemplateVersions($effective['settings'] ?? []);
+			$policy = $this->groupPolicyByAddonArea($policySettings);
 			$policyEditable = $this->groupPolicyByAddonArea($effective['addon_editable'] ?? []);
 			$policy['email_signature']['user_email'] = $this->clientSettings->getEmailSignatureUserEmail($targetUserId);
 			ksort($policy['email_signature']);
@@ -88,6 +94,31 @@ class StatusController extends Controller {
 			'policy' => $policy,
 			'policy_editable' => $policyEditable,
 		]);
+	}
+
+	/**
+	 * @param array<string, mixed> $settings
+	 * @return array<string, mixed>
+	 */
+	private function projectShareTemplateVersions(array $settings): array {
+		if (!array_key_exists(self::SHARE_HTML_BLOCK_TEMPLATE_KEY, $settings)) {
+			return $settings;
+		}
+
+		$template = $settings[self::SHARE_HTML_BLOCK_TEMPLATE_KEY];
+		$settings[self::SHARE_HTML_BLOCK_TEMPLATE_V2_KEY] = $template;
+		if (!is_string($template)) {
+			return $settings;
+		}
+
+		// Older clients render unknown placeholders literally, so the existing API key must remain placeholder-free.
+		$settings[self::SHARE_HTML_BLOCK_TEMPLATE_KEY] = str_replace(
+			['{LINK_INTRO}', '{LINK_LABEL}'],
+			[self::LEGACY_SHARE_LINK_INTRO, self::LEGACY_SHARE_LINK_LABEL],
+			$template
+		);
+
+		return $settings;
 	}
 
 	/**
