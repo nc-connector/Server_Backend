@@ -44,9 +44,10 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
   - `policy.talk.event_description_type` is always either `"html"` or `"plain_text"`.
   - `policy_editable` does not contain `event_description_type`, because it is derived from the effective talk template mode and is not directly editable in mail clients.
   - If `custom` is active, `policy.share.share_html_block_template_v2` contains the effective stored HTML template with the direct logo URL. Share templates may contain `{LINK_INTRO}` and `{LINK_LABEL}`; current Thunderbird and Outlook clients resolve them according to the existing share mode.
+  - `policy.share.share_html_block_effective_language` contains the language used by the effective Share template. For `custom`, it is read from the template's `lang` attribute; templates without that metadata keep the value `custom` so clients preserve their legacy fallback.
   - The existing `policy.share.share_html_block_template` key remains compatible with older clients. The backend replaces `{LINK_INTRO}` and `{LINK_LABEL}` with the generic wording recorded for the template language by the admin editor. Templates without this metadata use the historical English fallback.
   - Internal compatibility metadata is removed from both template response values.
-  - `share_html_block_template_v2` is output-only and is intentionally absent from `policy_editable`.
+  - `share_html_block_template_v2` and `share_html_block_effective_language` are output-only and are intentionally absent from `policy_editable`.
   - Existing stored templates are not rewritten or migrated. Templates without the two variables are identical in both response keys.
   - If `policy.talk.talk_invitation_template_format = "html"`, `policy.talk.talk_invitation_template` contains the stored HTML template.
   - If `policy.talk.talk_invitation_template_format = "plain_text"`, `policy.talk.talk_invitation_template` contains cleaned plain text with preserved raw URLs and preserved template variables such as `{MEETING_URL}` or `{PASSWORD}`.
@@ -95,6 +96,7 @@ curl -u "alice:APP_PASSWORD" \
       "attachments_min_size_mb": 5,
       "share_html_block_template": null,
       "share_html_block_template_v2": null,
+      "share_html_block_effective_language": "en",
       "share_password_template": null,
       "language_share_html_block": "en"
     },

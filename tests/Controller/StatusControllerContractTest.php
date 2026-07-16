@@ -11,7 +11,7 @@ require_once __DIR__ . '/ControllerTestDoubles.php';
 
 final class StatusControllerContractTest extends TestCase {
 	public function testStatusApiGroupsEffectivePolicyForSeatUser(): void {
-		$versionedShareTemplate = '<p>{LINK_INTRO}</p><p>{LINK_LABEL}: <a href="{URL}">{URL}</a></p>';
+		$versionedShareTemplate = '<div lang="de"><p>{LINK_INTRO}</p><p>{LINK_LABEL}: <a href="{URL}">{URL}</a></p></div>';
 		$controller = new StatusController(
 			'ncc_backend_4mc',
 			new TestRequest(['user_id' => 'target']),
@@ -26,6 +26,7 @@ final class StatusControllerContractTest extends TestCase {
 				effectiveSettings: [
 					'share_default_expire_days' => 14,
 					'share_html_block_template' => $versionedShareTemplate,
+					'language_share_html_block' => 'custom',
 					'share_send_password_mode' => 'secrets',
 					'talk_lobby_enabled' => true,
 					'talk_invitation_template_format' => 'html',
@@ -58,6 +59,7 @@ final class StatusControllerContractTest extends TestCase {
 		self::assertSame('secrets', $data['policy']['share']['share_send_password_mode']);
 		self::assertSame(14, $data['policy']['share']['share_default_expire_days']);
 		self::assertSame($versionedShareTemplate, $data['policy']['share']['share_html_block_template_v2']);
+		self::assertSame('de', $data['policy']['share']['share_html_block_effective_language']);
 		self::assertStringNotContainsString('{LINK_INTRO}', $data['policy']['share']['share_html_block_template']);
 		self::assertStringNotContainsString('{LINK_LABEL}', $data['policy']['share']['share_html_block_template']);
 		self::assertStringContainsString('The files have been provided securely', $data['policy']['share']['share_html_block_template']);
@@ -69,6 +71,7 @@ final class StatusControllerContractTest extends TestCase {
 
 		self::assertTrue($data['policy_editable']['share']['share_send_password_mode']);
 		self::assertArrayNotHasKey('share_html_block_template_v2', $data['policy_editable']['share']);
+		self::assertArrayNotHasKey('share_html_block_effective_language', $data['policy_editable']['share']);
 		self::assertFalse($data['policy_editable']['talk']['talk_lobby_enabled']);
 		self::assertFalse($data['policy_editable']['email_signature']['email_signature_on_compose']);
 	}
@@ -82,7 +85,10 @@ final class StatusControllerContractTest extends TestCase {
 			new TestSeatService(['customer']),
 			new TestLicenseService(),
 			new TestClientSettingsService(
-				effectiveSettings: ['share_html_block_template' => $legacyTemplate],
+				effectiveSettings: [
+					'share_html_block_template' => $legacyTemplate,
+					'language_share_html_block' => 'custom',
+				],
 				effectiveEditable: ['share_html_block_template' => false]
 			),
 			'customer'
@@ -92,6 +98,7 @@ final class StatusControllerContractTest extends TestCase {
 
 		self::assertSame($legacyTemplate, $policy['share_html_block_template']);
 		self::assertSame($legacyTemplate, $policy['share_html_block_template_v2']);
+		self::assertSame('custom', $policy['share_html_block_effective_language']);
 	}
 
 	public function testStatusApiUsesTranslatedCompatibilityCopyForOlderClients(): void {
@@ -106,7 +113,10 @@ final class StatusControllerContractTest extends TestCase {
 			new TestSeatService(['customer']),
 			new TestLicenseService(),
 			new TestClientSettingsService(
-				effectiveSettings: ['share_html_block_template' => $template],
+				effectiveSettings: [
+					'share_html_block_template' => $template,
+					'language_share_html_block' => 'custom',
+				],
 				effectiveEditable: ['share_html_block_template' => false]
 			),
 			'customer'
@@ -122,6 +132,7 @@ final class StatusControllerContractTest extends TestCase {
 		self::assertStringNotContainsString('{LINK_LABEL}', $policy['share_html_block_template']);
 		self::assertStringNotContainsString('data-nccb-legacy-link-', $policy['share_html_block_template']);
 		self::assertStringNotContainsString('data-nccb-legacy-link-', $policy['share_html_block_template_v2']);
+		self::assertSame('de', $policy['share_html_block_effective_language']);
 	}
 
 	public function testStatusApiProjectsNullTemplateForNonCustomLanguage(): void {
@@ -132,7 +143,10 @@ final class StatusControllerContractTest extends TestCase {
 			new TestSeatService(['customer']),
 			new TestLicenseService(),
 			new TestClientSettingsService(
-				effectiveSettings: ['share_html_block_template' => null],
+				effectiveSettings: [
+					'share_html_block_template' => null,
+					'language_share_html_block' => 'de',
+				],
 				effectiveEditable: ['share_html_block_template' => false]
 			),
 			'customer'
@@ -142,6 +156,7 @@ final class StatusControllerContractTest extends TestCase {
 
 		self::assertNull($policy['share_html_block_template']);
 		self::assertNull($policy['share_html_block_template_v2']);
+		self::assertSame('de', $policy['share_html_block_effective_language']);
 	}
 
 	public function testStatusApiDoesNotExposePolicyWithoutSeat(): void {

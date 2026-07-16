@@ -24,6 +24,8 @@ use OCP\IRequest;
 class StatusController extends Controller {
 	private const SHARE_HTML_BLOCK_TEMPLATE_KEY = 'share_html_block_template';
 	private const SHARE_HTML_BLOCK_TEMPLATE_V2_KEY = 'share_html_block_template_v2';
+	private const SHARE_HTML_BLOCK_EFFECTIVE_LANGUAGE_KEY = 'share_html_block_effective_language';
+	private const SHARE_HTML_BLOCK_LANGUAGE_KEY = 'language_share_html_block';
 	private const LEGACY_SHARE_LINK_INTRO_ATTRIBUTE = 'data-nccb-legacy-link-intro';
 	private const LEGACY_SHARE_LINK_LABEL_ATTRIBUTE = 'data-nccb-legacy-link-label';
 	private const LEGACY_SHARE_LINK_INTRO = 'The files have been provided securely and in a privacy-compliant manner via Nextcloud. You can download them using the link below.';
@@ -103,6 +105,7 @@ class StatusController extends Controller {
 	 * @return array<string, mixed>
 	 */
 	private function projectShareTemplateVersions(array $settings): array {
+		$settings[self::SHARE_HTML_BLOCK_EFFECTIVE_LANGUAGE_KEY] = $this->resolveShareTemplateLanguage($settings);
 		if (!array_key_exists(self::SHARE_HTML_BLOCK_TEMPLATE_KEY, $settings)) {
 			return $settings;
 		}
@@ -136,16 +139,43 @@ class StatusController extends Controller {
 		return $settings;
 	}
 
-	private function readLegacyShareCopy(string $template, string $attribute, string $fallback): string {
-		$pattern = '/\b' . preg_quote($attribute, '/') . '\s*=\s*(["\'])(.*?)\1/is';
-		if (preg_match($pattern, $template, $matches) !== 1) {
-			return $fallback;
+	/**
+	 * Custom is a template selection mode, not a language. The editor records the actual
+	 * template language on the root element so current clients can localize generated copy.
+	 *
+	 * @param array<string, mixed> $settings
+	 */
+	private function resolveShareTemplateLanguage(array $settings): string {
+		$configuredLanguage = strtolower(trim((string)($settings[self::SHARE_HTML_BLOCK_LANGUAGE_KEY] ?? '')));
+		if ($configuredLanguage !== 'custom') {
+			return $configuredLanguage !== '' ? $configuredLanguage : 'ui_default';
 		}
 
-		$value = trim(html_entity_decode((string)($matches[2] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+		$template = $settings[self::SHARE_HTML_BLOCK_TEMPLATE_KEY] ?? null;
+		if (!is_string($template)) {
+			return 'custom';
+		}
+
+		$templateLanguage = strtolower(str_replace('-', '_', $this->readTemplateAttribute($template, 'lang')));
+		return preg_match('/^[a-z]{2,3}(?:_[a-z0-9]{2,8})*$/', $templateLanguage) === 1
+			? $templateLanguage
+			: 'custom';
+	}
+
+	private function readLegacyShareCopy(string $template, string $attribute, string $fallback): string {
+		$value = $this->readTemplateAttribute($template, $attribute);
 		return $value !== ''
 			? htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8')
 			: $fallback;
+	}
+
+	private function readTemplateAttribute(string $template, string $attribute): string {
+		$pattern = '/\b' . preg_quote($attribute, '/') . '\s*=\s*(["\'])(.*?)\1/is';
+		if (preg_match($pattern, $template, $matches) !== 1) {
+			return '';
+		}
+
+		return trim(html_entity_decode((string)($matches[2] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 	}
 
 	private function stripLegacyShareCopyMetadata(string $template): string {
