@@ -4,6 +4,18 @@ All notable changes to this repository are documented in this file.
 
 The format is based on **Keep a Changelog** and uses a simple version-first structure.
 
+## [1.2.2] - 2026-07-17
+
+### Added
+- Add mode-aware Share template variables so mail clients can distinguish regular share pages from attachment ZIP downloads
+- Add public roadmap links and structured GitHub issue forms with support log guidance
+
+### Changed
+- Expose the effective Share template language so clients can localize generated labels, permission names, and password notices consistently
+- Keep the existing Share template response compatible with older clients while current clients can use the versioned template output
+- Keep legacy Share templates in the language selected in the template editor
+- Update the built-in email signature template without changing stored customer templates
+
 ## [1.2.1] - 2026-07-06
 
 ### Added
