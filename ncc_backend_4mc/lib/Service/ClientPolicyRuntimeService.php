@@ -36,7 +36,7 @@ class ClientPolicyRuntimeService {
 		$this->applyAttachmentPolicyDependency($settings);
 		$this->applyShareSecretsPolicyDependency($settings, $addonEditable, $policies);
 		$this->applyTemplateLanguageDependency($settings);
-		$this->applyEmailSignaturePolicyDependency($settings);
+		$this->applyEmailSignaturePolicyDependency($settings, $addonEditable);
 		$this->applyEmailSignatureProfileVariables($settings, $userId);
 		$this->removeUserOverrideOnlySettings($settings, $sources, $policies, $addonEditable);
 	}
@@ -137,9 +137,11 @@ class ClientPolicyRuntimeService {
 
 	/**
 	 * @param array<string, mixed> $settings
+	 * @param array<string, bool> $addonEditable
 	 */
-	private function applyEmailSignaturePolicyDependency(array &$settings): void {
-		if (($settings['email_signature_on_compose'] ?? false) === true) {
+	private function applyEmailSignaturePolicyDependency(array &$settings, array $addonEditable): void {
+		if (($settings['email_signature_on_compose'] ?? false) === true
+			|| ($addonEditable['email_signature_on_compose'] ?? false) === true) {
 			return;
 		}
 

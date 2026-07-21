@@ -194,7 +194,6 @@ HTML;
 		]],
 		'talk_invitation_template' => ['type' => 'string', 'default' => self::DEFAULT_TALK_INVITATION_TEMPLATE, 'max_length' => 32768],
 
-		'talk_generate_password' => ['type' => 'bool', 'default' => true],
 		'talk_title' => ['type' => 'string', 'default' => 'Meeting', 'max_length' => 120],
 		'talk_lobby_active' => ['type' => 'bool', 'default' => true],
 		'talk_show_in_search' => ['type' => 'bool', 'default' => true],

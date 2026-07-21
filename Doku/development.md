@@ -583,8 +583,9 @@ Current template-language rules:
 - `talk_invitation_template_format = html` returns stored editor HTML to the runtime API
 - `talk_invitation_template_format = plain_text` converts the stored HTML to cleaned plain text while preserving link targets as raw URLs
 - the runtime API additionally derives `event_description_type = html | plain_text` for clients that only need the final rendering mode
-- `email_signature_template` has no language selector and is delivered as HTML when policies are available and `email_signature_on_compose = true`
-- if `email_signature_on_compose = false`, `email_signature_on_reply`, `email_signature_on_forward`, and `email_signature_template` are returned as `null` in the runtime policy
+- `email_signature_template` has no language selector and is delivered as rendered HTML when policies are available and composing signatures are active or locally editable
+- if `email_signature_on_compose = false` and `policy_editable.email_signature.email_signature_on_compose = true`, reply, forward, and the rendered template remain in the runtime policy so a mail client can activate signatures locally
+- if `email_signature_on_compose = false` and its editable flag is `false`, `email_signature_on_reply`, `email_signature_on_forward`, and `email_signature_template` are returned as `null`
 - `policy.email_signature.user_email` is returned as runtime-only metadata so mail clients can apply the central signature only to matching sender identities
 - a forced `Signature email address` user override replaces the profile email for both `policy.email_signature.user_email` and `{EMAIL}`
 - `email_signature_template` is rendered for the resolved Seat user by replacing `{NAME}`, `{EMAIL}`, `{PHONE}`, `{PHONE_MOBILE}`, `{ABOUT}`, `{FUNCTION}`, `{ORGANISATION}`, `{CUSTOM1}`, and `{CUSTOM2}`

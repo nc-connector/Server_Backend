@@ -453,7 +453,6 @@
 			'language_talk_description',
 			TALK_INVITATION_TEMPLATE_FORMAT_KEY,
 			TALK_INVITATION_TEMPLATE_KEY,
-			'talk_generate_password',
 			'talk_title',
 			'talk_lobby_active',
 			'talk_show_in_search',

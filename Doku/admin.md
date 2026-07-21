@@ -307,13 +307,12 @@ Important dependency:
 | `Language in Talk description text` | Selects the built-in language for the Talk invitation text | Built-in default is **English** |
 | `Talk invitation output` | Controls whether the custom Talk template is delivered as HTML or as cleaned plain text | Only relevant when the language is set to `custom` |
 | `Talk invitation template` | Custom invitation template | Only active when the language is set to `custom` |
-| `Generate password for meetings` | Enables password generation by default for new Talk rooms | Default is add-on editable |
 | `Title` | Default room title | Used as prefill in the mail client |
 | `Lobby active until start time` | Enables lobby behavior until the start time | Relevant for meeting control |
 | `Show in search` | Makes the room searchable in Talk | Controls discoverability |
 | `Add users` | Adds internal users by default | Applied by the add-on when invitees are synchronized |
 | `Add guests` | Adds external recipients as guests by default | Depends on server-side Talk behavior |
-| `Set password` | Enables Talk password protection by default | Separate Talk password dispatch was intentionally removed |
+| `Set password` | Enables Talk password protection by default | Mail clients initially generate a password whenever this setting is effective |
 | `Delete Talk room when deleting a saved event` | Allows mail clients to delete a linked Talk room when a saved NC Connector event is deleted | Off by default; generic Talk links in location/URL fields are ignored by clients |
 | `Room type` | Selects the Talk room type | Affects room behavior on the Nextcloud side |
 
@@ -332,8 +331,8 @@ Important dependency:
 | Setting | Purpose | Notes |
 |---|---|---|
 | `Add signature when composing` | Enables centrally managed signatures for new messages | Delivered as a boolean policy flag |
-| `Add signature when replying` | Enables centrally managed signatures for replies | Runtime value becomes `null` when composing signatures are disabled |
-| `Add signature when forwarding` | Enables centrally managed signatures for forwarded messages | Runtime value becomes `null` when composing signatures are disabled |
+| `Add signature when replying` | Enables centrally managed signatures for replies | Runtime value becomes `null` when composing signatures are disabled and locked |
+| `Add signature when forwarding` | Enables centrally managed signatures for forwarded messages | Runtime value becomes `null` when composing signatures are disabled and locked |
 | `Email signature template` | Central HTML signature template | Backend-controlled template field |
 
 Email signature runtime behavior:
@@ -341,7 +340,8 @@ Email signature runtime behavior:
 - Mail clients may derive plain text from that HTML when needed.
 - The admin template editor sanitizes the signature HTML with bundled DOMPurify before it is saved.
 - There is intentionally **no language selector** for email signatures, including the template editor modal.
-- If `Add signature when composing` is disabled, the reply setting, forward setting, and template are inactive and the runtime API returns `null` for each dependent value.
+- If `Add signature when composing` is disabled but remains **Editable in add-on**, the runtime API still returns the reply setting, forward setting, and rendered template so a mail client can activate signatures locally.
+- If disabled composing signatures are locked, the reply setting, forward setting, and template are inactive and the runtime API returns `null` for each dependent value.
 - The template is rendered for the resolved Seat user before it is returned by `/api/v1/status`.
 - The built-in default signature template avoids layout tables and `<style>` tags so mail clients can sanitize it without reintroducing Thunderbird composer table guides.
 - The built-in template is an editable example. Replace its sample postal address and legal text before assigning it as the organisation signature.

@@ -101,6 +101,40 @@ final class StatusControllerContractTest extends TestCase {
 		self::assertSame('custom', $policy['share_html_block_effective_language']);
 	}
 
+	public function testStatusApiKeepsSignatureDependenciesWhenDisabledComposeIsEditable(): void {
+		$controller = new StatusController(
+			'ncc_backend_4mc',
+			new TestRequest(),
+			new TestAccessService(validSeatUsers: ['alice']),
+			new TestSeatService(['alice']),
+			new TestLicenseService(),
+			new TestClientSettingsService(
+				effectiveSettings: [
+					'email_signature_on_compose' => false,
+					'email_signature_on_reply' => true,
+					'email_signature_on_forward' => false,
+					'email_signature_template' => '<p>Alice</p>',
+				],
+				effectiveEditable: [
+					'email_signature_on_compose' => true,
+					'email_signature_on_reply' => true,
+					'email_signature_on_forward' => true,
+					'email_signature_template' => false,
+				],
+				signatureEmail: 'alice@example.test'
+			),
+			'alice'
+		);
+
+		$data = $controller->status()->getData();
+
+		self::assertFalse($data['policy']['email_signature']['email_signature_on_compose']);
+		self::assertTrue($data['policy_editable']['email_signature']['email_signature_on_compose']);
+		self::assertTrue($data['policy']['email_signature']['email_signature_on_reply']);
+		self::assertFalse($data['policy']['email_signature']['email_signature_on_forward']);
+		self::assertSame('<p>Alice</p>', $data['policy']['email_signature']['email_signature_template']);
+	}
+
 	public function testStatusApiUsesTranslatedCompatibilityCopyForOlderClients(): void {
 		$template = '<div lang="de"'
 			. ' data-nccb-legacy-link-intro="Die Dateien wurden sicher und datenschutzkonform über Nextcloud bereitgestellt. Der Download ist über den untenstehenden Link möglich."'

@@ -121,10 +121,6 @@
 				'Available variables: {MEETING_URL}, {PASSWORD}.',
 			],
 		},
-		talk_generate_password: {
-			label: 'Generate password for meetings',
-			tooltip: ['Automatically generates a password when a Talk room is created.'],
-		},
 		talk_title: {
 			label: 'Title',
 			tooltip: ['Default title for newly created Talk rooms.'],
