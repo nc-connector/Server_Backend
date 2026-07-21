@@ -45,6 +45,29 @@ final class ClientSettingsDefinitionServiceTest extends TestCase {
 		self::assertNull($this->definitions->parseStoredValue('attachments_min_size_mb', ''));
 	}
 
+	public function testAttachmentLinkTargetIsAddonControllableEnumWithZipDefault(): void {
+		$definition = $this->definitions->get(ClientSettingsDefinitionService::ATTACHMENT_LINK_TARGET_KEY);
+
+		self::assertSame('enum', $definition['type']);
+		self::assertSame(ClientSettingsDefinitionService::ATTACHMENT_LINK_TARGET_ZIP_DOWNLOAD, $definition['default']);
+		self::assertSame([
+			ClientSettingsDefinitionService::ATTACHMENT_LINK_TARGET_ZIP_DOWNLOAD,
+			ClientSettingsDefinitionService::ATTACHMENT_LINK_TARGET_SHARE_PAGE,
+		], $definition['options']);
+		self::assertTrue($this->definitions->isAddonControllableSetting(ClientSettingsDefinitionService::ATTACHMENT_LINK_TARGET_KEY));
+		self::assertSame(
+			ClientSettingsDefinitionService::ATTACHMENT_LINK_TARGET_SHARE_PAGE,
+			$this->definitions->normalizeValue(ClientSettingsDefinitionService::ATTACHMENT_LINK_TARGET_KEY, ' SHARE_PAGE ')
+		);
+		self::assertSame(
+			ClientSettingsDefinitionService::ATTACHMENT_LINK_TARGET_ZIP_DOWNLOAD,
+			$this->definitions->parseStoredValue(ClientSettingsDefinitionService::ATTACHMENT_LINK_TARGET_KEY, 'zip_download')
+		);
+
+		$this->expectException(\InvalidArgumentException::class);
+		$this->definitions->normalizeValue(ClientSettingsDefinitionService::ATTACHMENT_LINK_TARGET_KEY, 'direct_download');
+	}
+
 	public function testTemplateValuesAreSanitizedBeforeStorageAndAfterRead(): void {
 		$dirty = '<p onclick="alert(1)">Hello</p><script>alert(1)</script>';
 

@@ -15,6 +15,9 @@ class ClientSettingsDefinitionService {
 	public const SHARE_SEND_PASSWORD_MODE_PLAIN = 'plain';
 	public const SHARE_SEND_PASSWORD_MODE_SECRETS = 'secrets';
 	public const SHARE_SECRETS_EXPIRE_DAYS_KEY = 'share_secrets_expire_days';
+	public const ATTACHMENT_LINK_TARGET_KEY = 'attachment_link_target';
+	public const ATTACHMENT_LINK_TARGET_ZIP_DOWNLOAD = 'zip_download';
+	public const ATTACHMENT_LINK_TARGET_SHARE_PAGE = 'share_page';
 
 	private const MAIL_TEMPLATE_LOGO_URL = 'https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png';
 	private const MAIL_TEMPLATE_LOGO_LINK = 'https://nc-connector.de';
@@ -180,6 +183,9 @@ HTML;
 
 		'attachments_always_via_ncconnector' => ['type' => 'bool', 'default' => false],
 		'attachments_min_size_mb' => ['type' => 'int', 'default' => 5, 'min' => 0, 'max' => 10240],
+		self::ATTACHMENT_LINK_TARGET_KEY => ['type' => 'enum', 'default' => self::ATTACHMENT_LINK_TARGET_ZIP_DOWNLOAD, 'options' => [
+			self::ATTACHMENT_LINK_TARGET_ZIP_DOWNLOAD, self::ATTACHMENT_LINK_TARGET_SHARE_PAGE,
+		]],
 		'share_html_block_template' => ['type' => 'string', 'default' => self::DEFAULT_SHARE_HTML_BLOCK_TEMPLATE, 'max_length' => 32768],
 		'share_password_template' => ['type' => 'string', 'default' => self::DEFAULT_SHARE_PASSWORD_TEMPLATE, 'max_length' => 32768],
 

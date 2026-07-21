@@ -447,6 +447,7 @@
 			'share_expire_days',
 			'attachments_always_via_ncconnector',
 			'attachments_min_size_mb',
+			'attachment_link_target',
 			'language_share_html_block',
 			SHARE_HTML_TEMPLATE_KEY,
 			SHARE_PASSWORD_TEMPLATE_KEY,

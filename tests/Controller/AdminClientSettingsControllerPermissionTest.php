@@ -196,6 +196,15 @@ final class AdminClientSettingsControllerPermissionTest extends TestCase {
 		self::assertSame(403, $talkController->setGroupSettings()->getStatus());
 	}
 
+	public function testDelegatedSharePolicyAdminSeesAttachmentLinkTarget(): void {
+		[$controller] = $this->controller(['share.user_overrides', 'share.policy']);
+
+		$data = $controller->getUserSettings('target')->getData();
+
+		self::assertArrayHasKey('attachment_link_target', $data['schema']);
+		self::assertArrayHasKey('attachment_link_target', $data['items']);
+	}
+
 	/**
 	 * @param string[] $permissions
 	 * @param array<string, mixed> $requestParams
@@ -216,6 +225,7 @@ final class AdminClientSettingsControllerPermissionTest extends TestCase {
 				'email_signature_template' => ['type' => 'html'],
 				'email_signature_on_reply' => ['type' => 'boolean'],
 				'share_send_password_mode' => ['type' => 'string'],
+				'attachment_link_target' => ['type' => 'enum'],
 				'talk_lobby_enabled' => ['type' => 'boolean'],
 			],
 			[
@@ -224,6 +234,7 @@ final class AdminClientSettingsControllerPermissionTest extends TestCase {
 				'email_signature_template' => ['mode' => 'forced', 'effective_value' => '<p>Signature</p>'],
 				'email_signature_on_reply' => ['mode' => 'forced', 'effective_value' => true],
 				'share_send_password_mode' => ['mode' => 'forced', 'effective_value' => 'secrets'],
+				'attachment_link_target' => ['mode' => 'forced', 'effective_value' => 'zip_download'],
 				'talk_lobby_enabled' => ['mode' => 'forced', 'effective_value' => true],
 			]
 		);

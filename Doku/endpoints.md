@@ -36,6 +36,7 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
   - A **forced override** also sets the corresponding `policy_editable` value to `false` for that user and setting.
   - If a user override is removed and the setting falls back to a group override or the default again, `policy_editable` follows that lower layer again.
   - `policy.share.attachments_min_size_mb` is `null` when `policy.share.attachments_always_via_ncconnector=true`.
+  - `policy.share.attachment_link_target` is `"zip_download"` or `"share_page"`. The built-in default is `"zip_download"`; the setting applies only to attachment mode, and manual shares remain unchanged.
   - `policy.share.share_html_block_template`, `policy.share.share_html_block_template_v2`, and `policy.share.share_password_template` are `null` when `policy.share.language_share_html_block != "custom"`.
   - `policy.share.share_send_password_mode` is `"plain"` or `"secrets"`. Missing, empty, or `null` means clients must use the existing plain password mail behavior.
   - `policy.share.share_send_password_mode` and `policy.share.share_secrets_expire_days` are `null` when the Nextcloud Secrets app is not installed or disabled.
@@ -43,7 +44,7 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
   - `policy.talk.talk_invitation_template` and `policy.talk.talk_invitation_template_format` are `null` when `policy.talk.language_talk_description != "custom"`.
   - `policy.talk.event_description_type` is always either `"html"` or `"plain_text"`.
   - `policy_editable` does not contain `event_description_type`, because it is derived from the effective talk template mode and is not directly editable in mail clients.
-  - If `custom` is active, `policy.share.share_html_block_template_v2` contains the effective stored HTML template with the direct logo URL. Share templates may contain `{LINK_INTRO}` and `{LINK_LABEL}`; current Thunderbird and Outlook clients resolve them according to the existing share mode.
+  - If `custom` is active, `policy.share.share_html_block_template_v2` contains the effective stored HTML template with the direct logo URL. Share templates may contain `{URL}`, `{LINK_INTRO}`, and `{LINK_LABEL}`. In attachment mode, current Thunderbird and Outlook clients resolve these variables from the effective attachment link target after local settings and backend policy, including `policy_editable`, have been resolved.
   - `policy.share.share_html_block_effective_language` contains the language used by the effective Share template. For `custom`, it is read from the template's `lang` attribute; templates without that metadata keep the value `custom` so clients preserve their legacy fallback.
   - The existing `policy.share.share_html_block_template` key remains compatible with older clients. The backend replaces `{LINK_INTRO}` and `{LINK_LABEL}` with the generic wording recorded for the template language by the admin editor. Templates without this metadata use the historical English fallback.
   - Internal compatibility metadata is removed from both template response values.
@@ -95,6 +96,7 @@ curl -u "alice:APP_PASSWORD" \
       "share_expire_days": 8,
       "attachments_always_via_ncconnector": false,
       "attachments_min_size_mb": 5,
+      "attachment_link_target": "zip_download",
       "share_html_block_template": null,
       "share_html_block_template_v2": null,
       "share_html_block_effective_language": "en",
@@ -137,6 +139,7 @@ curl -u "alice:APP_PASSWORD" \
       "share_expire_days": true,
       "attachments_always_via_ncconnector": true,
       "attachments_min_size_mb": true,
+      "attachment_link_target": true,
       "share_html_block_template": false,
       "share_password_template": false,
       "language_share_html_block": true

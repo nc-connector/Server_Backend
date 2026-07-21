@@ -36,6 +36,7 @@ final class AdminPermissionServiceTest extends TestCase {
 		self::assertSame('talk.templates', $service->scopeForDefaultSetting('talk_invitation_template_format'));
 		self::assertSame('signature.templates', $service->scopeForDefaultSetting('email_signature_template'));
 		self::assertSame('share.policy', $service->scopeForDefaultSetting('share_send_password_mode'));
+		self::assertSame('share.policy', $service->scopeForDefaultSetting('attachment_link_target'));
 	}
 
 	public function testOverridePayloadRequiresOverrideAndContentScope(): void {
@@ -63,6 +64,12 @@ final class AdminPermissionServiceTest extends TestCase {
 			['share.group_overrides', 'share.templates'],
 			$service->scopesForGroupOverridePayload([
 				'share_html_block_template' => ['mode' => 'forced', 'value' => '<p>x</p>'],
+			])
+		);
+		self::assertSame(
+			['share.user_overrides', 'share.policy'],
+			$service->scopesForUserOverridePayload([
+				'attachment_link_target' => ['mode' => 'forced', 'value' => 'share_page'],
 			])
 		);
 	}

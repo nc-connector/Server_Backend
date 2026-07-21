@@ -269,6 +269,7 @@ then the default values are the effective policy delivered to the mail add-on.
 | `Expiration (days)` | Default share lifetime | Interpreted in days |
 | `Always share attachments via NC Connector` | Forces attachment handling into the NC Connector flow | If active, the size-threshold setting becomes operationally irrelevant |
 | `Offer upload for files larger than (MB)` | Threshold that prompts the add-on to offer NC Connector sharing | Comes with its own enable/disable checkbox; when disabled, the field is greyed out and the API value becomes `null` |
+| `Attachment link target` | Selects the link inserted by attachment mode | Built-in default is `ZIP download`; `Nextcloud share page` keeps the standard share page link; manual shares are unchanged |
 | `Language in share HTML block` | Selects the built-in language for generated share text | Built-in default is **English** |
 | `Email share template` | Custom HTML template for the main share mail | Only active when the language is set to `custom` |
 | `Email password template` | Custom HTML template for the separate password mail | Only active when the language is set to `custom` |
@@ -283,15 +284,15 @@ Template details:
 - The admin template editor sanitizes custom HTML with bundled DOMPurify before preview and save. Scripts, inline event handlers, unsafe URL protocols, and unsupported form/embed elements are removed there.
 
 Template variables used by Share templates:
-- `{URL}` → final share URL; normal shares use `/s/<token>`, attachment mode uses `/s/<token>/download`
-- `{LINK_INTRO}` → localized, mode-specific explanation supplied by the mail client
-- `{LINK_LABEL}` → localized `Nextcloud link` or `ZIP download` label supplied by the mail client
+- `{URL}` → final share URL; manual shares use `/s/<token>`, while attachment mode follows `Attachment link target`
+- `{LINK_INTRO}` → localized explanation supplied by the mail client for the effective link target
+- `{LINK_LABEL}` → localized `Nextcloud link` or `ZIP download` label supplied by the mail client for the effective link target
 - `{PASSWORD}`
 - `{EXPIRATIONDATE}`
 - `{RIGHTS}`
 - `{NOTE}`
 
-The built-in default Share template uses `{LINK_INTRO}` and `{LINK_LABEL}`. The admin still maintains one template: the backend derives a versioned response for current clients and a placeholder-free compatibility response for older clients. The compatibility response uses the language selected in the template editor. Existing custom templates stored by customers are not migrated or rewritten; templates that only use the older variables remain valid.
+The built-in default Share template uses `{URL}`, `{LINK_INTRO}`, and `{LINK_LABEL}`. The admin still maintains one template: the backend derives a versioned response for current clients and a placeholder-free compatibility response for older clients. The compatibility response uses the language selected in the template editor. Existing custom templates stored by customers are not migrated or rewritten; templates that only use the older variables remain valid. Custom templates should use all three link variables so the URL and wording stay aligned when `Attachment link target` changes.
 
 Important dependency:
 - If `Send password separately` is disabled, `Password mode` and `Nextcloud Secrets link expiry (days)` are inactive.

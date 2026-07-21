@@ -25,6 +25,7 @@ final class StatusControllerContractTest extends TestCase {
 			new TestClientSettingsService(
 				effectiveSettings: [
 					'share_default_expire_days' => 14,
+					'attachment_link_target' => 'zip_download',
 					'share_html_block_template' => $versionedShareTemplate,
 					'language_share_html_block' => 'custom',
 					'share_send_password_mode' => 'secrets',
@@ -34,6 +35,7 @@ final class StatusControllerContractTest extends TestCase {
 				],
 				effectiveEditable: [
 					'share_default_expire_days' => false,
+					'attachment_link_target' => true,
 					'share_html_block_template' => false,
 					'share_send_password_mode' => true,
 					'talk_lobby_enabled' => false,
@@ -58,6 +60,7 @@ final class StatusControllerContractTest extends TestCase {
 
 		self::assertSame('secrets', $data['policy']['share']['share_send_password_mode']);
 		self::assertSame(14, $data['policy']['share']['share_default_expire_days']);
+		self::assertSame('zip_download', $data['policy']['share']['attachment_link_target']);
 		self::assertSame($versionedShareTemplate, $data['policy']['share']['share_html_block_template_v2']);
 		self::assertSame('de', $data['policy']['share']['share_html_block_effective_language']);
 		self::assertStringNotContainsString('{LINK_INTRO}', $data['policy']['share']['share_html_block_template']);
@@ -70,6 +73,7 @@ final class StatusControllerContractTest extends TestCase {
 		self::assertSame('target@example.test', $data['policy']['email_signature']['user_email']);
 
 		self::assertTrue($data['policy_editable']['share']['share_send_password_mode']);
+		self::assertTrue($data['policy_editable']['share']['attachment_link_target']);
 		self::assertArrayNotHasKey('share_html_block_template_v2', $data['policy_editable']['share']);
 		self::assertArrayNotHasKey('share_html_block_effective_language', $data['policy_editable']['share']);
 		self::assertFalse($data['policy_editable']['talk']['talk_lobby_enabled']);
