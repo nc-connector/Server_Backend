@@ -386,6 +386,9 @@ Current rule set:
   - `null` means the threshold feature is disabled
   - a numeric value means the threshold feature is enabled
   - `attachments_always_via_ncconnector = true` also forces the runtime value to `null`
+- `attachment_link_target` is an add-on-editable enum with `zip_download` as its built-in default and `share_page` as the alternative
+- the generic key/value tables store administrator values for the new setting without a database schema migration; existing installations use the built-in ZIP default until an administrator stores another server-side value
+- when `policy_editable=true`, the mail client stores its selection only in local client settings and does not write it back through the read-only client endpoint
 
 Important current API behavior:
 - `/api/v1/status` no longer exposes a `default` block
@@ -568,12 +571,13 @@ Important distinction:
 
 Current template-language rules:
 - the stored `share_html_block_template` and `share_password_template` are relevant only when `language_share_html_block = custom`
-- the built-in Share template uses `{LINK_INTRO}` and `{LINK_LABEL}` so the mail clients can distinguish a normal Nextcloud share page from an attachment ZIP download without another policy setting
+- the built-in Share template uses `{URL}`, `{LINK_INTRO}`, and `{LINK_LABEL}` so mail clients can keep the final URL and wording aligned with `attachment_link_target`
 - after global, group, and user settings have been resolved, the status endpoint exposes the canonical Share template as output-only `share_html_block_template_v2`
 - the status endpoint also exposes output-only `share_html_block_effective_language`; for custom templates it comes from the root template `lang` metadata and lets clients translate generated labels, permissions, and password hints independently from the `custom` template-selection mode
 - the existing `share_html_block_template` response key replaces the two mode-aware variables with the generic wording recorded by the template editor for the selected template language; templates without that metadata use the historical English fallback
 - the compatibility metadata is removed from both API response templates and is never inserted into outgoing mail
 - `share_html_block_template_v2` and `share_html_block_effective_language` are not part of the settings schema or `policy_editable`; the admin still edits one canonical template
+- `attachment_link_target` is a normal settings-schema value under `policy.share` and `policy_editable.share`; it does not require another template version
 - stored customer templates are never rewritten to add these variables; older templates keep working with their existing placeholders and produce identical legacy and V2 output
 - legacy Share phrases remain in `TEMPLATE_TRANSLATION_PHRASES` so the editor can still translate templates saved before the mode-aware placeholders were introduced
 - `share_send_password_mode = null` means plain password mail fallback because the Secrets app is unavailable

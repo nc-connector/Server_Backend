@@ -88,6 +88,10 @@
 			tooltipLinkLabel: 'Read the Thunderbird prerequisite in the admin guide',
 			tooltipLinkHref: THUNDERBIRD_ATTACHMENT_AUTOMATION_GUIDE_URL,
 		},
+		attachment_link_target: {
+			label: 'Attachment link target',
+			tooltip: ['Choose whether attachment mode inserts a normal Nextcloud share page link or a ZIP download link; manual shares are unchanged.'],
+		},
 		share_html_block_template: {
 			label: 'Email share template',
 			tooltip: [
@@ -217,6 +221,10 @@
 		share_send_password_mode: {
 			plain: 'Plaintext',
 			secrets: 'Nextcloud Secret Link',
+		},
+		attachment_link_target: {
+			zip_download: 'ZIP download',
+			share_page: 'Nextcloud share page',
 		},
 		talk_room_type: {
 			event: 'Event conversation',
