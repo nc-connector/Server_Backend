@@ -1,449 +1,582 @@
 # Administration Guide — NC Connector Backend
 
-This document is written for **administrators**, including administrators who have **never worked with Nextcloud before**.
+This is the operating guide for administrators and operations teams. It covers deployment, configuration, policy rollout, maintenance, monitoring, recovery, and support.
 
-Its purpose is practical:
-- explain what this backend actually does
-- explain how to enable and configure it in Nextcloud
-- explain how Seats, defaults, group overrides, and user overrides interact
-- explain what mail clients finally read from the backend
-
-Related docs:
-- `development.md` — developer and maintenance guide
-- `endpoints.md` — endpoint reference for mail clients and admin APIs
-- `../README.md` — repository overview and product purpose
+Source layout, architecture, implementation details, builds, and tests belong in [development.md](development.md). The complete HTTP interface is documented in [endpoints.md](endpoints.md).
 
 ---
 
 ## Table of Contents
 
-- [1. Audience, prerequisites, and scope](#1-audience-prerequisites-and-scope)
-- [2. First-time setup for admins new to Nextcloud](#2-first-time-setup-for-admins-new-to-nextcloud)
-  - [2.1 What you need beforehand](#21-what-you-need-beforehand)
-  - [2.2 Nextcloud terms used in this guide](#22-nextcloud-terms-used-in-this-guide)
-  - [2.3 First rollout walkthrough](#23-first-rollout-walkthrough)
-- [3. Where to find the backend settings](#3-where-to-find-the-backend-settings)
-- [4. General section](#4-general-section)
-  - [4.1 Operating mode](#41-operating-mode)
-  - [4.2 License fields and sync](#42-license-fields-and-sync)
-  - [4.3 Reading the status block](#43-reading-the-status-block)
-  - [4.4 Recommended Nextcloud apps](#44-recommended-nextcloud-apps)
-- [5. Group Settings section](#5-group-settings-section)
-  - [5.1 Default Settings](#51-default-settings)
-    - [5.1.1 Share settings reference](#511-share-settings-reference)
-    - [5.1.2 Talk settings reference](#512-talk-settings-reference)
-    - [Email signature settings reference](#email-signature-settings-reference)
-    - [5.1.3 What “Editable in add-on” actually means](#513-what-editable-in-add-on-actually-means)
-    - [5.1.4 Thunderbird attachment automation prerequisite: disable competing compose features](#thunderbird-attachment-automation-prerequisite)
-  - [5.2 Seat assignment](#52-seat-assignment)
-  - [5.3 Assigned seats](#53-assigned-seats)
-  - [5.4 Group overrides](#54-group-overrides)
-  - [5.5 User overrides](#55-user-overrides)
-- [6. Advanced section](#6-advanced-section)
-  - [6.1 NC Connector admin delegation](#61-nc-connector-admin-delegation)
-  - [6.2 Delegation overview](#62-delegation-overview)
-- [7. Effective precedence model](#7-effective-precedence-model)
-- [8. What mail clients read from the backend](#8-what-mail-clients-read-from-the-backend)
-- [9. Install, disable, remove, keep-data](#9-install-disable-remove-keep-data)
-- [10. Operational recommendations](#10-operational-recommendations)
+- [1. Scope and responsibilities](#1-scope-and-responsibilities)
+- [2. Requirements and network access](#2-requirements-and-network-access)
+  - [2.1 Supported platform](#21-supported-platform)
+  - [2.2 Nextcloud apps](#22-nextcloud-apps)
+  - [2.3 Administrative access](#23-administrative-access)
+  - [2.4 Network paths](#24-network-paths)
+  - [2.5 Pre-deployment checklist](#25-pre-deployment-checklist)
+- [3. Installation and first rollout](#3-installation-and-first-rollout)
+  - [3.1 Install from the Nextcloud App Store](#31-install-from-the-nextcloud-app-store)
+  - [3.2 Install a signed release archive](#32-install-a-signed-release-archive)
+  - [3.3 Configure the first Seat](#33-configure-the-first-seat)
+  - [3.4 Pilot acceptance](#34-pilot-acceptance)
+- [4. General operation](#4-general-operation)
+  - [4.1 Open the administration page](#41-open-the-administration-page)
+  - [4.2 Community and Pro mode](#42-community-and-pro-mode)
+  - [4.3 License synchronization](#43-license-synchronization)
+  - [4.4 Backend update status](#44-backend-update-status)
+  - [4.5 Recommended apps](#45-recommended-apps)
+- [5. Policies and Seats](#5-policies-and-seats)
+  - [5.1 Policy precedence](#51-policy-precedence)
+  - [5.2 Editable in add-on](#52-editable-in-add-on)
+  - [5.3 Share settings](#53-share-settings)
+  - [5.4 Talk settings](#54-talk-settings)
+  - [5.5 Email signature settings](#55-email-signature-settings)
+  - [5.6 Template operation](#56-template-operation)
+  - [5.7 Seat assignment and reporting](#57-seat-assignment-and-reporting)
+  - [5.8 Group overrides](#58-group-overrides)
+  - [5.9 User overrides](#59-user-overrides)
+- [6. Delegated administration](#6-delegated-administration)
+- [7. Client rollout dependencies](#7-client-rollout-dependencies)
+  - [7.1 Thunderbird attachment automation](#thunderbird-attachment-automation-prerequisite)
+- [8. Operational verification](#8-operational-verification)
+- [9. Update, rollback, backup, and removal](#9-update-rollback-backup-and-removal)
+  - [9.1 Update](#91-update)
+  - [9.2 Roll back](#92-roll-back)
+  - [9.3 Back up](#93-back-up)
+  - [9.4 Restore](#94-restore)
+  - [9.5 Disable, reinstall, or remove](#95-disable-reinstall-or-remove)
+- [10. Operational checks and troubleshooting](#10-operational-checks-and-troubleshooting)
+  - [10.1 Routine checks](#101-routine-checks)
+  - [10.2 License synchronization fails](#102-license-synchronization-fails)
+  - [10.3 A Seat cannot be assigned](#103-a-seat-cannot-be-assigned)
+  - [10.4 A policy is missing or unexpected](#104-a-policy-is-missing-or-unexpected)
+  - [10.5 A delegated admin cannot access a setting](#105-a-delegated-admin-cannot-access-a-setting)
+  - [10.6 A template image cannot be previewed](#106-a-template-image-cannot-be-previewed)
+  - [10.7 Backend update status is stale](#107-backend-update-status-is-stale)
+  - [10.8 The app fails after an update or restore](#108-the-app-fails-after-an-update-or-restore)
 - [11. Logs and support data](#11-logs-and-support-data)
 
 ---
 
-## 1. Audience, prerequisites, and scope
+## 1. Scope and responsibilities
 
-Supported versions:
-- **Nextcloud 32–35**
-- **PHP 8.3+**
+NC Connector Backend is the central policy and template service for NC Connector mail add-ons.
 
-Operational scope:
-- The backend is the central policy source for the NC Connector mail add-ons.
-- One **Seat** always maps to exactly **one Nextcloud user**.
-- The backend controls:
-  - license mode and license synchronization
-  - seat assignment
-  - default policies
-  - group overrides
-  - user overrides
-  - template control for Share, Talk, and email signatures
+It manages:
 
-This backend does **not** replace mail-client deployment.
-You still need to deploy the Thunderbird or Outlook add-on separately.
+- Community or Pro operating mode
+- license status and Seat capacity
+- Seat assignment to Nextcloud users
+- Share, Talk, and email signature defaults
+- group and user overrides
+- Share, password-mail, Talk, and signature templates
+- delegated NC Connector administration
+
+It does not deploy or configure Thunderbird or Outlook. Client deployment remains a separate administrative task.
+
+One Seat belongs to one Nextcloud user. The mail add-on must authenticate as that same user to receive the expected Seat and policy state.
+
+The backend does not store mail content or attachments. Templates, policies, license state, Seats, overrides, and delegations are stored in the Nextcloud database. External template images may be mirrored temporarily for editor previews.
 
 ---
 
-## 2. First-time setup for admins new to Nextcloud
+## 2. Requirements and network access
 
-### 2.1 What you need beforehand
+### 2.1 Supported platform
 
-Before you configure NC Connector, make sure you have:
-- a working Nextcloud instance
-- a Nextcloud account with **administrator** rights
-- the NC Connector backend app installed or ready to install
-- if you want `Pro` mode:
-  - a license email
-  - a license key
-
-You can enable the app in two common ways:
-
-**Nextcloud web UI**
-- Open **Apps**
-- search for **NC Connector for mail integration**
-- click **Download and enable** or **Enable**
-
-**Nextcloud command line**
-- `php occ app:enable ncc_backend_4mc`
-
-If you are new to Nextcloud and do not have shell access, the web UI path is usually enough.
-
-### 2.2 Nextcloud terms used in this guide
-
-These terms are important:
-
-| Term | Meaning |
+| Component | Requirement |
 |---|---|
-| `User` | A normal Nextcloud account |
-| `Group` | A built-in Nextcloud group such as `Sales`, `HR`, or `Project-A` |
-| `Administrator` | A Nextcloud admin account; admins can configure NC Connector; by default, admins cannot receive Seats |
-| `Seat` | A license slot in NC Connector; exactly one Seat belongs to one Nextcloud user |
-| `Default` | The baseline policy for all Seat users |
-| `Group override` | A group-specific policy layer above the defaults |
-| `User override` | A user-specific policy layer above group and default |
-| `occ` | Nextcloud’s command-line tool |
+| Nextcloud | 32 through 35 |
+| PHP | 8.3 or newer |
+| Transport | HTTPS for production access |
+| Background jobs | Nextcloud background jobs must run regularly; system cron is recommended |
+| Browser | A current browser for the Nextcloud administration interface |
+| Mail client | A maintained NC Connector release for Thunderbird or Outlook Classic |
 
-The most important conceptual point is:
-- **NC Connector does not create its own user directory**
-- it reuses **existing Nextcloud users and groups**
+The PHP runtime must provide the normal Nextcloud XML and DOM capabilities. The web-server process also needs write access to `ncc_backend_4mc/img/runtime` when administrators use external images in template previews.
 
-### 2.3 First rollout walkthrough
+### 2.2 Nextcloud apps
 
-If you want the shortest possible path to a working setup, do this in order:
+| App | Requirement | Purpose |
+|---|---|---|
+| Files Sharing | Required for Share workflows used by the mail clients | Creates and manages public shares |
+| Talk | Optional | Enables calendar-based Talk meetings |
+| Secrets | Optional | Sends separate share passwords as expiring Secret links |
 
-1. Enable the app.
-2. Open **Settings → Administration → NC Connector Backend**.
-3. Decide whether the instance should run in `Community` or `Pro`.
-4. If `Pro`, store the license credentials and run a sync.
-5. Define clean **Default Settings** first.
-6. Assign Seats to the users who should use NC Connector.
-7. Test one real user with the mail add-on.
-8. Add **Group overrides** only if departments need different defaults.
-9. Add **User overrides** only for real exceptions.
+If Secrets is unavailable, NC Connector continues with plain separate password mails. The corresponding Secrets option is disabled in the backend UI.
 
-That order keeps the rollout understandable and avoids unnecessary exception handling too early.
+### 2.3 Administrative access
+
+Initial installation and full configuration require a Nextcloud administrator.
+
+Shell-based lifecycle commands additionally require:
+
+- access to the Nextcloud installation
+- permission to run `occ`
+- the correct PHP binary and web-server account for that installation
+
+Commands in this guide use `php occ ...`. Adapt the PHP path and operating-system user to the local Nextcloud deployment.
+
+Delegated NC Connector admins can manage only their assigned scopes. They cannot install the app, change license settings, assign Seats, or manage other delegations.
+
+### 2.4 Network paths
+
+| Direction | Destination | When used | Purpose |
+|---|---|---|---|
+| Mail client to Nextcloud | `/apps/ncc_backend_4mc/api/v1/status` or `/index.php/apps/ncc_backend_4mc/api/v1/status` | Client startup and policy refresh | Read Seat, license, and effective policy state |
+| Nextcloud to `https://nc-connector.de/wp-json/ncc/v1/update-check` | At most once per UTC day | Community and Pro | Check the latest backend version |
+| Nextcloud to `https://nc-connector.de/wp-json/ncc/v1/license/status` | Manual sync and the daily Pro job | Pro with stored credentials | Refresh license and Seat entitlement |
+| Nextcloud to administrator-selected HTTPS image hosts | Template preview or image refresh | Only when templates contain external images | Mirror safe public images for the editor |
+
+Allow DNS resolution, TLS validation, and outbound HTTPS through the Nextcloud proxy or firewall where these functions are required.
+
+The update check runs independently of Pro mode and license credentials. It sends product, installed version, stable channel, and a daily pseudonymous identifier. The license request is sent only in Pro mode with stored credentials.
+
+Template image retrieval rejects non-HTTPS URLs, private or reserved destinations, excessive redirects, files larger than 4 MB, unsupported image formats, and mismatched content types.
+
+### 2.5 Pre-deployment checklist
+
+Before installing:
+
+1. Confirm the supported Nextcloud and PHP versions.
+2. Confirm that Nextcloud background jobs run successfully.
+3. Back up the Nextcloud database and configuration.
+4. Keep the currently installed backend package if this is an update.
+5. Verify outbound access required by the selected operating mode.
+6. Select a non-admin pilot user with a working Thunderbird or Outlook setup.
+7. Decide whether Community mode or Pro mode will be used.
+8. Record the intended defaults, group rules, user exceptions, and delegated-admin scopes.
+
+Expected result: installation can proceed without changing production-wide client behavior immediately.
 
 ---
 
-## 3. Where to find the backend settings
+## 3. Installation and first rollout
 
-Path in Nextcloud:
+### 3.1 Install from the Nextcloud App Store
+
+Goal: install the published backend package through Nextcloud.
+
+Prerequisites:
+
+- a full Nextcloud administrator
+- a completed pre-deployment backup
+- access to the Nextcloud App Store
+
+Steps:
+
+1. Open **Apps** in Nextcloud.
+2. Search for **NC Connector for mail integration**.
+3. Select **Download and enable**.
+4. Open **Administration settings → NC Connector Backend**.
+
+Expected result: the administration page opens and shows the installed backend version.
+
+Verification:
+
+1. Confirm that the **General** tab loads without an error.
+2. Confirm that **Community** is available.
+3. Confirm that the version row shows the installed version.
+4. Check the Nextcloud log for new `ncc_backend_4mc` errors.
+
+If installation fails, disable the app, correct the reported platform, permission, or package problem, and enable it again. Do not use destructive removal as a troubleshooting shortcut.
+
+### 3.2 Install a signed release archive
+
+Goal: install a release supplied outside the App Store.
+
+Prerequisites:
+
+- a signed release archive from a trusted source
+- shell access to the Nextcloud server
+- knowledge of the active Nextcloud apps directory
+
+Steps:
+
+1. Extract the archive into the configured Nextcloud apps directory.
+2. Verify that the resulting path ends with `ncc_backend_4mc/appinfo/info.xml`.
+3. Apply the same owner and permissions used by the other Nextcloud apps.
+4. Run `php occ app:enable ncc_backend_4mc`.
+5. Open **Administration settings → NC Connector Backend**.
+
+Expected result: Nextcloud reports the app as enabled and the administration page opens.
+
+Verification:
+
+- `php occ app:list` lists `ncc_backend_4mc` under enabled apps.
+- The displayed version matches the installed archive.
+- No integrity or repair-step error appears in the Nextcloud log.
+
+If the package structure or signature is rejected, disable the app and replace it with a valid signed archive. Keep the database backup until pilot acceptance is complete.
+
+### 3.3 Configure the first Seat
+
+Goal: establish a small working configuration before broad rollout.
+
+Steps:
+
+1. Open **General**.
+2. Choose **Community** or **Pro**.
+3. For Pro, enter the license email and license key, save them, and run **Sync now**.
+4. Open **Group Settings → Default Settings**.
+5. Review Share, Talk, and email signature defaults.
+6. Replace example signature postal and legal text before enabling it for production.
+7. Open **Seat assignment** and assign one non-admin pilot user.
+8. Configure the mail add-on with the same Nextcloud user.
+9. Test one Share workflow and every enabled Talk or signature workflow.
+
+Expected result: the pilot user receives the configured policies and can complete the enabled workflows.
+
+Rollback: remove the pilot Seat and return changed defaults to their previous values. This does not uninstall the backend or delete stored configuration.
+
+### 3.4 Pilot acceptance
+
+Complete these checks before assigning more Seats:
+
+| Check | Expected result |
+|---|---|
+| Administration page | Loads for a full admin without server or browser-console errors |
+| License mode | Community shows one Seat, or Pro shows the purchased entitlement |
+| Seat assignment | Pilot user appears in **Assigned seats** |
+| Runtime status | Authenticated pilot request returns HTTP 200 and an assigned Seat |
+| Share | Effective password, expiry, permission, and link-target settings are applied |
+| Talk | Enabled Talk settings and invitation format are applied |
+| Signature | Matching sender identity receives the configured signature behavior |
+| Group override | A pilot group value wins over the default |
+| User override | A forced pilot-user value wins over the group |
+| Editable setting | The add-on can change it locally |
+| Locked setting | The add-on displays or applies the forced value |
+| Logs | No new unexpected `warning` or `error` entry appears |
+
+Record the Nextcloud version, backend version, client version, pilot user, date, and result. Expand the rollout only after the required rows pass.
+
+---
+
+## 4. General operation
+
+### 4.1 Open the administration page
+
+Full Nextcloud administrators use:
+
 - **Settings → Administration → NC Connector Backend**
 
-The interface is intentionally split into three main areas:
+Delegated NC Connector admins use:
+
+- **Settings → Personal → NC Connector Backend**
+
+The direct path `/apps/ncc_backend_4mc/` remains available for deep links. It is not shown as a main app-bar entry.
+
+The interface contains:
 
 | Area | Purpose |
 |---|---|
-| `General` | License mode, license credentials, license sync, and seat entitlement state |
-| `Group Settings` | Default policies, seat assignment, assigned-seat overview, group overrides, and user overrides |
-| `Advanced` | NC Connector admin delegation |
+| `General` | Mode, license, update status, and recommended apps |
+| `Group Settings` | Defaults, Seats, reports, group overrides, and user overrides |
+| `Advanced` | Delegated NC Connector administration |
 
-Important UI note:
-- In the Nextcloud app list, the app is named **NC Connector for mail integration**.
-- In the Administration settings, the section label is **NC Connector Backend**.
-- Full Nextcloud administrators use the **Administration settings** page.
-- Delegated NC Connector admins use their personal **Settings** page and open **NC Connector Backend** there.
+### 4.2 Community and Pro mode
+
+| Mode | Capacity | External license request |
+|---|---|---|
+| `Community` | One Seat | None |
+| `Pro` | Purchased Seat entitlement | Required after credentials are stored |
+
+Changing mode does not delete settings or Seats. A mode or license state with insufficient entitlement can pause Seat access until capacity becomes valid again.
+
+### 4.3 License synchronization
+
+In Pro mode:
+
+1. Enter **License email** and **License key**.
+2. Save the credentials.
+3. Select **Sync now**.
+4. Review status, validity, grace period, purchased Seats, available Seats, last sync, and any error.
+
+Expected result: the status becomes active or grace where applicable, and the Seat totals match the license.
+
+The scheduled Pro synchronization runs every 24 hours when Pro mode and complete credentials are present. Community mode does not contact the license endpoint.
+
+### 4.4 Backend update status
+
+The General tab shows:
+
+- installed backend version
+- latest known stable version
+- last check time
+- update availability or the last error
+
+The background job wakes every six hours but performs at most one successful check per UTC day. Opening the admin page starts the first check when no cached result exists.
+
+The status row is informational. It does not download or install an update.
+
+### 4.5 Recommended apps
+
+The General tab reports whether optional integrations are available.
+
+Currently:
+
+- **Nextcloud Secrets** enables expiring Secret links for separate Share passwords.
+
+Missing optional apps do not block the backend. Dependent settings become unavailable or fall back to their documented mode.
 
 ---
 
-## 4. General section
+## 5. Policies and Seats
 
-### 4.1 Operating mode
+### 5.1 Policy precedence
 
-The backend supports two operating modes:
+The effective order is:
 
-| Mode | Purpose | Operational effect |
-|---|---|---|
-| `Community` | Small setups, tests, proof of concept | Includes **1 Seat**, does not contact the license backend |
-| `Pro` | Team rollout | Seat entitlement comes from the NC Connector license backend |
+1. forced user override
+2. forced matching group override
+3. default
 
-Practical meaning:
-- In **Community**, the backend is fully usable, but seat capacity is intentionally minimal.
-- In **Pro**, seat entitlement is synchronized from the license state.
+`inherit` moves to the next lower layer.
 
-UI behavior:
-- The mode selector itself stays compact.
-- Explanatory details are shown in tooltips.
-- If **Pro** is active and no credentials are stored yet, the page shows an additional note that points admins to `nc-connector.de` for obtaining the license key.
+If several group overrides apply, the group with the lowest numeric priority wins. Use distinct priorities for overlapping groups so the result is easy to audit.
 
-### 4.2 License fields and sync
+### 5.2 Editable in add-on
 
-Relevant controls in `General`:
+**Editable in add-on** separates the backend default from the local user choice.
 
-| UI element | Purpose |
+When enabled:
+
+- the backend sends a concrete default
+- the add-on may keep a local choice for that setting
+- the backend value field is inactive in the default-settings UI
+
+When a group or user override is forced:
+
+- the forced value is effective
+- local editing is disabled for that setting
+
+Templates remain backend-controlled. The detailed response fields are documented in [endpoints.md](endpoints.md).
+
+### 5.3 Share settings
+
+| Setting | Operational effect |
 |---|---|
-| `License email` | Account identifier for the NC Connector license backend |
-| `License key` | License secret used for backend sync |
-| `Save license data` | Stores credentials in Nextcloud and triggers a sync path |
-| `Sync now` | Manually refreshes license state and seat entitlement |
+| `Base directory` | Prefills the target base path for new shares |
+| `Share name` | Prefills the share title |
+| `Upload/Create` | Allows recipients to add content |
+| `Edit` | Allows recipients to modify content |
+| `Delete` | Allows recipients to delete content |
+| `Set password` | Enables password protection by default |
+| `Send password separately` | Sends the password after the main mail |
+| `Password mode` | Uses a plain password mail or an expiring Secrets link |
+| `Nextcloud Secrets link expiry (days)` | Sets the Secrets-link lifetime |
+| `Expiration (days)` | Sets the public-share lifetime |
+| `Always share attachments via NC Connector` | Routes every attachment through the NC Connector flow |
+| `Offer upload for files larger than (MB)` | Offers NC Connector above the configured threshold |
+| `Attachment link target` | Uses `ZIP download` by default or the `Nextcloud share page` in attachment mode |
+| `Language in share HTML block` | Selects a built-in language or `custom` |
+| `Email share template` | Defines custom HTML for the main Share block |
+| `Email password template` | Defines custom HTML for separate password delivery |
 
-Operational note:
-- In **Community** mode, the backend does not need a license lookup.
-- In **Pro** mode, the license state becomes operationally relevant for seat availability.
+Operational dependencies:
 
-### 4.3 Reading the status block
+- **Always share attachments** makes the threshold inactive.
+- Disabling **Send password separately** makes password mode and Secrets expiry inactive.
+- Missing Secrets support disables the Secrets option and uses plain password delivery.
+- **Attachment link target** affects attachment automation only; manual shares keep the standard share page.
+- Custom Share templates should contain `{URL}`, `{LINK_INTRO}`, and `{LINK_LABEL}` so the visible text matches the selected link target.
 
-The status block is the first place to check when a seat or entitlement question comes up.
+### 5.4 Talk settings
 
-Typical fields shown there:
-- current status (`active`, `grace`, `expired`, ...)
-- validity window
-- grace window
-- purchased seats
-- available seats
-- last sync timestamp
-
-Use this section when the support question is:
-- “Why does this instance currently not allow more seats?”
-- “Why is a seat paused?”
-- “Did the last Pro sync succeed?”
-
-The `General` section also shows the installed backend version and the latest backend version known to `nc-connector.de`.
-If both versions match, the row shows a check mark.
-No download link is shown there.
-The check runs through Nextcloud background jobs and does not require Pro mode or license credentials.
-If no check has run yet, the admin page performs the first check once and stores the result.
-
-### 4.4 Recommended Nextcloud apps
-
-The `General` section also shows optional Nextcloud apps that improve NC Connector behavior.
-
-Currently listed:
-
-| App | Purpose |
+| Setting | Operational effect |
 |---|---|
-| `Nextcloud Secrets` | Allows separate share passwords to be sent as expiring Secrets links instead of plain password mails |
+| `Language in Talk description text` | Selects a built-in language or `custom` |
+| `Talk invitation output` | Returns custom invitations as HTML or cleaned plain text |
+| `Talk invitation template` | Defines the custom invitation |
+| `Title` | Prefills the room title |
+| `Lobby active until start time` | Keeps participants in the lobby until the event starts |
+| `Show in search` | Controls Talk search visibility |
+| `Add users` | Adds internal users from event recipients |
+| `Add guests` | Adds external recipients as guests |
+| `Set password` | Enables Talk password protection |
+| `Delete Talk room when deleting a saved event` | Allows the client that created a linked room to delete it with the saved event |
+| `Room type` | Selects event or group room behavior |
 
-If the app is enabled, the list shows it with a green status mark.
-If it is missing or disabled, the list shows a red status mark.
+`Set password` is the single Talk password control. The obsolete separate password-generation setting is no longer present.
 
-Important:
-- NC Connector still works without the Secrets app.
-- If Secrets is unavailable, password delivery falls back to the existing plain password mail behavior.
-- The Share setting `Password mode` disables the Secrets option while the app is unavailable.
+### 5.5 Email signature settings
 
----
+| Setting | Operational effect |
+|---|---|
+| `Add signature when composing` | Enables the managed signature for new messages |
+| `Add signature when replying` | Enables it for replies |
+| `Add signature when forwarding` | Enables it for forwards |
+| `Email signature template` | Defines the managed HTML signature |
 
-## 5. Group Settings section
+Important behavior:
 
-This area contains the actual policy and rollout logic.
+- The backend returns HTML; clients may derive plain text.
+- A disabled but add-on-editable compose setting still provides the reply, forward, and rendered template values so the user can enable signatures locally.
+- A disabled and locked compose setting makes the dependent signature values inactive.
+- The signature is applied only when the sender identity matches the email returned for that Seat user.
+- A forced **Signature email address** user override replaces the Nextcloud profile email for matching and `{EMAIL}`.
+- Empty profile values remove their surrounding line or table row.
+- The built-in signature is an example. Replace its address and legal text before rollout.
 
-It covers five operational layers:
-1. global defaults
-2. seat assignment
-3. assigned-seat overview
-4. group overrides
-5. user overrides
+Available variables:
 
-### 5.1 Default Settings
+- `{NAME}`
+- `{EMAIL}`
+- `{PHONE}`
+- `{PHONE_MOBILE}`
+- `{ABOUT}`
+- `{FUNCTION}`
+- `{ORGANISATION}`
+- `{CUSTOM1}`
+- `{CUSTOM2}`
 
-Default settings are the baseline policies for **all users with an assigned Seat**.
+`{PHONE_MOBILE}`, `{CUSTOM1}`, and `{CUSTOM2}` come from user overrides. `{ABOUT}` keeps line breaks.
 
-If there is:
-- no matching group override, and
-- no user override,
+### 5.6 Template operation
 
-then the default values are the effective policy delivered to the mail add-on.
+Share templates support:
 
-### 5.1.1 Share settings reference
-
-| Setting | Purpose | Notes |
-|---|---|---|
-| `Base directory` | Default target folder base path for new shares | Useful for structured server-side storage |
-| `Share name` | Default share title | Reduces manual input in the client |
-| `Upload/Create` | Default create permission | Delivered to the add-on as part of share policy |
-| `Edit` | Default write permission | Controls whether recipients may modify content |
-| `Delete` | Default delete permission | Controls whether recipients may remove content |
-| `Set password` | Default password toggle for shares | Does not force a password unless the value is forced downstream |
-| `Send password separately` | Sends the password in a separate follow-up mail | Built-in default is **enabled** |
-| `Password mode` | Selects how separate share passwords are delivered | `Plaintext` uses the existing password mail; `Nextcloud Secret Link` requires the Nextcloud Secrets app |
-| `Nextcloud Secrets link expiry (days)` | Lifetime for generated Secrets links | Default is **7 days**; only active when separate password delivery and Secrets mode are active |
-| `Expiration (days)` | Default share lifetime | Interpreted in days |
-| `Always share attachments via NC Connector` | Forces attachment handling into the NC Connector flow | If active, the size-threshold setting becomes operationally irrelevant |
-| `Offer upload for files larger than (MB)` | Threshold that prompts the add-on to offer NC Connector sharing | Comes with its own enable/disable checkbox; when disabled, the field is greyed out and the API value becomes `null` |
-| `Attachment link target` | Selects the link inserted by attachment mode | Built-in default is `ZIP download`; `Nextcloud share page` keeps the standard share page link; manual shares are unchanged |
-| `Language in share HTML block` | Selects the built-in language for generated share text | Built-in default is **English** |
-| `Email share template` | Custom HTML template for the main share mail | Only active when the language is set to `custom` |
-| `Email password template` | Custom HTML template for the separate password mail | Only active when the language is set to `custom` |
-
-Template details:
-- The editor is opened in a modal, not inline.
-- The modal offers preview, source-code view, and variable insertion.
-- The **Languages** dropdown rewrites the built-in text fragments to supported locales.
-- **Reset to default** keeps the language currently selected in the editor and applies it to the default template.
-- Variables and links stay untouched during translation.
-- Runtime image rendering inside the editor uses locally mirrored app files, while the stored template still keeps the original image URL.
-- The admin template editor sanitizes custom HTML with bundled DOMPurify before preview and save. Scripts, inline event handlers, unsafe URL protocols, and unsupported form/embed elements are removed there.
-
-Template variables used by Share templates:
-- `{URL}` → final share URL; manual shares use `/s/<token>`, while attachment mode follows `Attachment link target`
-- `{LINK_INTRO}` → localized explanation supplied by the mail client for the effective link target
-- `{LINK_LABEL}` → localized `Nextcloud link` or `ZIP download` label supplied by the mail client for the effective link target
+- `{URL}`
+- `{LINK_INTRO}`
+- `{LINK_LABEL}`
 - `{PASSWORD}`
 - `{EXPIRATIONDATE}`
 - `{RIGHTS}`
 - `{NOTE}`
 
-The built-in default Share template uses `{URL}`, `{LINK_INTRO}`, and `{LINK_LABEL}`. The admin still maintains one template: the backend derives a versioned response for current clients and a placeholder-free compatibility response for older clients. The compatibility response uses the language selected in the template editor. Existing custom templates stored by customers are not migrated or rewritten; templates that only use the older variables remain valid. Custom templates should use all three link variables so the URL and wording stay aligned when `Attachment link target` changes.
+Talk templates support:
 
-Important dependency:
-- If `Send password separately` is disabled, `Password mode` and `Nextcloud Secrets link expiry (days)` are inactive.
-- If the Nextcloud Secrets app is missing or disabled, Secrets mode and the expiry field are inactive.
-- In that case, the runtime API returns `null` for `share_send_password_mode` and `share_secrets_expire_days`, and mail clients use the existing plain password mail behavior.
-- If `Language in share HTML block` is **not** `custom`, the template rows stay visibly inactive.
-- In that state, the UI hides the override-mode selector for those rows because the template content is not the active source.
-
-### 5.1.2 Talk settings reference
-
-| Setting | Purpose | Notes |
-|---|---|---|
-| `Language in Talk description text` | Selects the built-in language for the Talk invitation text | Built-in default is **English** |
-| `Talk invitation output` | Controls whether the custom Talk template is delivered as HTML or as cleaned plain text | Only relevant when the language is set to `custom` |
-| `Talk invitation template` | Custom invitation template | Only active when the language is set to `custom` |
-| `Title` | Default room title | Used as prefill in the mail client |
-| `Lobby active until start time` | Enables lobby behavior until the start time | Relevant for meeting control |
-| `Show in search` | Makes the room searchable in Talk | Controls discoverability |
-| `Add users` | Adds internal users by default | Applied by the add-on when invitees are synchronized |
-| `Add guests` | Adds external recipients as guests by default | Depends on server-side Talk behavior |
-| `Set password` | Enables Talk password protection by default | Mail clients initially generate a password whenever this setting is effective |
-| `Delete Talk room when deleting a saved event` | Allows mail clients to delete a linked Talk room when a saved NC Connector event is deleted | Off by default; generic Talk links in location/URL fields are ignored by clients |
-| `Room type` | Selects the Talk room type | Affects room behavior on the Nextcloud side |
-
-Talk template variables:
 - `{MEETING_URL}`
 - `{PASSWORD}`
 
-Important dependency:
-- If `Language in Talk description text` is **not** `custom`, the Talk template row stays visibly inactive.
-- If `Language in Talk description text` is `custom`, the Talk template row additionally shows an `HTML | Plain Text` output selector.
-- `HTML` returns the stored editor HTML unchanged through the runtime API.
-- `Plain Text` strips the HTML markup for runtime delivery while preserving visible URLs, including meeting and help links.
+Operational rules:
 
-### Email signature settings reference
+1. Select `custom` for the corresponding template language.
+2. Open the template editor.
+3. Edit or reset the template.
+4. Preview both content and links.
+5. Save the modal and then save the settings layer.
+6. Test the result with a pilot client.
 
-| Setting | Purpose | Notes |
-|---|---|---|
-| `Add signature when composing` | Enables centrally managed signatures for new messages | Delivered as a boolean policy flag |
-| `Add signature when replying` | Enables centrally managed signatures for replies | Runtime value becomes `null` when composing signatures are disabled and locked |
-| `Add signature when forwarding` | Enables centrally managed signatures for forwarded messages | Runtime value becomes `null` when composing signatures are disabled and locked |
-| `Email signature template` | Central HTML signature template | Backend-controlled template field |
+Unsafe scripts, event handlers, URL schemes, forms, and embedded content are removed. External preview images must use a public HTTPS URL, remain below 4 MB, and return a supported image type. The stored template keeps the external URL; the local runtime copy is only an editor cache.
 
-Email signature runtime behavior:
-- The backend delivers **HTML only** for the signature.
-- Mail clients may derive plain text from that HTML when needed.
-- The admin template editor sanitizes the signature HTML with bundled DOMPurify before it is saved.
-- There is intentionally **no language selector** for email signatures, including the template editor modal.
-- If `Add signature when composing` is disabled but remains **Editable in add-on**, the runtime API still returns the reply setting, forward setting, and rendered template so a mail client can activate signatures locally.
-- If disabled composing signatures are locked, the reply setting, forward setting, and template are inactive and the runtime API returns `null` for each dependent value.
-- The template is rendered for the resolved Seat user before it is returned by `/api/v1/status`.
-- The built-in default signature template avoids layout tables and `<style>` tags so mail clients can sanitize it without reintroducing Thunderbird composer table guides.
-- The built-in template is an editable example. Replace its sample postal address and legal text before assigning it as the organisation signature.
-- Updating the app-provided default does not rewrite an email signature template that an administrator already stored at the default, group, or user layer.
-- The runtime API also returns `policy.email_signature.user_email`. Mail clients use it to apply the central signature only to matching sender identities.
-- Signature variables are filled from the assigned Seat user's **Nextcloud user profile settings** before the template is sent to Thunderbird or Outlook.
-- Example: if the Seat belongs to `alex@example.com`, `{PHONE}`, `{ABOUT}`, `{FUNCTION}`, and `{ORGANISATION}` are read from that Nextcloud user's profile fields.
-- Profile values are HTML-escaped by the backend before placeholder replacement.
-- `{ABOUT}` is the only multiline-capable profile placeholder: line breaks are normalized and rendered as `<br>`.
-- If a placeholder has no value, the backend removes that signature line or table row before returning the rendered HTML.
+Updating the built-in example does not rewrite templates already stored at the default, group, or user layer.
 
-Email signature template variables:
-- `{NAME}` → Nextcloud display name
-- `{EMAIL}` → Nextcloud user email address, or the user override value if one is forced
-- `{PHONE}` → Nextcloud profile phone
-- `{PHONE_MOBILE}` → Mobile phone value from user overrides
-- `{ABOUT}` → Nextcloud profile biography/about text, with line breaks preserved
-- `{FUNCTION}` → Nextcloud profile role/function
-- `{ORGANISATION}` → Nextcloud profile organisation
-- `{CUSTOM1}` → Custom value from user overrides
-- `{CUSTOM2}` → Custom value from user overrides
+### 5.7 Seat assignment and reporting
 
-User overrides add four signature-only fields that do not exist in defaults or group overrides:
+Seat assignment provides:
 
-| Field | Purpose |
+- group filtering
+- user search
+- individual assignment
+- bulk assignment for the filtered set
+- bulk removal
+- assigned-Seat overview
+- CSV export of effective policy state
+
+Admin accounts are excluded by default. This avoids accidental license use by administrative or automation accounts.
+
+To allow admin accounts explicitly:
+
+- show state: `php occ ncc:admin-seat-assignment status`
+- enable: `php occ ncc:admin-seat-assignment enable`
+- restore the default: `php occ ncc:admin-seat-assignment disable`
+
+Disabling the override does not remove an existing admin Seat. Remove it from **Assigned seats** if it should no longer consume capacity.
+
+The assigned-Seat table shows assignment state and links to matching group or user overrides. The CSV report omits raw template HTML and reports an effective custom template as `Custom`.
+
+### 5.8 Group overrides
+
+Use group overrides for department or team differences.
+
+Per setting:
+
+- `inherit` uses the default
+- `forced` applies the group value and locks it in the add-on
+
+Group overrides may be created before Seats are assigned. They become effective only for Seat users in the group.
+
+Lower numeric priority wins when a user belongs to several matching groups.
+
+### 5.9 User overrides
+
+Use user overrides for individual exceptions.
+
+Per setting:
+
+- `inherit` checks the winning group and then the default
+- `forced` applies the user value and locks it in the add-on
+
+Signature user overrides additionally provide:
+
+- `Signature email address`
+- `Mobile phone`
+- `Custom 1`
+- `Custom 2`
+
+Avoid using many user overrides as a substitute for group design. Review exceptions regularly through the assigned-Seat overview and CSV report.
+
+---
+
+## 6. Delegated administration
+
+Only full Nextcloud administrators can create, change, or remove NC Connector delegations.
+
+Delegations can cover:
+
+| Area | Available scopes |
 |---|---|
-| `Signature email address` | Overrides `{EMAIL}` and `policy.email_signature.user_email` for this Seat user |
-| `Mobile phone` | Supplies `{PHONE_MOBILE}` |
-| `Custom 1` | Supplies `{CUSTOM1}` |
-| `Custom 2` | Supplies `{CUSTOM2}` |
+| Share | policies, templates, group overrides, user overrides |
+| Talk | policies, templates, group overrides, user overrides |
+| Signature | policies, template and signature user values, group overrides, user overrides |
 
-Use `Signature email address` when the Nextcloud profile email is not the mailbox address used in Outlook or Thunderbird, for example with Entra ID based login setups.
+Delegated admins:
 
-### 5.1.3 What “Editable in add-on” actually means
+- see NC Connector Backend in personal settings
+- see only permitted tabs and rows
+- can save only permitted settings
+- may read the assigned-Seat overview when their scope requires override context
+- cannot assign Seats
+- cannot change license mode or credentials
+- cannot manage delegations
 
-This flag is easy to misunderstand, so it is worth being explicit.
+The backend checks permissions on every request. UI visibility does not replace server-side access checks.
 
-It does **not** mean:
-- “the backend default is disabled”
-- “the setting is optional”
-- “the mail client does not receive a backend value”
+After changing a delegation, sign in as the delegated user and verify both visible rows and denied actions before relying on it in production.
 
-It **does** mean:
-- the backend still sends a concrete effective value
-- the mail add-on is allowed to change that value locally for the user interaction
-- in the admin UI, the stored backend value stays visible but the value field is greyed out and locked as soon as **Editable in add-on** is enabled
+---
 
-Built-in default behavior:
-- All **non-template Share/Talk/email signature settings** start with **Editable in add-on = enabled**.
-- Template fields intentionally stay backend-controlled.
+## 7. Client rollout dependencies
 
-API consequence:
-- Mail clients receive both:
-  - `policy` → the effective value
-  - `policy_editable` → whether the add-on may change it locally
+Deploy the Thunderbird or Outlook add-on separately. The client must use the same Nextcloud identity that owns the Seat.
 
-Operational consequence:
-- If a later **forced** group override or user override exists for the same setting, the add-on is no longer allowed to change that setting.
-- If that override returns to `inherit`, the lower layer becomes effective again and `policy_editable` follows that lower layer again.
+Before broad rollout:
+
+1. Update the mail client and NC Connector add-on to a maintained compatible version.
+2. Verify HTTPS access from the client network to the Nextcloud instance.
+3. Verify the authenticated backend status request.
+4. Test locally editable and forced policy values.
+5. Test every enabled Share, Talk, password, and signature path.
+6. Record the client version with the pilot result.
 
 <a id="thunderbird-attachment-automation-prerequisite"></a>
-### 5.1.4 Thunderbird attachment automation prerequisite: disable competing compose features
+### 7.1 Thunderbird attachment automation
 
-This section matters **only for Thunderbird**.
-It does **not** apply to Outlook.
+This section applies only to Thunderbird.
 
-If you want **NC Connector attachment automation** to be the only active compose flow, administrators should also disable Thunderbird’s own competing compose prompts centrally.
+When NC Connector should own the attachment workflow, disable Thunderbird's competing compose prompts centrally. NC Connector does not change these Thunderbird-wide preferences.
 
-Why this is necessary:
-- NC Connector can route attachments into its own sharing flow (`always` or `offer above threshold`).
-- Thunderbird itself still has native compose features for:
-  - **Check for missing attachments**
-  - **Upload for files larger than ...**
-- Per reviewer constraints and the add-on’s limited experiment scope, **NC Connector must not change these Thunderbird-wide compose settings itself**.
-- Therefore, if you want a clear admin-managed rollout, disable and lock these Thunderbird settings via `policies.json`.
+Relevant preferences:
 
-Relevant Thunderbird preferences:
-- `mail.compose.attachment_reminder`
-  - controls **Check for missing attachments**
-- `mail.compose.big_attachments.notify`
-  - controls **Upload for files larger than ...**
-- `mail.compose.big_attachments.threshold_kb`
-  - controls the native Thunderbird threshold value in **KB**
+| Preference | Recommended locked value | Purpose |
+|---|---|---|
+| `mail.compose.attachment_reminder` | `false` | Disables the missing-attachment prompt |
+| `mail.compose.big_attachments.notify` | `false` | Disables Thunderbird's native large-attachment upload prompt |
+| `mail.compose.big_attachments.threshold_kb` | `5120` | Records the standard 5 MB threshold even though notification is disabled |
 
-Recommended lock state when NC Connector attachment automation should own the workflow:
-- `mail.compose.attachment_reminder` => `false` / `locked`
-- `mail.compose.big_attachments.notify` => `false` / `locked`
-- `mail.compose.big_attachments.threshold_kb` => `5120` / `locked`
-
-Notes:
-- `5120` KB is Thunderbird’s default threshold value (5 MB).
-- Once `mail.compose.big_attachments.notify=false`, the threshold is effectively inactive, but keeping it explicitly locked avoids drift and makes the admin intent visible.
-- Merge the example below into your existing `policies.json`; do not create a second policy file.
-
-Official references:
-- Thunderbird Enterprise Policies — `Preferences` policy:
-  - `https://thunderbird.github.io/policy-templates/templates/esr140/#preferences`
-- Thunderbird compose preferences source:
-  - `https://searchfox.org/comm-central/source/mail/components/preferences/compose.inc.xhtml`
-
-Example `policies.json` snippet:
+Merge this into the existing `policies.json`:
 
 ```json
 {
@@ -466,7 +599,7 @@ Example `policies.json` snippet:
 }
 ```
 
-Example merged `policies.json` (force-install NC Connector + lock Thunderbird native attachment prompts):
+Example with force installation:
 
 ```json
 {
@@ -499,291 +632,324 @@ Example merged `policies.json` (force-install NC Connector + lock Thunderbird na
 }
 ```
 
-### 5.2 Seat assignment
+Verification:
 
-This section is used to assign NC Connector access to users.
+1. Restart Thunderbird after policy deployment.
+2. Open Thunderbird settings and confirm that the affected preferences are locked.
+3. Add an attachment above the NC Connector threshold.
+4. Confirm that only the NC Connector flow appears.
 
-Main controls:
-- group filter
-- free-text search
-- per-user checkbox assignment
-- bulk assignment for all filtered users
-- bulk removal for all filtered users
+Official references:
 
-Rules that matter operationally:
-- **Admin users cannot receive Seats by default.**
-- If an administrator searches for their own account in this section, the account is intentionally not listed.
-- Reason:
-  - cost protection (admin/automation accounts should not consume productive seats by mistake)
-  - identity separation (admin role and daily-work mailbox role should stay separate)
-- If an organization deliberately wants to assign Seats to admin accounts, a server administrator with shell access can enable that behavior with `php occ ncc:admin-seat-assignment enable`.
-- Use `php occ ncc:admin-seat-assignment disable` to restore the default safety behavior.
-- Disabling the override does not delete already assigned admin Seats automatically; remove them from **Assigned seats** if they should no longer consume a Seat.
-- Seat availability depends on the active mode and license state.
-- In **Community**, only one Seat is available.
-- In **Pro**, seat entitlement comes from the license backend.
-
-Typical use:
-- Filter by department or group
-- Assign the relevant seat users
-- Verify the result in the **Assigned seats** table directly below
-- Recommended admin workflow:
-  - use a dedicated non-admin account for Thunderbird/Outlook daily work
-  - keep a separate admin-only account for Nextcloud administration tasks
-
-### 5.3 Assigned seats
-
-This is the operational overview for support and audits.
-
-The table shows at least:
-- user identity
-- assignment timestamp
-- assigning admin
-- current seat state (`active`, `paused`, ...)
-- whether matching **group overrides** currently apply
-- whether direct **user overrides** exist
-
-Additional behavior:
-- The table is refreshed after seat changes.
-- It is also refreshed after group-override and user-override changes, so the overview stays operationally useful.
-
-Tooltip behavior:
-- Hovering **Group overrides** shows which matching group overrides currently affect that seat user.
-- The group names inside that tooltip are clickable and jump directly to the corresponding **Group overrides** configuration.
-- Hovering **User overrides** shows a clickable link that jumps directly to that user’s override configuration.
-
-CSV report:
-- The section offers a downloadable CSV report.
-- The report lists all current seat users and their effective policy state.
-- Raw template HTML is intentionally **not** exported.
-- If a custom template is effective, the report shows `Custom` instead of embedding HTML into the file.
-
-### 5.4 Group overrides
-
-This layer exists for team-level deviations from the global default.
-
-Per setting, a group override can be:
-- `inherit` → use the global default layer
-- `forced` → enforce a group-specific value
-
-Additional group-level field:
-- `Priority`
-
-Why priority exists:
-- A user can belong to multiple Nextcloud groups.
-- If multiple groups define overrides, the backend needs a clear winner.
-
-Rule:
-- **Lower priority number wins.**
-
-Practical meaning:
-- Group overrides can be configured for **any Nextcloud group**.
-- They do **not** require that all members already have Seats.
-- They apply only to users who:
-  - belong to that group, and
-  - currently have an assigned Seat
-
-Operational advice:
-1. Keep the default layer clean.
-2. Use group overrides for department-level exceptions.
-3. Use user overrides only when the group layer is still not specific enough.
-
-### 5.5 User overrides
-
-This is the highest policy layer.
-
-Per setting, a user override can be:
-- `inherit` → fall back to the next lower layer
-- `forced` → enforce a specific user value
-
-Important resolution rule:
-- A user override first inherits from the **group layer**.
-- Only if no matching group override exists does it fall back to the **default layer**.
-
-Practical effect:
-- A forced user override wins over:
-  - the global default
-  - any matching group override
-- A forced user override also disables local editing in the add-on for that setting.
-
-Recommended use:
-- actual exceptions
-- legal or departmental edge cases
-- pilot users with temporarily different settings
-
-Do not use user overrides as a substitute for missing group structure. That becomes hard to maintain quickly.
+- [Thunderbird Enterprise Policies — Preferences](https://thunderbird.github.io/policy-templates/templates/esr140/#preferences)
+- [Thunderbird compose preferences source](https://searchfox.org/comm-central/source/mail/components/preferences/compose.inc.xhtml)
 
 ---
 
-## 6. Advanced section
+## 8. Operational verification
 
-The **Advanced** section contains settings that affect backend administration itself.
+The mail-client status endpoint is:
 
-### 6.1 NC Connector admin delegation
+- Pretty URL: `GET /apps/ncc_backend_4mc/api/v1/status`
+- Front-controller URL: `GET /index.php/apps/ncc_backend_4mc/api/v1/status`
 
-NC Connector admin delegation lets a Nextcloud administrator give selected users access to parts of the NC Connector admin UI without making them full Nextcloud administrators.
+Use an authenticated Seat user. Do not use an administrator account unless admin Seat assignment was explicitly enabled and that account owns a Seat.
 
-Only full Nextcloud administrators can create, change, or remove delegations.
+Expected result:
 
-Delegated admins can receive permissions for these areas:
+- HTTP 200
+- a current access and Seat state
+- effective Share, Talk, and signature policies
+- editability information for locally configurable settings
 
-| Area | Policy | Templates | Group overrides | User overrides |
-|---|---|---|---|---|
-| Share | Share defaults and lock state | Share and password templates | Share group overrides | Share user overrides |
-| Talk | Talk defaults and lock state | Talk invitation templates | Talk group overrides | Talk user overrides |
-| Signature | Signature defaults and lock state, including compose/reply/forward activation | Signature template and signature user values (`Mobile phone`, `Custom 1`, `Custom 2`) | Signature group overrides | Signature user overrides such as `Signature email address` |
+The exact response fields are documented in [endpoints.md](endpoints.md).
 
-Behavior:
-- Delegated admins see **NC Connector Backend** in their personal Nextcloud settings.
-- The direct route `/apps/ncc_backend_4mc/` remains available for deep links, but it is not shown as a main app-bar entry.
-- They only see tabs and rows for permissions they have.
-- They can see the **Assigned seats** overview when they may edit group/user overrides or signature template user values, because that table shows whether overrides exist for a Seat user.
-- They cannot assign Seats.
-- They cannot change license settings.
-- They cannot create or edit delegations.
-- They can only save settings that match their delegated permissions.
+If the Pretty URL returns 404 while the front-controller URL works, correct the Nextcloud web-server rewrite configuration. Do not change backend files to compensate for a proxy or rewrite problem.
 
-Important security rule:
-- UI hiding is only a convenience.
-- The backend also checks the required permission for every save request.
+Run the pilot acceptance table again after:
 
-### 6.2 Delegation overview
-
-The delegation overview lists:
-- delegated user
-- active/inactive state
-- assigned permission areas
-- creation and update metadata
-
-Use it for audits and support before checking individual override tables.
+- a backend update
+- a Nextcloud major update
+- a reverse-proxy or authentication change
+- a license-mode change
+- a broad policy redesign
+- a client major update
 
 ---
 
-## 7. Effective precedence model
+## 9. Update, rollback, backup, and removal
 
-The backend resolves policies in this order:
+### 9.1 Update
 
-1. **User override**
-2. **Group override**
-3. **Default**
+Goal: install a newer backend version while keeping configuration and Seat data.
 
-This means:
-- user `forced` wins over everything below
-- group `forced` wins if there is no user `forced`
-- `inherit` always falls back one layer down
+Prerequisites:
 
-Concrete fallback behavior:
-- user `inherit` → matching group override first, otherwise default
-- group `inherit` → default
+- a maintenance window appropriate for the installation
+- a current Nextcloud database and configuration backup
+- the previous signed backend package
+- the release notes for the target version
 
-This same precedence model is reflected in:
-- the admin UI behavior
-- the seat overview indicators
-- the mail-client API payload
+Steps:
+
+1. Record the current Nextcloud, PHP, backend, Thunderbird, and Outlook versions.
+2. Export the assigned-Seat CSV.
+3. Back up the Nextcloud database and configuration.
+4. Update through **Apps** or run `php occ app:update ncc_backend_4mc`.
+5. Confirm that the app remains enabled.
+6. Open the admin page and review version, license, Seat totals, and update status.
+7. Run the pilot acceptance checks.
+8. Review the Nextcloud log.
+
+Expected result: the new version is active, stored policies and Seats remain present, and the pilot workflows pass.
+
+If verification fails, stop the rollout and use the rollback procedure. Do not run destructive removal.
+
+### 9.2 Roll back
+
+Goal: return to the previous known-good application and data state.
+
+Prerequisites:
+
+- the previous signed app package
+- the database and configuration backup taken before the update
+- a maintenance window
+
+Steps:
+
+1. Disable the backend with `php occ app:disable ncc_backend_4mc`.
+2. Restore the pre-update Nextcloud database and configuration according to the site backup procedure.
+3. Restore the previous `ncc_backend_4mc` app directory or reinstall the previous signed package.
+4. Apply the normal app ownership and permissions.
+5. Enable the app with `php occ app:enable ncc_backend_4mc`.
+6. Open the admin page and run the pilot acceptance checks.
+
+Expected result: application code and stored data both match the previous release state.
+
+Do not combine older app code with a database already changed by a newer release. Restore code and data from the same recovery point.
+
+### 9.3 Back up
+
+NC Connector data is part of the Nextcloud database. Back up the complete Nextcloud database rather than exporting only selected tables.
+
+The app-owned tables use the configured Nextcloud table prefix and these suffixes:
+
+- `nccb_settings`
+- `nccb_seats`
+- `nccb_client_overrides`
+- `nccb_group_overrides`
+- `nccb_admin_delegations`
+
+The settings table contains policies, encrypted license credentials, license state, and cached update metadata. License-key decryption depends on the Nextcloud instance secrets, so the normal Nextcloud configuration backup is required as well.
+
+Keep:
+
+- full Nextcloud database backup
+- Nextcloud `config/config.php` and instance secrets
+- the installed or previous signed backend package
+- the assigned-Seat CSV as an operational reference
+
+The files under `ncc_backend_4mc/img/runtime` are a regenerable preview cache. Stored templates retain their external image URLs; the cache is not the primary copy of policy or template data.
+
+### 9.4 Restore
+
+Goal: restore backend operation after data loss or a failed update.
+
+Steps:
+
+1. Restore the Nextcloud database and configuration from the same backup set.
+2. Restore a backend app version compatible with that database state.
+3. Restore normal owner and permissions, including runtime image-cache write access if external images are used.
+4. Enable the app.
+5. Open **General** and review license and update status.
+6. Verify Seat assignments, overrides, delegations, and templates.
+7. Run the authenticated status check and pilot acceptance table.
+8. Run a manual Pro sync if Pro mode is active.
+
+Expected result: policy state matches the backup and the pilot user can complete the configured workflows.
+
+### 9.5 Disable, reinstall, or remove
+
+| Command | Data effect | Intended use |
+|---|---|---|
+| `php occ app:disable ncc_backend_4mc` | Keeps data | Maintenance or temporary shutdown |
+| `php occ app:enable ncc_backend_4mc` | Keeps data and creates missing schema objects | Re-enable or repair installation |
+| `php occ app:remove --keep-data ncc_backend_4mc` | Keeps database data | Remove app code before a controlled reinstall |
+| `php occ app:remove ncc_backend_4mc` | Deletes app-owned data | Permanent destructive removal |
+
+Full removal deletes:
+
+- all five `nccb_*` tables
+- both NC Connector background-job entries
+- the runtime image cache
+
+Before full removal:
+
+1. Export the assigned-Seat report.
+2. Take a complete backup.
+3. Confirm that permanent data deletion is intended.
+4. Record who approved the removal.
+
+There is no in-app undo for full removal. Recovery requires a database and configuration restore.
 
 ---
 
-## 8. What mail clients read from the backend
+## 10. Operational checks and troubleshooting
 
-Mail clients read the effective runtime state from:
-- `GET /apps/ncc_backend_4mc/api/v1/status`
+### 10.1 Routine checks
 
-The response contains:
+| Frequency or event | Check | Expected result |
+|---|---|---|
+| Daily | Nextcloud background-job health | Jobs run on schedule without repeated failures |
+| Daily in Pro | Last license sync | Recent timestamp and no error |
+| Daily | Backend update status | Recent daily check or a documented network exception |
+| Weekly | Seat usage | Assigned and available totals match rollout records |
+| Weekly | Nextcloud log | No repeated `ncc_backend_4mc` warning or error |
+| Monthly | Delegations | Only current administrators retain scopes |
+| Monthly | User overrides | Exceptions remain necessary and documented |
+| After policy changes | Pilot workflow | Effective client behavior matches the change |
+| After updates or restore | Full pilot acceptance | All required rows pass |
 
-| Block | Meaning |
-|---|---|
-| `status` | Current seat/license/user access state |
-| `policy` | Effective Share, Talk, and email signature policies after full resolution |
-| `policy_editable` | Per-setting information whether the add-on may still change the effective value locally |
+Use the assigned-Seat CSV for periodic review. It records effective policies without exposing raw template HTML.
 
-Important current behavior:
-- The status response no longer contains a `default` block.
-- Mail clients should rely only on the effective runtime blocks above.
+### 10.2 License synchronization fails
 
-For the detailed schema, see:
-- `endpoints.md`
+Goal: restore Pro entitlement refresh.
 
----
+Checks:
 
-## 9. Install, disable, remove, keep-data
+1. Confirm that **Pro** mode is selected.
+2. Confirm that both license fields are stored.
+3. Verify server access to `https://nc-connector.de/wp-json/ncc/v1/license/status`.
+4. Check DNS, proxy, TLS trust, and firewall logs.
+5. Review the last error in **General**.
+6. Filter the Nextcloud log for `ncc_backend_4mc`.
+7. Run **Sync now** again after correcting the cause.
 
-The backend lifecycle is intentionally split into destructive and non-destructive paths.
+Expected result: the last-sync timestamp advances and Seat totals match the entitlement.
 
-| Command | Expected behavior |
-|---|---|
-| `php occ app:enable ncc_backend_4mc` | Creates missing schema objects if necessary |
-| `php occ app:disable ncc_backend_4mc` | Disables the app **without deleting data** |
-| `php occ app:remove --keep-data ncc_backend_4mc` | Removes the app code **but keeps data** |
-| `php occ app:remove ncc_backend_4mc` | Removes app code **and deletes NC Connector data** |
-| `php occ ncc:admin-seat-assignment status` | Shows whether admin accounts may receive Seats |
-| `php occ ncc:admin-seat-assignment enable` | Allows admin accounts to appear in Seat search and receive Seats |
-| `php occ ncc:admin-seat-assignment disable` | Restores the default safety behavior and blocks new admin Seat assignment |
+Do not repeatedly replace credentials before checking the recorded error and network path.
 
-Deletion on full remove includes:
-- settings table
-- seats table
-- user overrides table
-- group overrides table
-- admin delegation table
-- local runtime image cache
-- background job entry for license sync
+### 10.3 A Seat cannot be assigned
 
-Template editor image previews use this runtime cache only for HTTPS images. The backend rejects unsupported schemes, private or reserved target addresses, oversized files above 4 MB, unsupported image types, and image responses whose content type does not match the file signature. If an image cannot be cached, the admin UI shows the rejection reason next to the editor message area.
+Checks:
 
-This distinction matters for real-world operations:
-- `disable` / `enable` is the safe maintenance path
-- `remove --keep-data` is the safe reinstall path
-- `remove` is the destructive cleanup path
+1. Review total, assigned, and available Seats.
+2. In Pro, confirm an active or grace license state.
+3. Confirm that the target is a real Nextcloud user.
+4. Clear group and text filters.
+5. If the target is an admin, check `php occ ncc:admin-seat-assignment status`.
+6. Check the Nextcloud log for a Seat-limit or permission warning.
 
----
+Expected result: the user appears in Seat search and assignment updates the assigned-Seat table.
 
-## 10. Operational recommendations
+### 10.4 A policy is missing or unexpected
 
-Recommended order for a fresh setup:
-1. Enable the app.
-2. Decide on `Community` vs `Pro`.
-3. If `Pro`, store license credentials and run a sync.
-4. Define clean global defaults first.
-5. Assign Seats.
-6. Add group overrides only where departments really differ.
-7. Add user overrides only where real exceptions exist.
-8. Export the seat report if documentation is required.
+Checks:
 
-Recommended support checklist:
-1. Check the license mode and license status block.
-2. Check whether the affected user has a Seat.
-3. Check whether the seat is active or paused.
-4. Check whether a matching group override exists.
-5. Check whether a direct user override exists.
-6. Check the effective runtime payload via `/api/v1/status`.
-7. Check the Nextcloud log for `warning` / `error` entries from `ncc_backend_4mc`.
+1. Confirm that the mail client authenticates as the Seat owner.
+2. Confirm an active Seat.
+3. Read the authenticated status endpoint.
+4. Check for a forced user override.
+5. Check matching groups and their numeric priorities.
+6. Check the default and **Editable in add-on** state.
+7. Confirm that the client version supports the setting.
+8. Refresh the add-on policy state or restart the client.
 
-Logging note:
-- The backend now logs denied admin access, invalid admin payloads, and unexpected backend failures consistently.
-- Admin support should therefore treat the Nextcloud log as part of the normal troubleshooting workflow, not as an optional last resort.
-- Browser-side admin UI failures are additionally written to the browser console.
+Expected result: the effective value follows user, group, then default precedence.
 
-If you follow that order, most support cases become straightforward instead of guesswork.
+### 10.5 A delegated admin cannot access a setting
+
+Checks:
+
+1. Sign in as a full Nextcloud administrator.
+2. Open **Advanced** and review the user's active delegation.
+3. Confirm the product area and action scope.
+4. Save the delegation again if it changed.
+5. Have the delegated user sign out and back in.
+6. Check for an HTTP 403 and the matching server warning.
+
+Expected result: permitted rows appear; actions outside the delegation remain unavailable.
+
+### 10.6 A template image cannot be previewed
+
+Checks:
+
+1. Confirm a public HTTPS image URL.
+2. Confirm that redirects remain on public HTTPS destinations.
+3. Confirm a supported image format and a file size below 4 MB.
+4. Confirm that the server response content type matches the image data.
+5. Confirm web-server write access to `ncc_backend_4mc/img/runtime`.
+6. Read the warning shown by the editor and the matching Nextcloud log entry.
+
+Expected result: the editor displays the local preview image while the stored template keeps the external URL.
+
+### 10.7 Backend update status is stale
+
+Checks:
+
+1. Confirm that Nextcloud background jobs run.
+2. Verify outbound access to `https://nc-connector.de/wp-json/ncc/v1/update-check`.
+3. Open the General tab to initialize a missing first result.
+4. Review the last-check time and error.
+5. Check the Nextcloud log.
+
+Expected result: one successful result is stored per UTC day.
+
+### 10.8 The app fails after an update or restore
+
+Checks:
+
+1. Confirm supported Nextcloud and PHP versions.
+2. Confirm that `ncc_backend_4mc/appinfo/info.xml` belongs to the intended package.
+3. Confirm file owner, permissions, and app integrity.
+4. Confirm that the restored database, configuration, and app package belong to the same recovery point.
+5. Run `php occ app:enable ncc_backend_4mc` and record the exact error.
+6. Review the Nextcloud log before another change.
+
+If the cause cannot be corrected safely, return to the last known-good backup using the rollback procedure.
 
 ---
 
 ## 11. Logs and support data
 
-For backend bug reports, include the shortest useful log excerpt instead of a full server log.
+Collect the shortest log window that contains one complete reproduction.
 
-Nextcloud server log:
-1. Reproduce the problem in the admin UI or from the affected mail client.
-2. Open **Administration settings -> Logging** in Nextcloud and filter for `ncc_backend_4mc`, or use shell access to inspect the Nextcloud `nextcloud.log`.
-3. If you have shell access, `php occ log:watch` can be useful while reproducing the issue.
-4. Copy the relevant `warning` or `error` entries around the failing action.
+### Nextcloud server log
 
-Browser console for admin UI problems:
-1. Open the NC Connector Backend admin page.
-2. Open the browser developer tools console.
+1. Reproduce the problem once.
+2. Open **Administration settings → Logging** and filter for `ncc_backend_4mc`.
+3. With shell access, use `php occ log:watch` while reproducing if appropriate.
+4. Copy the relevant `warning` or `error` entries and their timestamps.
+
+### Browser console
+
+For admin-UI problems:
+
+1. Open the NC Connector Backend page.
+2. Open the browser developer tools.
 3. Reproduce the problem.
-4. Copy the failing request path, HTTP status, and console error text.
+4. Record the request path, HTTP method, status, response message, and console error.
 
-Before sharing logs:
-- remove license keys, app passwords, tokens, private links, and customer data
-- keep HTTP status codes, endpoint paths, backend version, Nextcloud version, PHP version, and the affected UI area
-- include whether the affected user is a full Nextcloud admin or a delegated NC Connector admin
+### Support package
+
+Include:
+
+- backend version
+- Nextcloud version
+- PHP version
+- Community or Pro mode
+- full-admin or delegated-admin role
+- affected user and group structure using anonymized identifiers
+- mail client and add-on version when a client is involved
+- exact steps and expected result
+- relevant server and browser log excerpts
+
+Remove before sharing:
+
+- license keys
+- app passwords
+- authorization headers
+- cookies and tokens
+- private Share, Talk, or Secrets links
+- customer names, addresses, mail content, and attachment names not required for diagnosis

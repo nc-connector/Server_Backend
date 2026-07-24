@@ -1,727 +1,875 @@
 # Development Guide — NC Connector Backend
 
-This document is the main maintenance reference for the **NC Connector backend** for Nextcloud.
+This is the technical guide for contributors and maintainers of NC Connector Backend. It covers source layout, architecture, data flow, persistence, security boundaries, tests, and release work.
 
-It is written to answer three practical questions:
-- where the relevant code lives
-- how policy resolution works end to end
-- which lifecycle and packaging rules must not be broken
-
-Related docs:
-- `admin.md` — admin-facing behavior and operational guide
-- `endpoints.md` — API reference for mail clients and admin UI
-- `../README.md` — repository overview and product purpose
+Deployment, configuration, policy rollout, update, rollback, backup, monitoring, and support procedures belong in [admin.md](admin.md). HTTP routes and payload fields belong in [endpoints.md](endpoints.md).
 
 ---
 
 ## Table of Contents
 
-- [1. Scope & goals](#1-scope--goals)
-- [2. Supported versions & prerequisites](#2-supported-versions--prerequisites)
+- [1. Purpose and boundaries](#1-purpose-and-boundaries)
+- [2. Developer prerequisites and quick start](#2-developer-prerequisites-and-quick-start)
+  - [2.1 Toolchain](#21-toolchain)
+  - [2.2 First checkout](#22-first-checkout)
+  - [2.3 Local validation](#23-local-validation)
 - [3. Repository layout](#3-repository-layout)
-- [4. Architecture overview](#4-architecture-overview)
-  - [4.1 Admin UI layer](#41-admin-ui-layer)
-  - [4.2 Controller layer](#42-controller-layer)
-  - [4.3 Service layer](#43-service-layer)
-  - [4.4 Persistence layer](#44-persistence-layer)
-- [5. Database model](#5-database-model)
-- [6. Policy resolution model](#6-policy-resolution-model)
-  - [6.1 Default, group, user](#61-default-group-user)
-  - [6.2 `inherit` vs `forced`](#62-inherit-vs-forced)
-  - [6.3 `policy` vs `policy_editable`](#63-policy-vs-policy_editable)
-- [7. Template editor and runtime image handling](#7-template-editor-and-runtime-image-handling)
-- [8. Endpoint inventory](#8-endpoint-inventory)
-  - [8.1 Mail-client endpoint](#81-mail-client-endpoint)
-  - [8.2 Admin endpoints](#82-admin-endpoints)
-  - [8.3 Direct page route](#83-direct-page-route)
-- [9. Install, disable, remove, keep-data](#9-install-disable-remove-keep-data)
-- [10. Internationalization (i18n / l10n)](#10-internationalization-i18n--l10n)
-- [11. Local development and validation](#11-local-development-and-validation)
-- [11.1 Logging and error-handling rules](#111-logging-and-error-handling-rules)
-- [12. Smoke-test checklist](#12-smoke-test-checklist)
-- [13. Packaging and release notes](#13-packaging-and-release-notes)
+- [4. Architecture](#4-architecture)
+  - [4.1 Bootstrap and Nextcloud integration](#41-bootstrap-and-nextcloud-integration)
+  - [4.2 Admin UI](#42-admin-ui)
+  - [4.3 Controllers](#43-controllers)
+  - [4.4 Services](#44-services)
+  - [4.5 Persistence and background jobs](#45-persistence-and-background-jobs)
+- [5. End-to-end flows](#5-end-to-end-flows)
+  - [5.1 Runtime policy request](#51-runtime-policy-request)
+  - [5.2 Admin settings request](#52-admin-settings-request)
+  - [5.3 Template edit and preview](#53-template-edit-and-preview)
+  - [5.4 Scheduled update and license checks](#54-scheduled-update-and-license-checks)
+- [6. Database and lifecycle](#6-database-and-lifecycle)
+  - [6.1 Tables](#61-tables)
+  - [6.2 Install and migration rules](#62-install-and-migration-rules)
+  - [6.3 Disable and removal behavior](#63-disable-and-removal-behavior)
+- [7. Policy resolution](#7-policy-resolution)
+  - [7.1 Precedence](#71-precedence)
+  - [7.2 Editable client values](#72-editable-client-values)
+  - [7.3 Runtime dependencies](#73-runtime-dependencies)
+- [8. Template and signature processing](#8-template-and-signature-processing)
+  - [8.1 Sanitizing](#81-sanitizing)
+  - [8.2 External image cache](#82-external-image-cache)
+  - [8.3 Share compatibility output](#83-share-compatibility-output)
+  - [8.4 Talk rendering](#84-talk-rendering)
+  - [8.5 Email signature rendering](#85-email-signature-rendering)
+- [9. Routes, authentication, and permissions](#9-routes-authentication-and-permissions)
+- [10. Localization](#10-localization)
+- [11. Logging and error handling](#11-logging-and-error-handling)
+- [12. Tests and continuous integration](#12-tests-and-continuous-integration)
+  - [12.1 Local commands](#121-local-commands)
+  - [12.2 CI matrix](#122-ci-matrix)
+  - [12.3 Nextcloud acceptance](#123-nextcloud-acceptance)
+- [13. Packaging and release](#13-packaging-and-release)
+- [14. Change checklists](#14-change-checklists)
+  - [14.1 Add or change a setting](#141-add-or-change-a-setting)
+  - [14.2 Add or change an endpoint](#142-add-or-change-an-endpoint)
+  - [14.3 Change persistence](#143-change-persistence)
+  - [14.4 Change templates or sanitizing](#144-change-templates-or-sanitizing)
 
 ---
 
-## 1. Scope & goals
+## 1. Purpose and boundaries
 
-Goals for this backend:
-- provide a central policy source for the NC Connector mail add-ons
-- manage seat assignment and seat availability
-- resolve effective client policies through a clear precedence model
-- expose a clean runtime API to mail clients
-- keep admin operations understandable and auditable
+The backend provides:
 
-What this backend is responsible for:
-- license mode and license synchronization
-- seat assignment
-- default settings
-- group overrides
-- user overrides
-- template editing and rendering support for Share, Talk, and email signature content
+- Seat and license state
+- central Share, Talk, and email signature policies
+- default, group, and user policy layers
+- managed templates and signature rendering
+- scoped administration for delegated users
+- one authenticated runtime interface for mail clients
 
-What this backend is **not** responsible for:
-- rendering the mail-client UI itself
-- implementing Outlook/Thunderbird compose or calendar logic
-- storing raw mail-client-local preferences
+The backend does not implement Thunderbird or Outlook compose, attachment, calendar, or sender-identity behavior. Client-specific behavior belongs in the matching client repository.
+
+Documentation ownership:
+
+| Document | Primary content |
+|---|---|
+| `README.md` | Product overview and repository entry points |
+| `Doku/admin.md` | Deployment and operations |
+| `Doku/development.md` | Source and maintenance |
+| `Doku/endpoints.md` | Route and payload reference |
+| `CHANGELOG.md` | Repository release history |
+| `ncc_backend_4mc/CHANGELOG.md` | App-package release history |
+| `VENDOR.md` | Bundled third-party components |
+
+The repository root is not the Nextcloud app root. The installable app is `ncc_backend_4mc/`.
 
 ---
 
-## 2. Supported versions & prerequisites
+## 2. Developer prerequisites and quick start
 
-Nextcloud:
-- Supported: **32–35**
+### 2.1 Toolchain
 
-PHP:
-- Required: **8.3+**
+Use:
 
-Background job:
-- `OCA\NcConnector\Cron\LicenseSyncJob`
-- `OCA\NcConnector\Cron\UpdateCheckJob`
+- PHP 8.3 or newer
+- Composer 2
+- Node.js 24 for CI parity
+- PHP DOM, libxml, and SimpleXML extensions
+- Git
+- a Nextcloud 32–35 test instance for integration checks
 
-App registration:
-- metadata, dependencies, repair steps, and admin settings registration live in:
-  - `ncc_backend_4mc/appinfo/info.xml`
-- delegated admin personal settings are registered dynamically in `Application.php` only for users with NC Connector delegation
+The PHP and Nextcloud support range is declared in `ncc_backend_4mc/appinfo/info.xml`.
 
-Important practical point:
-- The repository root is **not** the app root.
-- The actual Nextcloud app lives in:
-  - `ncc_backend_4mc/`
+### 2.2 First checkout
 
-In other words:
-- repo root: docs, release helpers, repo-level files
-- app root: installable Nextcloud app content
+From the repository root:
+
+```powershell
+composer install
+composer run check
+```
+
+`composer run check` runs static, schema, localization, JavaScript, and PHPUnit checks. It does not run PHP syntax over every application file.
+
+The application can be installed into a test Nextcloud instance by placing or linking `ncc_backend_4mc/` in a configured apps directory and running:
+
+```text
+php occ app:enable ncc_backend_4mc
+```
+
+Use only a disposable or backed-up instance for lifecycle and destructive-removal tests.
+
+### 2.3 Local validation
+
+Recommended order:
+
+1. PHP syntax for every `ncc_backend_4mc/**/*.php` file
+2. backend static checks
+3. database-schema checks
+4. localization checks
+5. JavaScript syntax checks
+6. PHPUnit
+7. install or enable on Nextcloud
+8. admin and client acceptance checks
+9. log review
+
+Automated commands are listed in [12. Tests and continuous integration](#12-tests-and-continuous-integration).
 
 ---
 
 ## 3. Repository layout
 
-Top-level inside this repository:
-
 | Path | Purpose |
 |---|---|
-| `ncc_backend_4mc/` | Actual Nextcloud app |
-| `Doku/` | Project documentation |
-| `release/` | Packaging and signing helpers |
-| `README.md` | Repository overview |
+| `ncc_backend_4mc/` | Installable Nextcloud app |
+| `ncc_backend_4mc/appinfo/` | Metadata and explicit routes |
+| `ncc_backend_4mc/lib/AppInfo/` | Bootstrap and registration |
+| `ncc_backend_4mc/lib/Controller/` | HTTP entry points |
+| `ncc_backend_4mc/lib/Service/` | Policy, license, template, access, and Seat behavior |
+| `ncc_backend_4mc/lib/Db/` | Entities and mappers |
+| `ncc_backend_4mc/lib/Setup/` | Install and uninstall repair steps |
+| `ncc_backend_4mc/lib/Settings/` | Nextcloud admin and delegated personal settings integration |
+| `ncc_backend_4mc/lib/Cron/` | Timed background jobs |
+| `ncc_backend_4mc/js/` | Admin and direct-page browser code |
+| `ncc_backend_4mc/css/` | Admin and direct-page styles |
+| `ncc_backend_4mc/templates/` | Nextcloud-rendered PHP views |
+| `ncc_backend_4mc/l10n/` | Browser and server translations |
+| `ncc_backend_4mc/img/runtime/` | Regenerable external-image preview cache |
+| `tests/` | PHPUnit tests and Nextcloud test doubles |
+| `scripts/` | Static, schema, localization, and JavaScript checks |
+| `Doku/` | Administration, development, and endpoint documentation |
 
-Key paths inside the app folder:
+Key app metadata:
 
-| Path | Purpose |
-|---|---|
-| `ncc_backend_4mc/appinfo/info.xml` | App metadata, dependencies, repair steps, background jobs |
-| `ncc_backend_4mc/lib/Setup/InstallSchema.php` | Install-time schema creation for all NC Connector tables |
-| `ncc_backend_4mc/appinfo/routes.php` | Explicit route registration for group override and admin delegation endpoints |
-| `ncc_backend_4mc/lib/AppInfo/Application.php` | App bootstrapping and registration |
-| `ncc_backend_4mc/lib/Controller/*` | Admin and runtime HTTP controllers |
-| `ncc_backend_4mc/lib/Service/*` | Business logic, policy resolution, license logic, seat logic |
-| `ncc_backend_4mc/lib/Db/*` | Entity and mapper classes |
-| `ncc_backend_4mc/lib/Setup/*` | Install and uninstall repair steps |
-| `ncc_backend_4mc/lib/Settings/*` | Nextcloud admin and delegated personal settings integration |
-| `ncc_backend_4mc/js/ncc_backend_4mc-adminSettings.js` | Main admin UI logic |
-| `ncc_backend_4mc/js/adminApi.js` | Admin UI API client for backend endpoints |
-| `ncc_backend_4mc/js/adminSettingsMeta.js` | Static admin UI labels, enum labels, and built-in template translation fragments |
-| `ncc_backend_4mc/js/adminTemplatePreview.js` | Template preview document, preview modal, and Talk plain-text preview rendering |
-| `ncc_backend_4mc/js/adminPermissions.js` | Delegated admin permission mapping used by the admin UI |
-| `ncc_backend_4mc/js/adminDelegationUi.js` | Delegation permission matrix and delegated-admin overview rendering |
-| `ncc_backend_4mc/js/adminTemplateImages.js` | Template image source rewriting and admin-template sanitizing |
-| `ncc_backend_4mc/js/adminTemplateEditor.js` | Template editor modal, TinyMCE wiring, draft asset maps, and editor translations |
-| `ncc_backend_4mc/js/adminTemplateAssetRefresh.js` | Template editor asset refresh calls for default, group override, and user override layers |
-| `ncc_backend_4mc/js/adminSeatReport.js` | Assigned-seat table rendering and seat-report CSV export |
-| `ncc_backend_4mc/js/adminTabs.js` | Shared admin tab switching |
-| `ncc_backend_4mc/js/adminVisibility.js` | Permission-based admin tab and settings row visibility |
-| `ncc_backend_4mc/js/adminSeatUi.js` | Seat assignment table, usage, and pager rendering |
-| `ncc_backend_4mc/js/adminGeneralStatusUi.js` | General-tab license, Pro hint, update status, and recommended-app rendering |
-| `ncc_backend_4mc/js/adminOverridesUi.js` | User and group override selection and table rendering |
-| `ncc_backend_4mc/js/adminSettingsPayload.js` | Save-payload collection for default, group override, and user override setting layers |
-| `ncc_backend_4mc/js/ncc_backend_4mc-main.js` | Direct page UI under `/apps/ncc_backend_4mc` |
-| `ncc_backend_4mc/css/adminSettings.css` | Base admin layout, tabs, forms, tables, and shared help styles |
-| `ncc_backend_4mc/css/adminStatus.css` | General-tab status cards, Pro hint, backend update status, and recommended-app styles |
-| `ncc_backend_4mc/css/adminSeatOverview.css` | Seat overview, override badges, and pagination styles |
-| `ncc_backend_4mc/css/adminTemplates.css` | Template editor, preview modal, editor modal, and TinyMCE overlay styles |
-| `ncc_backend_4mc/css/adminDelegation.css` | Delegation permission cards and overview permission chips |
-| `ncc_backend_4mc/css/ncc_backend_4mc-main.css` | Direct-page styling |
-| `ncc_backend_4mc/templates/*` | Nextcloud-rendered PHP templates |
-| `ncc_backend_4mc/l10n/*.json` | Source translations |
-| `ncc_backend_4mc/l10n/*.js` | Browser-loaded translation files |
-| `ncc_backend_4mc/img/runtime/` | Local runtime image mirror for the editor |
+- `appinfo/info.xml` owns app id, version, support range, background jobs, commands, repair steps, and settings registration.
+- `appinfo/routes.php` owns routes that require explicit registration across the supported Nextcloud versions.
 
 ---
 
-## 4. Architecture overview
+## 4. Architecture
 
-The backend is deliberately split into four layers:
-1. admin UI
-2. controllers
-3. services
-4. persistence
+The application uses five main layers:
 
-That split is what keeps policy logic understandable.
+1. Nextcloud registration and settings entry points
+2. browser UI
+3. controllers
+4. services
+5. persistence
 
-### 4.1 Admin UI layer
+Controllers coordinate requests. Services own business rules. Mappers own database access.
 
-Main files:
-- `ncc_backend_4mc/js/ncc_backend_4mc-adminSettings.js`
-- `ncc_backend_4mc/js/adminApi.js`
-- `ncc_backend_4mc/js/adminSettingsMeta.js`
-- `ncc_backend_4mc/js/adminTemplatePreview.js`
-- `ncc_backend_4mc/js/adminPermissions.js`
-- `ncc_backend_4mc/js/adminDelegationUi.js`
-- `ncc_backend_4mc/js/adminTemplateImages.js`
-- `ncc_backend_4mc/js/adminTemplateEditor.js`
-- `ncc_backend_4mc/js/adminTemplateAssetRefresh.js`
-- `ncc_backend_4mc/js/adminSeatReport.js`
-- `ncc_backend_4mc/js/adminTabs.js`
-- `ncc_backend_4mc/js/adminVisibility.js`
-- `ncc_backend_4mc/js/adminSeatUi.js`
-- `ncc_backend_4mc/js/adminGeneralStatusUi.js`
-- `ncc_backend_4mc/js/adminOverridesUi.js`
-- `ncc_backend_4mc/js/adminSettingsPayload.js`
-- `ncc_backend_4mc/css/adminSettings.css`
-- `ncc_backend_4mc/css/adminStatus.css`
-- `ncc_backend_4mc/css/adminSeatOverview.css`
-- `ncc_backend_4mc/css/adminTemplates.css`
-- `ncc_backend_4mc/css/adminDelegation.css`
-- `ncc_backend_4mc/templates/adminSettings.php`
+### 4.1 Bootstrap and Nextcloud integration
 
-Responsibilities:
-- render the admin tabs
-- call the admin endpoints
-- manage modal editor state
-- show seat overview, tooltips, and CSV export
-- handle translations in the browser
+`lib/AppInfo/Application.php` registers application services and delegated personal settings.
 
-Important UI behaviors currently implemented there:
-- preview and source-code dialogs layered correctly above the modal
-- clickable tooltip links from seat overview to group/user overrides
-- CSV export for assigned seats
-- Pro checkout/trial hint is shown until Pro has an active or grace license state
-- compact backend update status in the `General` tab
-- delegated admins only see tabs and rows covered by their NC Connector permissions
-- settings tables use shared layer helpers for mode sync, event binding, forced override rows, and save payloads
-- default settings row rendering stays separate because `Editable in add-on` is not the same UI model as `inherit` / `forced`
-- admin HTTP calls live in `adminApi.js`; `ncc_backend_4mc-adminSettings.js` should not grow new `fetch(...)` wrappers
-- static setting metadata and built-in template translation fragments live in `adminSettingsMeta.js`
-- preview-document, preview modal, and Talk plain-text preview rendering live in `adminTemplatePreview.js`
-- delegated admin permission mapping for the admin UI lives in `adminPermissions.js`
-- delegation permission matrix and delegated-admin overview rendering live in `adminDelegationUi.js`
-- template image source rewriting and admin-template sanitizing live in `adminTemplateImages.js`
-- template editor modal, TinyMCE setup, draft asset maps, and editor-only template translations live in `adminTemplateEditor.js`
-- template editor asset refresh calls for default, group override, and user override layers live in `adminTemplateAssetRefresh.js`
-- assigned-seat table rendering and seat-report CSV export live in `adminSeatReport.js`
-- repeated tab switching logic lives in `adminTabs.js`
-- permission-based admin tab and settings row visibility lives in `adminVisibility.js`
-- seat assignment table, usage, and pager rendering live in `adminSeatUi.js`
-- General-tab license, Pro hint, update status, and recommended-app rendering live in `adminGeneralStatusUi.js`
-- user and group override selection and table rendering live in `adminOverridesUi.js`
-- default, group override, and user override save-payload collection lives in `adminSettingsPayload.js`
-- default settings orchestration stays in `ncc_backend_4mc-adminSettings.js` until it has enough independent state and events for a cohesive `adminDefaultsUi.js`
-- admin styles follow the same UI-area split: base styles stay in `adminSettings.css`, while status, seat overview, templates, and delegation styles live in their matching CSS files
+`lib/Settings/` contains:
 
-### 4.2 Controller layer
+- the administration section
+- the full-admin settings page
+- the delegated personal settings page
 
-Main controllers:
+Full admins open the administration page. Delegated admins receive the personal settings entry only when an active NC Connector delegation applies.
 
-| Controller | Responsibility |
+Metadata in `appinfo/info.xml` registers:
+
+- app dependencies
+- both background jobs
+- the admin Seat command
+- install and uninstall repair steps
+- the full-admin settings section
+
+### 4.2 Admin UI
+
+The main entry point is `js/ncc_backend_4mc-adminSettings.js`. New responsibilities should go into the existing area module where they belong.
+
+| Module | Ownership |
 |---|---|
-| `AdminLicenseController` | License mode, credentials, sync |
-| `AdminUpdateController` | Backend update status for the admin UI |
-| `AdminDirectoryController` | Group and user lookup for admin UI |
-| `AdminSeatController` | Seat assignment and assigned-seat overview |
-| `AdminClientSettingsController` | Defaults, user overrides, group overrides |
-| `AdminDelegationController` | NC Connector admin delegation |
-| `StatusController` | Effective runtime API for mail clients |
-| `PageController` | Direct page under `/apps/ncc_backend_4mc` |
+| `adminApi.js` | Admin HTTP calls |
+| `adminSettingsMeta.js` | Setting labels, enum labels, template fragments, and documentation URLs |
+| `adminSettingsPayload.js` | Save payloads for default, group, and user layers |
+| `adminOverridesUi.js` | Group and user override selection and tables |
+| `adminSeatUi.js` | Seat assignment and paging |
+| `adminSeatReport.js` | Assigned-Seat table and CSV export |
+| `adminGeneralStatusUi.js` | License, update, and recommended-app status |
+| `adminPermissions.js` | Browser-side delegated-scope mapping |
+| `adminDelegationUi.js` | Delegation editor and overview |
+| `adminTemplateEditor.js` | Editor modal and TinyMCE lifecycle |
+| `adminTemplateImages.js` | Template image rewriting and browser sanitizing |
+| `adminTemplateAssetRefresh.js` | Preview-asset refresh requests |
+| `adminTemplatePreview.js` | Preview document and Talk plain-text preview |
+| `adminTabs.js` | Shared tab activation |
+| `adminVisibility.js` | Permission-based row and tab visibility |
 
-Design intent:
-- Controllers should stay thin.
-- Resolution logic belongs in services, not in endpoint methods.
-- Admin API warning responses use `AdminWarningResponseTrait` so denied access and invalid admin input keep one response shape.
+Style files follow the same UI areas. Shared layout stays in `adminSettings.css`; status, Seats, templates, and delegation use their matching files.
 
-### 4.3 Service layer
+Do not add new `fetch(...)` wrappers to the main entry point. Use `adminApi.js`.
 
-Core services:
+Default rows remain separate from override rows:
 
-| Service | Responsibility |
+- defaults use **Editable in add-on**
+- group and user layers use `inherit` or `forced`
+
+These are different state models and should not share one implicit mode.
+
+### 4.3 Controllers
+
+| Controller | Ownership |
 |---|---|
-| `LicenseService` | License mode, credentials, sync, entitlement state |
-| `SeatService` | Seat assignment, seat-limit enforcement, and the explicit admin-seat override |
-| `ClientSettingsDefinitionService` | Client setting definitions, built-in defaults, value parsing, value serialization, and setting classification |
-| `ClientSettingsService` | Stored defaults, group/user overrides, effective policy resolution, and template activation rules |
-| `ClientPolicyRuntimeService` | Applies final client-policy dependencies before values are returned to mail clients |
-| `AccessService` | Access checks for direct page visibility and user-facing runtime state |
-| `AdminPermissionService` | Maps admin actions to delegated NC Connector permission scopes |
-| `AdminDelegationService` | Stores and normalizes delegated admin permissions |
-| `TemplateSanitizerService` | Sanitizes template-editor HTML before storage and before stored values are returned |
-| `TemplateAssetService` | Mirrors external template images into local runtime assets for editor rendering |
-| `TalkTemplateRuntimeService` | Renders Talk invitation templates as HTML or cleaned plain text for policy responses |
-| `EmailSignatureRuntimeService` | Resolves email signature profile variables, user overrides, empty-variable cleanup, and HTML escaping |
-| `UpdateCheckService` | Daily backend version check against `nc-connector.de`; runs independently of license mode |
+| `StatusController` | Mail-client runtime response |
+| `AdminLicenseController` | Mode, credentials, and manual license sync |
+| `AdminUpdateController` | Cached backend update state |
+| `AdminDirectoryController` | User and group lookup |
+| `AdminSeatController` | Seat assignment and report data |
+| `AdminClientSettingsController` | Schema, defaults, and overrides |
+| `AdminDelegationController` | Delegated-admin management |
+| `PageController` | Direct app page |
 
-Most important service in day-to-day maintenance:
-- `ClientSettingsService.php`
+Controller rules:
 
-That file is the core of the backend because it owns:
-- stored default values
-- override modes
-- precedence resolution
-- template activation rules
-- seat-overview helper data for matching overrides
+- authenticate and authorize first
+- parse request values through the definition or service layer
+- return one response shape for expected admin warnings
+- keep policy resolution and persistence out of controller methods
+- log denied access and invalid admin input as warnings
 
-`ClientSettingsDefinitionService.php` owns the static setting catalog and the value codec used by defaults, user overrides, and group overrides.
-`ClientPolicyRuntimeService.php` owns runtime-only policy shaping, including Secrets availability, attachment dependency values, template-language activation, and email-signature rendering for policy responses.
+`AdminWarningResponseTrait` provides the shared warning response used by admin controllers.
 
-Logging rule for service/controller work:
-- server-side logging uses `Psr\Log\LoggerInterface`
+### 4.4 Services
 
-Permission mapping rule:
-- `AdminPermissionService` is the single place that maps Default, user override, and group override settings to delegated admin scopes.
-- Controllers should use its settings-layer helpers instead of duplicating scope branches.
-
-### 4.4 Persistence layer
-
-Entity / mapper pairs exist for:
-- settings
-- seats
-- user overrides
-- group overrides
-- admin delegations
-
-Files:
-- `ncc_backend_4mc/lib/Db/Setting.php`
-- `ncc_backend_4mc/lib/Db/SettingMapper.php`
-- `ncc_backend_4mc/lib/Db/Seat.php`
-- `ncc_backend_4mc/lib/Db/SeatMapper.php`
-- `ncc_backend_4mc/lib/Db/ClientOverride.php`
-- `ncc_backend_4mc/lib/Db/ClientOverrideMapper.php`
-- `ncc_backend_4mc/lib/Db/GroupOverride.php`
-- `ncc_backend_4mc/lib/Db/GroupOverrideMapper.php`
-- `ncc_backend_4mc/lib/Db/AdminDelegation.php`
-- `ncc_backend_4mc/lib/Db/AdminDelegationMapper.php`
-
-These classes map the Nextcloud database rows into the service layer.
-
----
-
-## 5. Database model
-
-Current schema objects:
-
-| Table | Purpose |
+| Service | Ownership |
 |---|---|
-| `*dbprefix*nccb_settings` | Global backend settings and defaults |
-| `*dbprefix*nccb_seats` | Assigned seats per user |
-| `*dbprefix*nccb_client_overrides` | User-specific override rows |
-| `*dbprefix*nccb_group_overrides` | Group-specific override rows including priority |
-| `*dbprefix*nccb_admin_delegations` | Delegated NC Connector admin permissions per user |
+| `LicenseService` | Community/Pro mode, encrypted credentials, entitlement, grace state, and sync |
+| `SeatService` | Assignment, capacity, active/paused state, and admin-seat override |
+| `ClientSettingsDefinitionService` | Setting schema, defaults, parsing, serialization, and classification |
+| `ClientSettingsService` | Stored layers, precedence, effective values, and template activation |
+| `ClientPolicyRuntimeService` | Final runtime dependencies and output shaping |
+| `AccessService` | User-facing access state |
+| `AdminPermissionService` | Mapping of admin operations to delegated scopes |
+| `AdminDelegationService` | Delegation storage and normalization |
+| `TemplateSanitizerService` | Server-side HTML allowlist |
+| `TemplateAssetService` | Safe external-image preview cache |
+| `TalkTemplateRuntimeService` | HTML or plain-text Talk output |
+| `EmailSignatureRuntimeService` | Profile variables and signature rendering |
+| `UpdateCheckService` | Daily stable-version lookup and cached state |
 
-Important schema characteristics:
-- settings are keyed by `config_key`
-- seats are unique per `user_id`
-- overrides are unique per `(target, setting_key)`
-- group overrides additionally carry a numeric `priority`
-- admin delegations are unique per `user_id` and store normalized permission keys as JSON
+Keep each rule in one service. Controllers and UI modules should consume the result instead of reproducing the rule.
 
-Schema source of truth:
-- `OCA\NcConnector\Setup\InstallSchema`
+### 4.5 Persistence and background jobs
 
-Repair/install logic:
-- `OCA\NcConnector\Setup\InstallSchema`
+Each stored object uses an entity and mapper under `lib/Db/`.
 
-Important maintenance rule:
-- If future schema changes are introduced, do not rely only on table recreation.
-- Add proper migration classes under `lib/Migration/` for upgrade safety.
+Background jobs:
 
----
-
-## 6. Policy resolution model
-
-This is the most important conceptual part of the backend.
-
-### 6.1 Default, group, user
-
-Effective policy precedence is:
-1. **user override**
-2. **group override**
-3. **default**
-
-That rule is applied consistently in:
-- runtime API resolution
-- admin seat overview indicators
-- editability calculation
-- CSV export logic
-
-### 6.2 `inherit` vs `forced`
-
-Every group/user override row is mode-based.
-
-| Mode | Meaning |
-|---|---|
-| `inherit` | Do not enforce a value here; fall back to the next lower layer |
-| `forced` | Enforce the concrete value stored in that row |
-
-Fallback behavior:
-- group `inherit` → default
-- user `inherit` → group first, otherwise default
-
-This matters because user overrides are intentionally layered on top of group overrides, not directly on top of defaults.
-
-### 6.3 `policy` vs `policy_editable`
-
-The runtime API intentionally separates two questions:
-1. What is the effective value?
-2. May the add-on still change it locally?
-
-Those map to:
-- `policy`
-- `policy_editable`
-
-Current rule set:
-- all non-template Share/Talk/email signature defaults start as **editable in add-on**
-- templates remain backend-controlled
-- any **forced** override disables local add-on editing for that specific setting
-- in the admin defaults table, `user_choice` is rendered as a checked **Editable in add-on** box and the corresponding backend value field is disabled for clarity
-- `attachments_min_size_mb` is nullable by design:
-  - `null` means the threshold feature is disabled
-  - a numeric value means the threshold feature is enabled
-  - `attachments_always_via_ncconnector = true` also forces the runtime value to `null`
-- `attachment_link_target` is an add-on-editable enum with `zip_download` as its built-in default and `share_page` as the alternative
-- the generic key/value tables store administrator values for the new setting without a database schema migration; existing installations use the built-in ZIP default until an administrator stores another server-side value
-- when `policy_editable=true`, the mail client stores its selection only in local client settings and does not write it back through the read-only client endpoint
-
-Important current API behavior:
-- `/api/v1/status` no longer exposes a `default` block
-- clients should use only the effective runtime values
-
----
-
-## 7. Template editor and runtime image handling
-
-The editor path deserves its own section because it is more than simple form storage.
-
-Relevant responsibilities in `ClientSettingsService`, `ClientSettingsDefinitionService`, `TemplateAssetService`, `TalkTemplateRuntimeService`, and `ncc_backend_4mc-adminSettings.js`:
-- detect whether a template row is active at all
-- treat Share/Talk template rows as active only when the corresponding language is `custom`
-- keep the email signature template independent from template-language selection
-- mirror external image URLs into local runtime files for editor rendering
-- keep the original external image URL in stored template HTML
-- refresh draft images immediately inside the open modal editor
-- discard unsaved modal changes on close
-- translate built-in text fragments via the editor’s **Languages** dropdown
-
-Current implementation model:
-- Editor rendering uses only local app image files.
-- Stored template HTML still keeps the original source URL.
-- New image URLs inserted in the modal are refreshed into the runtime cache immediately for the current draft.
-- Saving the modal remains the only real commit path.
-- Custom Share, Talk, password-mail, and email-signature HTML is sanitized in the admin editor with bundled DOMPurify before preview and save.
-- `TemplateSanitizerService` applies the matching server-side allowlist before template values are stored and before stored values are returned.
-- `TemplateAssetService` only mirrors HTTPS images, rejects private/reserved targets, follows a small redirect chain, limits each image to 4 MB, and verifies content type plus image magic bytes.
-- Rejected preview images are returned as `template_asset_warnings` so the admin UI can show the reason instead of failing silently.
-- The runtime API returns the stored template values after normal policy resolution and variable replacement.
-
-Talk plain-text rendering intentionally exists in two places:
-- JavaScript renders the admin preview so admins can see the plain-text result before saving.
-- `TalkTemplateRuntimeService` renders the runtime policy response because mail clients must not depend on admin UI code.
-
-Keep both paths aligned when changing Talk template markup rules. The important parity points are:
-- visible text is preserved
-- link targets remain visible as raw URLs
-- block-level HTML keeps readable line breaks
-- the final value is normalized before delivery
-
-Export/report behavior:
-- Template HTML is never exported as raw HTML in the seat CSV.
-- If a custom template applies, the CSV uses `Custom`.
-
----
-
-## 8. Endpoint inventory
-
-### 8.1 Mail-client endpoint
-
-Main runtime endpoint:
-- `GET /apps/ncc_backend_4mc/api/v1/status`
-
-Purpose:
-- deliver effective access state and effective policies to the mail add-on
-
-Current high-level response blocks:
-- `status`
-- `policy`
-- `policy_editable`
-
-Internal admin use:
-- the assigned-seats CSV export reuses the same status endpoint with `user_id` filtering when building effective per-user policy rows
-
-### 8.2 Admin endpoints
-
-| Method | Path | Purpose |
+| Job | Interval | Behavior |
 |---|---|---|
-| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/license` | Read current license state |
-| `PUT` | `/apps/ncc_backend_4mc/api/v1/admin/license/credentials` | Store license credentials |
-| `PUT` | `/apps/ncc_backend_4mc/api/v1/admin/license/mode` | Switch `Community` / `Pro` |
-| `POST` | `/apps/ncc_backend_4mc/api/v1/admin/license/sync` | Trigger manual sync |
-| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/update-check` | Read backend update status for the admin UI |
-| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/me` | Read the current admin/delegation permission payload |
-| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/delegations` | List delegated NC Connector admins |
-| `PUT` | `/apps/ncc_backend_4mc/api/v1/admin/delegations/{targetUserId}` | Save a user delegation |
-| `DELETE` | `/apps/ncc_backend_4mc/api/v1/admin/delegations/{targetUserId}` | Remove a user delegation |
-| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/groups` | Read available Nextcloud groups |
-| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/users` | Read users, optionally filtered |
-| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/seats` | Read assigned seats overview |
-| `PUT` | `/apps/ncc_backend_4mc/api/v1/admin/seats/{targetUserId}` | Assign or remove seat |
-| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/client-settings/schema` | Read admin settings schema and defaults metadata |
-| `PUT` | `/apps/ncc_backend_4mc/api/v1/admin/client-settings/defaults` | Save global defaults |
-| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/client-settings/users/{targetUserId}` | Read user overrides |
-| `PUT` | `/apps/ncc_backend_4mc/api/v1/admin/client-settings/users/{targetUserId}` | Save user overrides |
-| `GET` | `/apps/ncc_backend_4mc/api/v1/admin/client-settings/groups?group_id=...` | Read group overrides |
-| `PUT` | `/apps/ncc_backend_4mc/api/v1/admin/client-settings/groups` | Save group overrides |
+| `LicenseSyncJob` | 24 hours | Runs only when Pro mode and complete credentials permit a license request |
+| `UpdateCheckJob` | 6 hours | Calls the update service; the service performs at most one successful request per UTC day |
 
-Important implementation detail:
-- Full Nextcloud admins can use every admin endpoint.
-- Delegated NC Connector admins can only use endpoints and settings covered by their delegated scopes.
-- Delegation management itself is restricted to full Nextcloud admins.
-- Delegation user selection reuses `/api/v1/admin/users`; do not add a second user endpoint for the same data.
-- `email_signature_template`, `email_signature_phone_mobile`, `email_signature_custom1`, and `email_signature_custom2` are user override rows with delegated scope `signature.templates` because they provide the signature body and template variables.
-- `email_signature_on_compose`, `email_signature_on_reply`, and `email_signature_on_forward` keep delegated scope `signature.policy`, including in the user override view.
-- Delegated admins with group/user override scopes or `signature.templates` may read the assigned-seat overview, but only full Nextcloud admins may assign or remove Seats.
-- The schema/defaults response includes `recommended_apps` for optional Nextcloud apps that unlock extra admin-configurable behavior.
-- The backend update check runs through `UpdateCheckJob` and does not require Pro mode or license credentials.
-- Admin delegation endpoints intentionally use `appinfo/routes.php`.
-- Keep them there unless every supported Nextcloud version resolves the controller through attribute routing reliably.
-- Group override endpoints intentionally use the query-based route in `appinfo/routes.php`.
-- That path was chosen because it handles group identifiers reliably and avoids the earlier path-segment routing problem.
-- Admin accounts are excluded from Seat search by default.
-- `GET /apps/ncc_backend_4mc/api/v1/admin/users` returns `hints.admin_self_excluded=true` when the current admin account matches the active search scope but is intentionally filtered out.
-- `php occ ncc:admin-seat-assignment enable` intentionally disables that safety behavior; admin accounts then appear in Seat search and can receive Seats.
-- `php occ ncc:admin-seat-assignment disable` restores the default safety behavior.
-
-### 8.3 Direct page route
-
-Direct route:
-- `GET /apps/ncc_backend_4mc/`
-
-Purpose:
-- direct page view without an app-bar entry
-
-Status:
-- The route still exists.
-- Full Nextcloud admins use the Nextcloud administration settings entry.
-- Delegated NC Connector admins use the personal settings entry registered by `Application.php`.
-- The direct route remains a fallback/deep-link path and must not be registered in the main app bar.
+Both jobs resolve their services through the application container when Nextcloud executes them.
 
 ---
 
-## 9. Install, disable, remove, keep-data
+## 5. End-to-end flows
 
-Lifecycle behavior must stay stable. This was a source of regressions earlier and should not be changed casually.
+### 5.1 Runtime policy request
 
-Install path:
-- `php occ app:enable ncc_backend_4mc`
-- creates missing schema via `InstallSchema`
+High-level flow:
 
-Disable path:
-- `php occ app:disable ncc_backend_4mc`
-- must **not** delete data
+```text
+Authenticated request
+  -> StatusController
+  -> access, license, and Seat evaluation
+  -> ClientSettingsService layer resolution
+  -> ClientPolicyRuntimeService dependency processing
+  -> template and signature rendering
+  -> status + policy + policy_editable response
+```
 
-Remove but keep data:
-- `php occ app:remove --keep-data ncc_backend_4mc`
-- removes app code only
-- keeps NC Connector data intact
+`StatusController` also supports an internal `user_id` query for admin reporting. Normal mail clients use the authenticated user and do not supply that parameter.
 
-Remove including data:
-- `php occ app:remove ncc_backend_4mc`
-- deletes:
-  - settings table
-  - seats table
-  - user overrides table
-  - group overrides table
-  - runtime image cache
-  - `LicenseSyncJob` entry from `oc_jobs`
+When access is not available, the response keeps status information while policy groups become unavailable. The exact fields are defined in [endpoints.md](endpoints.md).
 
-Implementation pieces:
-- install repair step: `OCA\NcConnector\Setup\InstallSchema`
-- uninstall repair step: `OCA\NcConnector\Setup\UninstallCleanup`
+### 5.2 Admin settings request
 
-Maintenance rule:
-- `disable` and `remove --keep-data` are non-destructive paths.
-- `remove` is the destructive path.
-- Do not merge these semantics accidentally.
+Read flow:
 
----
+```text
+Admin request
+  -> permission check
+  -> setting schema and stored layer
+  -> availability and template-asset processing
+  -> admin response
+```
 
-## 10. Internationalization (i18n / l10n)
+Save flow:
 
-Translation model:
-- source translations live in `ncc_backend_4mc/l10n/*.json`
-- browser-loaded translation files live in `ncc_backend_4mc/l10n/*.js`
+```text
+Admin payload
+  -> permission check
+  -> setting definition normalization
+  -> template sanitizing where applicable
+  -> layer-specific persistence
+  -> refreshed layer and warnings
+```
 
-Current behavior:
-- All visible JS UI strings go through the translation helper.
-- Tooltip texts are translated too.
-- English is the fallback language.
-- The editor modal includes a **Languages** dropdown for built-in template text fragments.
+The browser collects values in `adminSettingsPayload.js`. Server services re-check every permission and value. Browser state never grants authority.
 
-Important distinction:
-- UI translation and template-language translation are different concerns.
-- The UI follows Nextcloud translation loading.
-- The template language dropdown rewrites built-in Share/Talk template fragments only.
+### 5.3 Template edit and preview
 
-Current template-language rules:
-- the stored `share_html_block_template` and `share_password_template` are relevant only when `language_share_html_block = custom`
-- the built-in Share template uses `{URL}`, `{LINK_INTRO}`, and `{LINK_LABEL}` so mail clients can keep the final URL and wording aligned with `attachment_link_target`
-- after global, group, and user settings have been resolved, the status endpoint exposes the canonical Share template as output-only `share_html_block_template_v2`
-- the status endpoint also exposes output-only `share_html_block_effective_language`; for custom templates it comes from the root template `lang` metadata and lets clients translate generated labels, permissions, and password hints independently from the `custom` template-selection mode
-- the existing `share_html_block_template` response key replaces the two mode-aware variables with the generic wording recorded by the template editor for the selected template language; templates without that metadata use the historical English fallback
-- the compatibility metadata is removed from both API response templates and is never inserted into outgoing mail
-- `share_html_block_template_v2` and `share_html_block_effective_language` are not part of the settings schema or `policy_editable`; the admin still edits one canonical template
-- `attachment_link_target` is a normal settings-schema value under `policy.share` and `policy_editable.share`; it does not require another template version
-- stored customer templates are never rewritten to add these variables; older templates keep working with their existing placeholders and produce identical legacy and V2 output
-- legacy Share phrases remain in `TEMPLATE_TRANSLATION_PHRASES` so the editor can still translate templates saved before the mode-aware placeholders were introduced
-- `share_send_password_mode = null` means plain password mail fallback because the Secrets app is unavailable
-- `share_secrets_expire_days = null` means no Secrets link expiry can be used
-- `talk_invitation_template` is relevant only when `language_talk_description = custom`
-- `talk_invitation_template_format` is relevant only when `language_talk_description = custom`
-- `talk_invitation_template_format = html` returns stored editor HTML to the runtime API
-- `talk_invitation_template_format = plain_text` converts the stored HTML to cleaned plain text while preserving link targets as raw URLs
-- the runtime API additionally derives `event_description_type = html | plain_text` for clients that only need the final rendering mode
-- `email_signature_template` has no language selector and is delivered as rendered HTML when policies are available and composing signatures are active or locally editable
-- if `email_signature_on_compose = false` and `policy_editable.email_signature.email_signature_on_compose = true`, reply, forward, and the rendered template remain in the runtime policy so a mail client can activate signatures locally
-- if `email_signature_on_compose = false` and its editable flag is `false`, `email_signature_on_reply`, `email_signature_on_forward`, and `email_signature_template` are returned as `null`
-- `policy.email_signature.user_email` is returned as runtime-only metadata so mail clients can apply the central signature only to matching sender identities
-- a forced `Signature email address` user override replaces the profile email for both `policy.email_signature.user_email` and `{EMAIL}`
-- `email_signature_template` is rendered for the resolved Seat user by replacing `{NAME}`, `{EMAIL}`, `{PHONE}`, `{PHONE_MOBILE}`, `{ABOUT}`, `{FUNCTION}`, `{ORGANISATION}`, `{CUSTOM1}`, and `{CUSTOM2}`
-- `{PHONE_MOBILE}`, `{CUSTOM1}`, and `{CUSTOM2}` come only from user overrides
-- `{ABOUT}` is the only multiline-capable email signature variable: it is HTML-escaped, CRLF/CR line endings are normalized, and line breaks are rendered as `<br>`
-- empty signature placeholders remove their surrounding line or table row before the rendered HTML is returned
-- the built-in default email signature template is intentionally table-free and does not rely on `<style>` tags, because mail clients may sanitize style blocks before inserting the signature
-- changes to the built-in email signature template only affect the schema fallback; stored default, group, and user templates are never migrated or rewritten
-- template variables are protected while `DOMDocument` sanitizes HTML so placeholders inside `href` attributes are not URL-encoded before runtime rendering
-- rendered email signatures pass through the sanitizer again because profile and user-override values are inserted after the stored template was sanitized
-- otherwise those template values are effectively inactive for runtime use
+The editor maintains a draft until the modal is saved.
 
-Maintenance rule:
-- If you add visible UI strings, update both:
-  - `l10n/*.json`
-  - generated `l10n/*.js`
+Flow:
+
+1. Load the effective template and cached preview assets.
+2. Replace safe external image sources with local preview paths.
+3. Edit and sanitize the browser draft.
+4. Refresh new image sources through the server.
+5. Preview HTML or Talk plain text.
+6. Save the modal draft into the settings form.
+7. Save the settings layer.
+8. Sanitize again on the server before persistence.
+
+Closing the editor without saving discards the draft.
+
+### 5.4 Scheduled update and license checks
+
+Update flow:
+
+1. `UpdateCheckJob` starts every six hours.
+2. `UpdateCheckService` reads the installed version from `appinfo/info.xml`.
+3. A cached successful result from the same UTC day is reused.
+4. Otherwise the service requests stable update metadata.
+5. Payload, timestamp, or error are stored in `nccb_settings`.
+
+License flow:
+
+1. `LicenseSyncJob` starts every 24 hours.
+2. Community mode or incomplete credentials stop the flow before an external request.
+3. Pro credentials are decrypted through Nextcloud crypto.
+4. The service requests entitlement state.
+5. Seat count, status, expiry, timestamp, or error are stored.
+
+Manual **Sync now** uses the same license service.
 
 ---
 
-## 11. Local development and validation
+## 6. Database and lifecycle
 
-Typical local checks used in this repository:
-- PHP test tools:
-  - `composer install`
-- PHP syntax:
-  - `find ncc_backend_4mc -name "*.php" -print0 | xargs -0 -n1 php -l`
-- backend static checks:
-  - `php scripts/check-backend-static.php`
-- backend schema checks:
-  - `php scripts/check-backend-schema.php`
-- PHPUnit:
-  - `vendor/bin/phpunit`
-- JS syntax:
-  - `node scripts/check-backend-js.mjs`
-- translation JS syntax:
-  - syntax-check `ncc_backend_4mc/l10n/*.js`
-- XML sanity:
-  - covered by `php scripts/check-backend-static.php`
+### 6.1 Tables
 
-Environment note from this workspace:
-- Local validation uses PHP 8.3 or newer.
-- `occ`-based verification still happens on a Nextcloud instance.
+The configured Nextcloud prefix is prepended to every table name.
 
-### 11.1 Logging and error-handling rules
+| Suffix | Content | Key rule |
+|---|---|---|
+| `nccb_settings` | License, update, and default-setting values | Unique `config_key` |
+| `nccb_seats` | Seat ownership and assignment metadata | Unique `user_id` |
+| `nccb_client_overrides` | User setting overrides | Unique `user_id + setting_key` |
+| `nccb_group_overrides` | Group setting overrides and priority | Unique `group_id + setting_key` |
+| `nccb_admin_delegations` | Delegated-admin scopes | Unique `user_id` |
 
-Current logging rules:
-- do not silently swallow backend exceptions
-- do not use suppressed filesystem operators such as `@unlink`
-- do not keep silent JSON/API parse failures in app-owned JavaScript
-- log expected admin misuse / invalid input as `warning`
-- log unexpected backend failures as `error` with exception context
+`lib/Setup/InstallSchema.php` describes the current schema.
 
-Concrete implementation rules:
-- Controllers use `warning` for:
-  - denied admin access
-  - invalid payloads
-  - missing users / groups
-  - seat-conflict situations
-- Services use `error` when an operation that should succeed fails unexpectedly
-- JavaScript uses `console.error(...)` for UI/API failures and parse issues
+### 6.2 Install and migration rules
 
-Practical audit checks:
-- `rg -n "@unlink|@rmdir|@mkdir|@file|@copy|@rename|catch \\{" ncc_backend_4mc -g '!js/vendor/**' -g '!l10n/**'`
-- `rg -n "catch \\(" ncc_backend_4mc -g '!js/vendor/**' -g '!l10n/**'`
+`InstallSchema` runs as:
 
-Good practical validation order:
-1. PHP syntax
-2. backend static checks
-3. backend schema checks
-4. backend l10n checks
-5. JS syntax
-6. PHPUnit
-7. install / enable on Nextcloud
-8. admin UI smoke test
-9. runtime `/api/v1/status` check
-10. logging audit grep checks
+- pre-migration repair step
+- install repair step
 
-Local commands:
-- `composer run check:static`
-- `composer run check:schema`
-- `composer run check:l10n`
-- `composer run check:js`
-- `composer test`
-- `composer run check`
+It creates missing tables and indexes. It is not a substitute for versioned migrations once an existing column or stored format changes.
+
+For a future schema change:
+
+1. add a migration under `lib/Migration/`
+2. keep fresh-install schema current
+3. test upgrade from the previous released schema
+4. test a fresh install
+5. test rollback through backup restoration
+
+Do not delete or recreate production tables to apply a normal upgrade.
+
+### 6.3 Disable and removal behavior
+
+The operational commands are documented in [admin.md](admin.md#95-disable-reinstall-or-remove).
+
+Implementation rules:
+
+- disable does not call destructive cleanup
+- `app:remove --keep-data` leaves app-owned tables intact
+- plain `app:remove` invokes `UninstallCleanup`
+
+Full cleanup drops all five app tables, deletes `LicenseSyncJob` and `UpdateCheckJob` entries, and removes the runtime image cache.
+
+`UninstallCleanup` checks the actual `occ app:remove ncc_backend_4mc` command line before changing data. Keep this guard when changing repair registration.
 
 ---
 
-## 12. Smoke-test checklist
+## 7. Policy resolution
 
-A pragmatic smoke test for this backend should cover the actual operational risks.
+### 7.1 Precedence
 
-1. `php occ app:enable ncc_backend_4mc`
-2. Open the admin settings page
-3. Switch to `Community`
-4. Assign one Seat to a non-admin user
-5. Verify the assigned user appears in **Assigned seats**
-6. Check `GET /apps/ncc_backend_4mc/api/v1/status` as that seat user
-7. Save default Share/Talk/email signature settings
-8. Verify that non-template settings default to `policy_editable = true`
-9. Configure a group override and confirm the seat overview marks group overrides as active for matching users
-10. Configure a user override and confirm it wins over the group layer
-11. Change a template, open the editor modal, preview it, and verify image rendering
-12. Use the editor **Languages** dropdown and confirm variables/links remain untouched
-13. Download the seat CSV report and confirm effective policy data is present while template HTML is shown as `Custom`
-14. Switch to `Pro`, save credentials, run `Sync now`, and verify the status block updates
-15. Test lifecycle commands:
-    - `php occ app:disable ncc_backend_4mc`
-    - `php occ app:enable ncc_backend_4mc`
-    - `php occ app:remove --keep-data ncc_backend_4mc`
-    - `php occ app:remove ncc_backend_4mc`
-16. Test the admin-seat override command:
-    - `php occ ncc:admin-seat-assignment status`
-    - `php occ ncc:admin-seat-assignment enable`
-    - verify admin accounts appear in Seat search
-    - `php occ ncc:admin-seat-assignment disable`
-    - verify admin accounts are hidden from Seat search again
+Resolution order:
 
-If any of these fail, fix the underlying lifecycle or resolution logic before touching surface-level UI behavior.
+1. user override
+2. matching group override
+3. default
+
+Only `forced` override rows contribute a value. `inherit` continues to the lower layer.
+
+Group selection:
+
+- collect the user's matching groups
+- ignore inherited rows
+- compare numeric priority
+- use the lowest priority number
+
+The resolved value, source layer, policy mode, and add-on editability are carried together so the runtime response and assigned-Seat report use the same result.
+
+### 7.2 Editable client values
+
+`ClientSettingsDefinitionService::isAddonControllableSetting()` classifies values that may remain locally editable.
+
+Default behavior:
+
+- non-template Share, Talk, and signature settings start add-on editable
+- template values remain backend-managed
+- user-only signature values remain backend-managed
+- a forced group or user value sets add-on editability to false
+
+The runtime response separates:
+
+- the effective value in `policy`
+- local editability in `policy_editable`
+
+When editability is true, clients may store a local choice. They do not write it to the backend runtime endpoint.
+
+### 7.3 Runtime dependencies
+
+`ClientPolicyRuntimeService` applies dependencies after layer resolution.
+
+Share:
+
+- `attachments_always_via_ncconnector = true` clears the threshold value
+- missing Secrets support clears and locks Secrets-dependent runtime values
+- non-custom Share language clears custom template values
+- `attachment_link_target` accepts `zip_download` or `share_page`
+- absent stored link target uses the built-in ZIP default
+
+Talk:
+
+- non-custom language clears custom invitation and format
+- custom format is normalized to HTML or plain text
+- `event_description_type` is derived for clients
+
+Email signature:
+
+- disabled and locked compose clears reply, forward, and template output
+- disabled but add-on-editable compose keeps dependent values available
+- template rendering occurs after dependency checks
+- user-only source values are removed from the public settings map after rendering
+
+Keep dependency rules in the runtime service rather than client-specific branches.
 
 ---
 
-## 13. Packaging and release notes
+## 8. Template and signature processing
 
-Repository-level release helpers exist under:
-- `release/`
+### 8.1 Sanitizing
 
-Current release model:
-- the installable app package must contain only the actual app folder content
-- final store packages require `appinfo/signature.json`
-- signing depends on a Nextcloud-issued certificate and a signing environment with `occ integrity:sign-app`
+Template HTML is checked twice:
 
-Practical rule:
-- Build release archives from the **app folder**, not from the entire repository root.
+1. bundled DOMPurify cleans the admin draft before preview and save
+2. `TemplateSanitizerService` applies the server allowlist before storage and when stored templates are read
 
-That keeps docs, local helpers, and private signing material out of the shipped app package.
+Rendered email signatures pass through the server sanitizer after profile values are inserted.
+
+When changing allowed elements or attributes:
+
+- update browser and server behavior together
+- preserve template placeholders through DOM parsing
+- add sanitizer tests for allowed and rejected input
+- update `VENDOR.md` when the bundled sanitizer changes
+
+### 8.2 External image cache
+
+`TemplateAssetService` mirrors external editor images under `img/runtime`.
+
+It accepts only:
+
+- HTTPS
+- public destinations
+- a limited redirect chain
+- files up to 4 MB
+- supported image content types
+- image bytes matching the declared type
+
+It rejects private and reserved network targets before downloading. It removes stale cache files for the same source key before writing a replacement.
+
+The stored template keeps the original external URL. The cached file is editor-only and can be regenerated.
+
+Failures return `template_asset_warnings` and create a warning or error log entry. Do not turn an image-cache failure into a silent preview omission.
+
+### 8.3 Share compatibility output
+
+The admin edits one canonical Share template.
+
+Current clients receive:
+
+- `share_html_block_template_v2`, which keeps `{LINK_INTRO}` and `{LINK_LABEL}`
+- `share_html_block_effective_language`, which tells clients how to localize generated labels and notices
+
+Older clients receive:
+
+- `share_html_block_template`, where link-intro and label placeholders are replaced with generic wording
+
+Internal compatibility metadata is removed from both outputs.
+
+Existing stored customer templates are not rewritten to add new variables. A template without the mode-aware variables produces compatible output in both fields.
+
+`attachment_link_target` is a normal policy value, not another template version. Manual shares remain standard share-page links; attachment clients select ZIP or share-page wording from the effective target.
+
+### 8.4 Talk rendering
+
+Talk custom output supports:
+
+- HTML
+- cleaned plain text
+
+Plain-text conversion exists in two environments:
+
+- `adminTemplatePreview.js` for the admin preview
+- `TalkTemplateRuntimeService` for mail-client output
+
+Keep both paths aligned for:
+
+- visible text
+- raw link targets
+- block-level line breaks
+- final whitespace normalization
+
+### 8.5 Email signature rendering
+
+`EmailSignatureRuntimeService` resolves:
+
+- Nextcloud display name and profile fields
+- forced signature email override
+- mobile phone and custom user values
+- HTML escaping
+- multiline `{ABOUT}` conversion
+- empty line or table-row removal
+
+Supported variables:
+
+- `{NAME}`
+- `{EMAIL}`
+- `{PHONE}`
+- `{PHONE_MOBILE}`
+- `{ABOUT}`
+- `{FUNCTION}`
+- `{ORGANISATION}`
+- `{CUSTOM1}`
+- `{CUSTOM2}`
+
+The resolved email is returned separately for client sender-identity matching.
+
+Built-in template changes affect only the schema fallback. Never rewrite stored customer templates during a default-template update.
+
+---
+
+## 9. Routes, authentication, and permissions
+
+The complete route list and response fields live in [endpoints.md](endpoints.md).
+
+Public mail-client interface:
+
+- authenticated `GET /apps/ncc_backend_4mc/api/v1/status`
+- front-controller variant with `/index.php`
+- optional internal `user_id` only for authorized admin reporting
+
+Admin interface:
+
+- full Nextcloud admins may use every admin action
+- delegated admins are limited to active NC Connector scopes
+- delegation management itself remains full-admin only
+- Seat assignment and license settings remain full-admin only
+
+`AdminPermissionService` maps settings and actions to scopes. Browser mapping in `adminPermissions.js` controls visibility but does not replace the server check.
+
+Signature scope details:
+
+- compose, reply, and forward activation use signature-policy permission
+- signature template and signature user values use signature-template permission
+
+Route registration:
+
+- group override routes remain explicit in `appinfo/routes.php` because query-based group identifiers work across supported versions
+- delegation routes remain explicit for the same compatibility range
+- attribute routes cover the remaining controllers where supported
+
+Do not add a second user-directory endpoint. Delegation selection reuses the existing admin users endpoint.
+
+---
+
+## 10. Localization
+
+Source translations:
+
+- `ncc_backend_4mc/l10n/*.json`
+
+Browser-loaded translations:
+
+- `ncc_backend_4mc/l10n/*.js`
+
+Every visible UI string must exist in both forms for every supported locale.
+
+Rules:
+
+- use the translation helper for labels, messages, buttons, tooltips, and errors
+- do not add an English-only fallback key to non-English files
+- keep JSON and JavaScript keys aligned
+- run the localization checker after every visible text change
+
+UI language and template language are separate:
+
+- UI language follows Nextcloud localization
+- the editor language selector rewrites built-in Share and Talk text fragments
+- signature templates have no language selector
+
+Template translation must preserve variables, links, and language metadata.
+
+---
+
+## 11. Logging and error handling
+
+Server code uses `Psr\Log\LoggerInterface`.
+
+Severity:
+
+| Level | Use |
+|---|---|
+| `debug` | Scheduled-job start and other opt-in trace context |
+| `warning` | Denied admin access, invalid input, missing directory objects, unavailable integrations, and recoverable preview failures |
+| `error` | Unexpected persistence, network, crypto, file, or lifecycle failures |
+
+Browser code uses `console.error(...)` for failed admin API calls, parse failures, and UI operations that cannot continue.
+
+Rules:
+
+- do not swallow exceptions without recording or returning the failure
+- do not use suppressed file operations such as `@unlink`
+- include the exception object in server error context
+- do not log license keys, app passwords, tokens, cookies, or template customer data
+- keep expected admin misuse at warning level
+- return actionable messages without exposing secrets
+
+Useful source audits:
+
+```text
+rg -n "@unlink|@rmdir|@mkdir|@file|@copy|@rename|catch \{" ncc_backend_4mc -g "!js/vendor/**" -g "!l10n/**"
+rg -n "catch \(" ncc_backend_4mc -g "!js/vendor/**" -g "!l10n/**"
+```
+
+Operational collection steps live in [admin.md](admin.md#11-logs-and-support-data).
+
+---
+
+## 12. Tests and continuous integration
+
+### 12.1 Local commands
+
+Install tools:
+
+```powershell
+composer install
+```
+
+Run all Composer checks:
+
+```powershell
+composer run check
+```
+
+Individual checks:
+
+```powershell
+composer run check:static
+composer run check:schema
+composer run check:l10n
+composer run check:js
+composer test
+```
+
+PHP syntax is separate. On a POSIX shell:
+
+```bash
+find ncc_backend_4mc -name "*.php" -print0 | xargs -0 -n1 php -l
+```
+
+On PowerShell:
+
+```powershell
+Get-ChildItem .\ncc_backend_4mc -Filter *.php -File -Recurse |
+  ForEach-Object {
+    php -l $_.FullName
+    if ($LASTEXITCODE -ne 0) { throw "PHP syntax failed: $($_.FullName)" }
+  }
+```
+
+### 12.2 CI matrix
+
+The repository workflow runs:
+
+| Check | Runtime |
+|---|---|
+| PHP syntax | PHP 8.3, 8.4, and 8.5 |
+| Backend static checks | PHP 8.3 |
+| Database-schema checks | PHP 8.3 |
+| Localization checks | Node.js 24 |
+| JavaScript syntax | Node.js 24 |
+| PHPUnit | PHP 8.3, 8.4, and 8.5 |
+
+The matrix produces ten executions across six jobs.
+
+Test coverage includes:
+
+- setting definitions and value normalization
+- runtime policy dependencies
+- template and signature rendering
+- sanitizer behavior
+- template image restrictions
+- delegated-admin permissions
+- Seat and directory boundaries
+- endpoint response fields
+- schema-to-mapper alignment
+- localization and JavaScript syntax
+
+### 12.3 Nextcloud acceptance
+
+Automated tests do not replace a real Nextcloud check.
+
+After a lifecycle, policy, permission, template, or route change:
+
+1. install or update on a supported Nextcloud instance
+2. run the pilot acceptance table in [admin.md](admin.md#34-pilot-acceptance)
+3. run the relevant troubleshooting-free operational checks
+4. review server and browser logs
+
+Test destructive removal only on a disposable instance or after a verified backup.
+
+---
+
+## 13. Packaging and release
+
+The App Store archive must contain the app directory as:
+
+```text
+ncc_backend_4mc/
+  appinfo/
+  lib/
+  js/
+  css/
+  templates/
+  l10n/
+  img/
+  CHANGELOG.md
+  LICENSE.txt
+```
+
+Do not package the repository root, test tools, documentation source directory, dependency caches, or local signing material.
+
+A store release requires:
+
+- matching version in `ncc_backend_4mc/appinfo/info.xml`
+- matching release entry in `CHANGELOG.md`
+- byte-identical release entry in `ncc_backend_4mc/CHANGELOG.md`
+- a clean staged copy of `ncc_backend_4mc/`
+- `appinfo/signature.json` generated through the Nextcloud app-signing process
+- a signed archive from that staged copy
+
+Private signing keys never belong in Git or the release archive.
+
+Release checklist:
+
+1. classify the delta from the previous release tag
+2. update both Changelogs and the app version
+3. keep both Changelogs byte-identical
+4. run the full local checks
+5. verify every CI job is still wired
+6. run Nextcloud pilot acceptance
+7. build and sign from a clean staged app directory
+8. inspect archive paths and excluded files
+9. commit with `Release X.Y.Z`
+10. create a tag or push only as a separate release action
+
+Documentation-only changes still run the project checks before the release commit is amended.
+
+---
+
+## 14. Change checklists
+
+### 14.1 Add or change a setting
+
+1. Add or update the definition in `ClientSettingsDefinitionService`.
+2. Decide whether the setting is add-on controllable, template-managed, backend-only, or user-only.
+3. Add admin metadata and the correct default or override UI.
+4. Map delegated permissions in `AdminPermissionService` and browser visibility.
+5. Add every locale key to JSON and JavaScript files.
+6. Add runtime dependency processing only when the setting affects another value.
+7. Update [admin.md](admin.md) for operator behavior.
+8. Update [endpoints.md](endpoints.md) for response fields.
+9. Add definition, permission, runtime, controller, and response tests.
+10. Run the full test matrix.
+
+Generic settings use the existing key/value tables and do not need a database migration. A new column, index, table, or stored format does.
+
+### 14.2 Add or change an endpoint
+
+1. Reuse an existing controller when the responsibility matches.
+2. Define authentication and permission before request parsing.
+3. Keep business rules in services.
+4. Reuse existing directory and settings endpoints instead of adding parallel paths.
+5. Add explicit routing only where supported-version behavior requires it.
+6. Document method, path, parameters, response, and failure states in [endpoints.md](endpoints.md).
+7. Add permission and response tests.
+8. Run Pretty URL and `/index.php` path checks on Nextcloud.
+
+### 14.3 Change persistence
+
+1. Add a versioned migration.
+2. Update fresh-install schema.
+3. Update entity and mapper code.
+4. Test upgrade from the last release.
+5. Test fresh install.
+6. Test keep-data reinstall.
+7. Test full destructive removal.
+8. Verify backup and rollback instructions remain accurate.
+
+### 14.4 Change templates or sanitizing
+
+1. Keep browser and server sanitizer rules aligned.
+2. Preserve supported placeholders through parsing and rendering.
+3. Keep Share legacy and current outputs compatible.
+4. Keep Talk browser preview and server plain-text rendering aligned.
+5. Sanitize signatures after profile substitution.
+6. Test unsafe HTML, URLs, redirects, file limits, content types, and empty variables.
+7. Update template authoring guidance in [admin.md](admin.md#56-template-operation).
+8. Update `VENDOR.md` for bundled dependency changes.

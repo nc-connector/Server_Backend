@@ -4,6 +4,20 @@ All notable changes to this repository are documented in this file.
 
 The format is based on **Keep a Changelog** and uses a simple version-first structure.
 
+## [1.3.0] - 2026-07-24
+
+### Added
+- Add an `Attachment link target` policy for attachment mode, with `ZIP download` as the default and `Nextcloud share page` as the alternative; manual shares keep the standard share page
+
+### Changed
+- Update the bundled DOMPurify template sanitizer to 3.4.12
+
+### Fixed
+- Keep reply, forward, and rendered signature values available to mail clients when composing signatures are disabled but remain editable in the add-on
+
+### Removed
+- Remove the obsolete `Generate password for meetings` setting; `Set password` remains the single Talk password control
+
 ## [1.2.2] - 2026-07-17
 
 ### Added

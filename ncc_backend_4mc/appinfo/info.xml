@@ -120,7 +120,7 @@ Einzelne Nutzer können die Mail-Add-ons weiterhin ohne dieses Backend verwenden
 - Homepage: [https://nc-connector.de](https://nc-connector.de)
 - Kontakt: [https://nc-connector.de/kontakt/](https://nc-connector.de/kontakt/)
 ]]></description>
-	<version>1.2.2</version>
+	<version>1.3.0</version>
 	<licence>AGPL-3.0-or-later</licence>
 	<author mail="info@nc-connector.de" homepage="https://nc-connector.de">NC Connector</author>
 	<namespace>NcConnector</namespace>
