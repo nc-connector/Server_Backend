@@ -146,6 +146,10 @@ if (preg_match('/DOMPurify\.version\s*=\s*[\'"]([^\'"]+)[\'"]/', $purify, $versi
 	if (!str_contains($vendor, 'dompurify-' . $version . '.tgz')) {
 		addFailure($failures, relativePath($root, $vendorPath) . ' DOMPurify source URL mismatch');
 	}
+	$purifyHash = strtoupper(hash('sha256', $purify));
+	if (!str_contains($vendor, 'SHA-256: `' . $purifyHash . '`')) {
+		addFailure($failures, relativePath($root, $vendorPath) . ' DOMPurify SHA-256 mismatch');
+	}
 }
 
 if ($failures !== []) {
