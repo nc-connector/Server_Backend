@@ -196,7 +196,7 @@
 	}
 
 	function renderAssignedSeats(element, seats, helpers) {
-		const { tr, escapeHtml, formatDateTime } = helpers
+		const { tr, escapeHtml, formatDateTime, canManageSeats = false } = helpers
 		if (!seats || seats.length === 0) {
 			element.textContent = tr('No seats assigned.')
 			return
@@ -223,6 +223,9 @@
 						: `<span class="${userOverrideClass}">${escapeHtml(tr('Disabled'))}</span>`}</td>
 					<td>${escapeHtml(formatDateTime(seat.assigned_at || null))}</td>
 					<td>${escapeHtml(seat.assigned_by || '—')}</td>
+					${canManageSeats
+						? `<td><button type="button" class="button" data-seat-remove-user-id="${escapeHtml(seat.user_id || '')}">${escapeHtml(tr('Delete'))}</button></td>`
+						: ''}
 				</tr>
 			`
 		}).join('')
@@ -238,6 +241,7 @@
 						<th style="width:220px;">${escapeHtml(tr('User overrides'))}</th>
 						<th style="width:180px;">${escapeHtml(tr('Assigned at'))}</th>
 						<th style="width:180px;">${escapeHtml(tr('Assigned by'))}</th>
+						${canManageSeats ? `<th>${escapeHtml(tr('Seat'))}</th>` : ''}
 					</tr>
 				</thead>
 				<tbody>${rows}</tbody>

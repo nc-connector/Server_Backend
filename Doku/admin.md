@@ -485,7 +485,11 @@ To allow admin accounts explicitly:
 
 Disabling the override does not remove an existing admin Seat. Remove it from **Assigned seats** if it should no longer consume capacity.
 
-The assigned-Seat table shows assignment state and links to matching group or user overrides. The CSV report omits raw template HTML and reports an effective custom template as `Custom`.
+The assigned-Seat table shows assignment state and links to matching group or user overrides. Full Nextcloud admins can also remove individual assignments directly from this table. Delegated NC Connector admins retain read-only access to the overview.
+
+If an assigned user no longer exists in the Nextcloud user directory, its stored user ID remains in **Assigned seats** and still consumes a Seat until a full admin removes it. The backend does not remove such assignments automatically because a temporarily unavailable external user directory must not release Seats unexpectedly.
+
+The CSV report omits raw template HTML and reports an effective custom template as `Custom`.
 
 ### 5.8 Group overrides
 

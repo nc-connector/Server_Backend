@@ -176,8 +176,11 @@
 		}
 	}
 
-	function renderAssignedSeats(element, seats) {
-		seatReport.renderAssignedSeats(element, seats, getSeatReportHelpers())
+	function renderAssignedSeats(element, seats, canManageSeats = false) {
+		seatReport.renderAssignedSeats(element, seats, {
+			...getSeatReportHelpers(),
+			canManageSeats,
+		})
 	}
 
 	function buildSeatReportCsv(seats, schema, api) {
@@ -1755,20 +1758,28 @@
 			fillDelegationUsers(state.delegationUsers)
 		}
 
+		async function persistSeatAssignment(userId, assigned, messageElement) {
+			setMessage(messageElement, '', '')
+			try {
+				await api.setSeat(userId, assigned)
+				await refreshSeatsAndUsers(false)
+				setMessage(messageElement, tr('Seat saved.'), 'success')
+				return true
+			} catch (error) {
+				console.error('nccb seat save failed', userId, error)
+				setMessage(messageElement, error.message || tr('Failed to save seat.'), 'error')
+				return false
+			}
+		}
+
 		const attachSeatHandlers = () => {
 			refs.userTable.querySelectorAll('tr[data-user-id]').forEach((row) => {
 				const userId = row.getAttribute('data-user-id')
 				const checkbox = row.querySelector('.nccb-seat-toggle')
 				checkbox.addEventListener('change', async () => {
-					setMessage(refs.seatMessage, '', '')
-					try {
-						await api.setSeat(userId, checkbox.checked)
-						await refreshSeatsAndUsers(false)
-						setMessage(refs.seatMessage, tr('Seat saved.'), 'success')
-					} catch (error) {
-						console.error('nccb seat save failed', userId, error)
+					const saved = await persistSeatAssignment(userId, checkbox.checked, refs.seatMessage)
+					if (!saved) {
 						checkbox.checked = !checkbox.checked
-						setMessage(refs.seatMessage, error.message || tr('Failed to save seat.'), 'error')
 					}
 				})
 			})
@@ -1845,7 +1856,7 @@
 			const { seats, seatStatus } = await loadAssignedSeats()
 			state.assignedSeats = seats
 			renderSeatUsage(seatStatus)
-			renderAssignedSeats(refs.assignedSeats, seats)
+			renderAssignedSeats(refs.assignedSeats, seats, Boolean(state.admin?.is_nextcloud_admin))
 			if (canUseAnyUserOverridePanel(state)) {
 				fillOverrideUsers(seats)
 			}
@@ -1958,11 +1969,28 @@
 		refs.groupOverrideTabs.forEach((button) => button.addEventListener('click', () => setGroupOverrideTab(root, button.getAttribute('data-group-override-tab-button'))))
 		refs.advancedTabs.forEach((button) => button.addEventListener('click', () => setAdvancedTab(root, button.getAttribute('data-advanced-tab-button'))))
 		root.addEventListener('click', async (event) => {
-			const target = event.target instanceof Element ? event.target.closest('[data-group-override-link], [data-user-override-link]') : null
+			const target = event.target instanceof Element
+				? event.target.closest('[data-group-override-link], [data-user-override-link], [data-seat-remove-user-id]')
+				: null
 			if (!(target instanceof HTMLElement)) {
 				return
 			}
 			event.preventDefault()
+			const seatRemovalUserId = String(target.dataset.seatRemoveUserId || '')
+			if (seatRemovalUserId) {
+				if (!state.admin?.is_nextcloud_admin) {
+					return
+				}
+				const button = target instanceof HTMLButtonElement ? target : null
+				if (button) {
+					button.disabled = true
+				}
+				const saved = await persistSeatAssignment(seatRemovalUserId, false, refs.assignedMessage)
+				if (!saved && button) {
+					button.disabled = false
+				}
+				return
+			}
 			const groupId = String(target.dataset.groupOverrideLink || '')
 			const userId = String(target.dataset.userOverrideLink || '')
 			if (groupId) {

@@ -388,6 +388,8 @@ The configured Nextcloud prefix is prepended to every table name.
 
 `lib/Setup/InstallSchema.php` describes the current schema.
 
+Seat rows are keyed by the stored Nextcloud user ID. Assignment requires that the user currently resolves through `IUserManager`; unassignment deliberately requires only the stored ID. This lets a full admin release a Seat after its Nextcloud user was deleted. An unresolved assignment remains visible, assigned, and counted until that explicit action. Never auto-delete these rows: a transient LDAP or other external-directory outage is indistinguishable from a deleted user at lookup time.
+
 ### 6.2 Install and migration rules
 
 `InstallSchema` runs as:

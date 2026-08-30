@@ -124,7 +124,7 @@ class AdminSeatController extends Controller {
 			]);
 		}
 
-		if ($this->userManager->get($targetUserId) === null) {
+		if ($assigned && $this->userManager->get($targetUserId) === null) {
 			return $this->warningResponse('User not found', Http::STATUS_NOT_FOUND, [
 				'actor_user_id' => $this->userId,
 				'target_user_id' => $targetUserId,
