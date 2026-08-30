@@ -35,6 +35,7 @@
     'cellspacing',
     'align',
     'valign',
+    'nowrap',
     'data-nccb-legacy-link-intro',
     'data-nccb-legacy-link-label',
   ];
@@ -44,6 +45,7 @@
     'article',
     'header',
     'footer',
+    'nobr',
   ];
 
   function getPurify() {

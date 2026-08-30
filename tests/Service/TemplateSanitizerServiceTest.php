@@ -67,6 +67,20 @@ final class TemplateSanitizerServiceTest extends TestCase {
 		self::assertStringContainsString('alt="Logo"', $html);
 	}
 
+	public function testOutlookNoBreakAndRightsTableMarkupSurvives(): void {
+		$html = $this->sanitizer->sanitizeHtml(
+			'<table role="presentation" border="0" cellspacing="0" cellpadding="0">'
+			. '<tbody><tr><td nowrap="nowrap" valign="middle" style="white-space: nowrap;">'
+			. '<nobr style="white-space: nowrap;">Expiration&nbsp;date</nobr>'
+			. '</td></tr></tbody></table>'
+		);
+
+		self::assertStringContainsString('<table role="presentation" border="0" cellspacing="0" cellpadding="0">', $html);
+		self::assertStringContainsString('<tbody><tr><td nowrap valign="middle" style="white-space: nowrap">', $html);
+		self::assertStringContainsString('<nobr style="white-space: nowrap">', $html);
+		self::assertStringContainsString('Expiration' . "\u{00A0}" . 'date', $html);
+	}
+
 	public function testBlankTargetsReceiveNoopenerAndNoreferrer(): void {
 		$html = $this->sanitizer->sanitizeHtml(
 			'<a href="https://example.invalid" target="_blank">Open</a>'

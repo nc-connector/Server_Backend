@@ -113,6 +113,20 @@ requireSubstring(
 	'url\\(',
 	'must block CSS url() in style attributes'
 );
+foreach ([
+	$appRoot . '/lib/Service/TemplateSanitizerService.php' => ["'nobr' => true", "'nowrap' => true"],
+	$appRoot . '/js/templateSanitizer.js' => ["'nobr',", "'nowrap',"],
+] as $path => $requiredNoBreakTokens) {
+	foreach ($requiredNoBreakTokens as $token) {
+		requireSubstring(
+			$failures,
+			$root,
+			$path,
+			$token,
+			'must preserve Outlook-safe no-break template markup'
+		);
+	}
+}
 
 $infoXml = $appRoot . '/appinfo/info.xml';
 $previousUseInternalErrors = libxml_use_internal_errors(true);
