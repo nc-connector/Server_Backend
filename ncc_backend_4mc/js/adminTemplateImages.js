@@ -7,7 +7,9 @@
 (() => {
 	'use strict'
 
-	const DEFAULT_TEMPLATE_LOGO_URL = 'https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png'
+	// This fallback only repairs legacy relative/CID sources. New defaults carry
+	// their explicit asset URL and stored customer templates are not migrated.
+	const LEGACY_TEMPLATE_LOGO_URL = 'https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png'
 
 	function normalizeImageSourceValue(src) {
 		const value = String(src || '').trim()
@@ -23,7 +25,7 @@
 			|| value.includes('/apps/ncc_backend_4mc/img/header.png')
 			|| value.endsWith('/img/header.png')
 		) {
-			return DEFAULT_TEMPLATE_LOGO_URL
+			return LEGACY_TEMPLATE_LOGO_URL
 		}
 		return value
 	}

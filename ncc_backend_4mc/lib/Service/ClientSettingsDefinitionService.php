@@ -19,7 +19,9 @@ class ClientSettingsDefinitionService {
 	public const ATTACHMENT_LINK_TARGET_ZIP_DOWNLOAD = 'zip_download';
 	public const ATTACHMENT_LINK_TARGET_SHARE_PAGE = 'share_page';
 
-	private const MAIL_TEMPLATE_LOGO_URL = 'https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png';
+	// Legacy relative and CID sources keep resolving to the historical asset so
+	// stored customer templates are never silently migrated to a new default.
+	private const LEGACY_MAIL_TEMPLATE_LOGO_URL = 'https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png';
 	private const MAIL_TEMPLATE_LOGO_LINK = 'https://nc-connector.de';
 	private const USER_OVERRIDE_ONLY_SETTINGS = [
 		EmailSignatureRuntimeService::EMAIL_ADDRESS_KEY => true,
@@ -30,6 +32,7 @@ class ClientSettingsDefinitionService {
 	private const BACKEND_ONLY_SETTINGS = [
 		self::SHARE_SECRETS_EXPIRE_DAYS_KEY => true,
 	];
+	// Presentation-table padding and a fixed label column survive Outlook's Word renderer.
 	private const DEFAULT_SHARE_HTML_BLOCK_TEMPLATE = <<<'HTML'
 <!DOCTYPE html>
 <html>
@@ -38,48 +41,60 @@ class ClientSettingsDefinitionService {
 </head>
 <body>
 	<div lang="en" data-nccb-legacy-link-intro="The files have been provided securely and in a privacy-compliant manner via Nextcloud. You can download them using the link below." data-nccb-legacy-link-label="Download link" style="font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;margin:16px 0;">
-		<table role="presentation" width="640" style="border-collapse:separate;border-spacing:0;width:640px;margin:0;background-color:transparent;border:1px solid #d7d7db;border-radius:8px;overflow:hidden;">
+		<table role="presentation" width="640" border="0" cellspacing="0" cellpadding="0" style="border-collapse:separate;border-spacing:0;width:640px;margin:0;background-color:transparent;border:1px solid #d7d7db;border-radius:8px;overflow:hidden;">
 			<tbody>
 				<tr>
-					<td style="padding:0;">
-						<table role="presentation" width="640" height="32" style="border-collapse:collapse;width:640px;height:32px;margin:0;background-color:transparent;">
+					<td valign="top" style="padding:0;vertical-align:top;">
+						<table role="presentation" width="640" height="32" border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:640px;height:32px;margin:0;background-color:transparent;">
 							<tbody>
 								<tr>
 									<td style="padding:0; background-color:#0082c9; text-align:center; height:32px; min-height:32px; max-height:32px; line-height:0; font-size:0; vertical-align:middle;" height="32">
 										<a href="https://nc-connector.de" target="_blank" rel="noopener" style="display:inline-block; text-decoration:none; line-height:0; font-size:0; vertical-align:middle;">
-											<img src="https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png" height="32" style="display:block; height:32px; width:auto; border:0; margin:0 auto;">
+											<img src="https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-transparent-164x48.png" height="32" style="display:block; height:32px; width:auto; border:0; margin:0 auto;">
 										</a>
 									</td>
 								</tr>
 							</tbody>
 						</table>
-						<div style="padding:18px 18px 12px 18px;">
-							<p style="margin:0 0 14px 0;line-height:1.4;">{NOTE}</p>
-							<p style="margin:0 0 14px 0;line-height:1.4;">{LINK_INTRO}</p>
-							<table style="width:100%;border-collapse:collapse;margin-bottom:10px;">
-								<tbody>
-									<tr>
-										<th style="text-align:left;width:13ch;vertical-align:top;padding:6px 10px 6px 0;">{LINK_LABEL}</th>
-										<td style="padding:6px 0;max-width:50ch;word-break:break-word;"><a href="{URL}" style="color:#0082C9;text-decoration:none;">{URL}</a></td>
-									</tr>
-									<tr>
-										<th style="text-align:left;width:13ch;vertical-align:top;padding:6px 10px 6px 0;">Password</th>
-										<td style="padding:6px 0;max-width:50ch;word-break:break-word;"><span style="display:inline-block;font-family:'Consolas','Courier New',monospace;padding:2px 6px;border:1px solid #c7c7c7;border-radius:3px;">{PASSWORD}</span></td>
-									</tr>
-									<tr>
-										<th style="text-align:left;width:13ch;vertical-align:top;padding:6px 10px 6px 0;">Expiration date</th>
-										<td style="padding:6px 0;max-width:50ch;word-break:break-word;">{EXPIRATIONDATE}</td>
-									</tr>
-									<tr>
-										<th style="text-align:left;width:13ch;vertical-align:top;padding:6px 10px 6px 0;">Rights</th>
-										<td style="padding:6px 0;max-width:50ch;word-break:break-word;">{RIGHTS}</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-						<div style="padding:10px 18px 16px 18px;font-size:9pt;font-style:italic;">
-							<a href="https://nextcloud.com/" style="color:#0082C9;text-decoration:none;">Nextcloud</a> is a solution for secure email and data exchange.
-						</div>
+						<table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%;margin:0;background-color:transparent;">
+							<tbody>
+								<tr>
+									<td valign="top" style="padding:18px 18px 22px 18px;vertical-align:top;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;">
+										<p style="margin:0 0 14px 0;line-height:1.4;">{NOTE}</p>
+										<p style="margin:0 0 14px 0;line-height:1.4;">{LINK_INTRO}<br></p>
+										<table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100%;border-collapse:collapse;margin:0;">
+											<tbody>
+												<tr>
+													<th width="124" valign="top" style="text-align:left;width:124px;vertical-align:top;padding:6px 10px 6px 0;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;"><nobr style="white-space: nowrap;">{LINK_LABEL}</nobr></th>
+													<td valign="top" style="padding:6px 0;max-width:50ch;word-break:break-word;vertical-align:top;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;"><a href="{URL}" style="color:#0082C9;text-decoration:none;">{URL}</a></td>
+												</tr>
+												<tr>
+													<th width="124" valign="top" style="text-align:left;width:124px;vertical-align:top;padding:6px 10px 6px 0;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;"><nobr style="white-space: nowrap;">Password</nobr></th>
+													<td valign="top" style="padding:6px 0;max-width:50ch;word-break:break-word;vertical-align:top;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;"><span style="display:inline-block;font-family:'Consolas','Courier New',monospace;padding:2px 6px;border:1px solid #c7c7c7;border-radius:3px;-ms-user-select:all;user-select:all;">{PASSWORD}</span></td>
+												</tr>
+												<tr>
+													<th width="124" valign="top" style="text-align:left;width:124px;vertical-align:top;padding:6px 10px 6px 0;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;"><nobr style="white-space: nowrap;">Expiration&nbsp;date</nobr></th>
+													<td valign="top" style="padding:6px 0;max-width:50ch;word-break:break-word;vertical-align:top;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;"><nobr style="white-space: nowrap;">{EXPIRATIONDATE}</nobr></td>
+												</tr>
+												<tr>
+													<th width="124" valign="top" style="text-align:left;width:124px;vertical-align:top;padding:6px 10px 6px 0;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;"><nobr style="white-space: nowrap;">Rights</nobr></th>
+													<td valign="top" style="padding:6px 0;max-width:50ch;word-break:break-word;vertical-align:top;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;">{RIGHTS}</td>
+												</tr>
+											</tbody>
+										</table>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%;margin:0;background-color:transparent;">
+							<tbody>
+								<tr>
+									<td valign="top" style="padding:10px 18px 16px 18px;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:9pt;font-style:italic;vertical-align:top;">
+										<a href="https://nextcloud.com/" style="color:#0082C9;text-decoration:none;">Nextcloud</a> is a solution for secure email and data exchange.
+									</td>
+								</tr>
+							</tbody>
+						</table>
 					</td>
 				</tr>
 			</tbody>
@@ -96,34 +111,40 @@ HTML;
 </head>
 <body>
 	<div style="font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;margin:16px 0;">
-		<table role="presentation" width="640" style="border-collapse:separate;border-spacing:0;width:640px;margin:0;background-color:transparent;border:1px solid #d7d7db;border-radius:8px;overflow:hidden;">
+		<table role="presentation" width="640" border="0" cellspacing="0" cellpadding="0" style="border-collapse:separate;border-spacing:0;width:640px;margin:0;background-color:transparent;border:1px solid #d7d7db;border-radius:8px;overflow:hidden;">
 			<tbody>
 				<tr>
-					<td style="padding:0;">
-						<table role="presentation" width="640" height="32" style="border-collapse:collapse;width:640px;height:32px;margin:0;background-color:transparent;">
+					<td valign="top" style="padding:0;vertical-align:top;">
+						<table role="presentation" width="640" height="32" border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:640px;height:32px;margin:0;background-color:transparent;">
 							<tbody>
 								<tr>
 									<td style="padding:0; background-color:#0082c9; text-align:center; height:32px; min-height:32px; max-height:32px; line-height:0; font-size:0; vertical-align:middle;" height="32">
 										<a href="https://nc-connector.de" target="_blank" rel="noopener" style="display:inline-block; text-decoration:none; line-height:0; font-size:0; vertical-align:middle;">
-											<img src="https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png" height="32" style="display:block; height:32px; width:auto; border:0; margin:0 auto;">
+											<img src="https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-transparent-164x48.png" height="32" style="display:block; height:32px; width:auto; border:0; margin:0 auto;">
 										</a>
 									</td>
 								</tr>
 							</tbody>
 						</table>
-						<div style="padding:18px 18px 12px 18px;">
-							<p style="margin:0 0 14px 0;line-height:1.4;">Here is your password for the sent share.</p>
-							<table style="width:100%;border-collapse:collapse;margin-bottom:10px;">
-								<tbody>
-									<tr>
-										<th style="text-align:left;width:12ch;vertical-align:top;padding:6px 10px 6px 0;">Password</th>
-										<td style="padding:6px 0;max-width:50ch;word-break:break-word;">
-											<span style="display:inline-block;font-family:'Consolas','Courier New',monospace;padding:2px 6px;border:1px solid #c7c7c7;border-radius:3px;">{PASSWORD}</span>
-										</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
+						<table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%;margin:0;background-color:transparent;">
+							<tbody>
+								<tr>
+									<td valign="top" style="padding:18px 18px 22px 18px;vertical-align:top;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;">
+										<p style="margin:0 0 14px 0;line-height:1.4;">Here is your password for the sent share.</p>
+										<table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100%;border-collapse:collapse;margin:0;">
+											<tbody>
+												<tr>
+													<th width="124" valign="top" style="text-align:left;width:124px;vertical-align:top;padding:6px 10px 6px 0;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;"><nobr style="white-space: nowrap;">Password</nobr></th>
+													<td valign="top" style="padding:6px 0;max-width:50ch;word-break:break-word;vertical-align:top;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;">
+														<span style="display:inline-block;font-family:'Consolas','Courier New',monospace;padding:2px 6px;border:1px solid #c7c7c7;border-radius:3px;-ms-user-select:all;user-select:all;">{PASSWORD}</span>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</td>
+								</tr>
+							</tbody>
+						</table>
 					</td>
 				</tr>
 			</tbody>
@@ -416,19 +437,19 @@ HTML;
 				"src='../img/header.png'",
 			],
 			[
-				'src="' . self::MAIL_TEMPLATE_LOGO_URL . '"',
-				"src='" . self::MAIL_TEMPLATE_LOGO_URL . "'",
-				'src="' . self::MAIL_TEMPLATE_LOGO_URL . '"',
-				"src='" . self::MAIL_TEMPLATE_LOGO_URL . "'",
-				'src="' . self::MAIL_TEMPLATE_LOGO_URL . '"',
-				"src='" . self::MAIL_TEMPLATE_LOGO_URL . "'",
+				'src="' . self::LEGACY_MAIL_TEMPLATE_LOGO_URL . '"',
+				"src='" . self::LEGACY_MAIL_TEMPLATE_LOGO_URL . "'",
+				'src="' . self::LEGACY_MAIL_TEMPLATE_LOGO_URL . '"',
+				"src='" . self::LEGACY_MAIL_TEMPLATE_LOGO_URL . "'",
+				'src="' . self::LEGACY_MAIL_TEMPLATE_LOGO_URL . '"',
+				"src='" . self::LEGACY_MAIL_TEMPLATE_LOGO_URL . "'",
 			],
 			$template
 		);
 
 		$template = preg_replace(
 			'/src=(["\'])cid:[^"\']+\\1/i',
-			'src="' . self::MAIL_TEMPLATE_LOGO_URL . '"',
+			'src="' . self::LEGACY_MAIL_TEMPLATE_LOGO_URL . '"',
 			$template
 		) ?? $template;
 
@@ -451,8 +472,8 @@ HTML;
 		) ?? $template;
 
 		$template = preg_replace(
-			'/<img\b[^>]*src=(["\'])' . preg_quote(self::MAIL_TEMPLATE_LOGO_URL, '/') . '\\1[^>]*>/i',
-			'<img src="' . self::MAIL_TEMPLATE_LOGO_URL . '" height="32" style="display:block; height:32px; width:auto; border:0; margin:0 auto;">',
+			'/<img\b[^>]*src=(["\'])' . preg_quote(self::LEGACY_MAIL_TEMPLATE_LOGO_URL, '/') . '\\1[^>]*>/i',
+			'<img src="' . self::LEGACY_MAIL_TEMPLATE_LOGO_URL . '" height="32" style="display:block; height:32px; width:auto; border:0; margin:0 auto;">',
 			$template
 		) ?? $template;
 

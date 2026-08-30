@@ -509,6 +509,8 @@ When changing allowed elements or attributes:
 - add sanitizer tests for allowed and rejected input
 - update `VENDOR.md` when the bundled sanitizer changes
 
+The mail-template allowlist explicitly retains `nobr` and `nowrap`. These are compatibility markup for known visible labels, dates, and client-generated Rights tables; generic placeholder substitution remains context-neutral so variables stay valid in both text and attributes.
+
 ### 8.2 External image cache
 
 `TemplateAssetService` mirrors external editor images under `img/runtime`.
@@ -525,6 +527,8 @@ It accepts only:
 It rejects private and reserved network targets before downloading. It removes stale cache files for the same source key before writing a replacement.
 
 The stored template keeps the original external URL. The cached file is editor-only and can be regenerated.
+
+The built-in Share and password-mail defaults use the public transparent 164 x 48 mail-header asset over a single blue table-cell background. Legacy relative/CID image repair deliberately keeps its historical opaque URL so reading or saving an existing customer template does not migrate it to a newer default.
 
 Failures return `template_asset_warnings` and create a warning or error log entry. Do not turn an image-cache failure into a silent preview omission.
 
@@ -592,6 +596,8 @@ Supported variables:
 The resolved email is returned separately for client sender-identity matching.
 
 Built-in template changes affect only the schema fallback. Never rewrite stored customer templates during a default-template update.
+
+The current Share fallback mirrors the compact client layout with Word-safe table-cell padding, a 124 px label column, visible no-break labels and expiration date, selectable password text, and a `{RIGHTS}` slot populated by the client presentation-table renderer. A reset selects this current fallback; existing stored defaults, group overrides, and user overrides remain unchanged.
 
 ---
 

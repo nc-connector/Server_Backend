@@ -92,6 +92,52 @@ final class ClientSettingsDefinitionServiceTest extends TestCase {
 		self::assertStringNotContainsString('>Download link<', $default);
 	}
 
+	public function testDefaultShareTemplatesUseTransparentOutlookSafeBranding(): void {
+		$transparentLogoUrl = 'https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-transparent-164x48.png';
+		$legacyLogoUrl = 'https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png';
+
+		foreach (['share_html_block_template', 'share_password_template'] as $key) {
+			$default = (string)$this->definitions->get($key)['default'];
+			$roundTripped = (string)$this->definitions->normalizeValue($key, $default);
+
+			self::assertStringContainsString($transparentLogoUrl, $default);
+			self::assertStringContainsString($transparentLogoUrl, $roundTripped);
+			self::assertStringContainsString('<nobr style="white-space: nowrap">Password</nobr>', $roundTripped);
+			self::assertStringContainsString('cellspacing="0"', $roundTripped);
+			self::assertStringContainsString('cellpadding="0"', $roundTripped);
+			self::assertStringContainsString('padding: 18px 18px 22px', $roundTripped);
+			self::assertStringContainsString('width="124"', $roundTripped);
+			self::assertStringContainsString('width: 124px', $roundTripped);
+			self::assertStringContainsString('font-family: Calibri', $roundTripped);
+			self::assertStringContainsString('font-size: 11pt', $roundTripped);
+			self::assertStringContainsString('margin: 0', $roundTripped);
+			self::assertStringNotContainsString($legacyLogoUrl, $default);
+			self::assertStringNotContainsString($legacyLogoUrl, $roundTripped);
+		}
+
+		$shareDefault = (string)$this->definitions->get('share_html_block_template')['default'];
+		$shareRoundTripped = (string)$this->definitions->normalizeValue('share_html_block_template', $shareDefault);
+		self::assertStringContainsString('<nobr style="white-space: nowrap">{LINK_LABEL}</nobr>', $shareRoundTripped);
+		self::assertStringContainsString('<nobr style="white-space: nowrap">{EXPIRATIONDATE}</nobr>', $shareRoundTripped);
+		self::assertStringNotContainsString('width: 12ch', $shareRoundTripped);
+		self::assertStringContainsString('-ms-user-select: all', $shareRoundTripped);
+		self::assertStringNotContainsString('width: 13ch', $shareRoundTripped);
+	}
+
+	public function testStoredLegacyShareBrandingIsNotMigratedToTheNewDefault(): void {
+		$legacyLogoUrl = 'https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png';
+		$transparentLogoUrl = 'https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-transparent-164x48.png';
+		$storedTemplate = '<div><img src="' . $legacyLogoUrl . '" height="32" style="display:block; height:32px; width:auto; border:0; margin:0 auto;"></div>';
+
+		foreach ([
+			$this->definitions->normalizeValue('share_html_block_template', $storedTemplate),
+			$this->definitions->parseStoredValue('share_html_block_template', $storedTemplate),
+		] as $value) {
+			self::assertStringContainsString($legacyLogoUrl, $value);
+			self::assertStringNotContainsString($transparentLogoUrl, $value);
+		}
+	}
+
 	public function testLegacyStoredShareTemplateIsNotRewrittenWithNewVariables(): void {
 		$legacy = '<p>Legacy link: {URL}</p>';
 
