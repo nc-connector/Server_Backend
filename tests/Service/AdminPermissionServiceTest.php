@@ -7,6 +7,7 @@ namespace OCA\NcConnector\Tests\Service;
 use OCA\NcConnector\Service\AccessService;
 use OCA\NcConnector\Service\AdminDelegationService;
 use OCA\NcConnector\Service\AdminPermissionService;
+use OCA\NcConnector\Service\ClientSettingsDefinitionService;
 use OCA\NcConnector\Service\EmailSignatureRuntimeService;
 use PHPUnit\Framework\TestCase;
 
@@ -37,6 +38,8 @@ final class AdminPermissionServiceTest extends TestCase {
 		self::assertSame('signature.templates', $service->scopeForDefaultSetting('email_signature_template'));
 		self::assertSame('share.policy', $service->scopeForDefaultSetting('share_send_password_mode'));
 		self::assertSame('share.policy', $service->scopeForDefaultSetting('attachment_link_target'));
+		self::assertSame('share.policy', $service->scopeForDefaultSetting(ClientSettingsDefinitionService::VFS_PROVIDER_ENABLED_KEY));
+		self::assertSame('share.policy', $service->scopeForDefaultSetting(ClientSettingsDefinitionService::VFS_EXTERNAL_PROVIDERS_ENABLED_KEY));
 	}
 
 	public function testOverridePayloadRequiresOverrideAndContentScope(): void {
@@ -72,6 +75,25 @@ final class AdminPermissionServiceTest extends TestCase {
 				'attachment_link_target' => ['mode' => 'forced', 'value' => 'share_page'],
 			])
 		);
+	}
+
+	public function testVfsSettingsUseDelegatedShareScopesAcrossEveryLayer(): void {
+		$service = self::service();
+
+		foreach ([
+			ClientSettingsDefinitionService::VFS_PROVIDER_ENABLED_KEY,
+			ClientSettingsDefinitionService::VFS_EXTERNAL_PROVIDERS_ENABLED_KEY,
+		] as $key) {
+			self::assertSame('share.policy', $service->scopeForDefaultSetting($key));
+			self::assertSame(
+				['share.group_overrides', 'share.policy'],
+				$service->scopesForGroupOverridePayload([$key => ['mode' => 'forced', 'value' => true]])
+			);
+			self::assertSame(
+				['share.user_overrides', 'share.policy'],
+				$service->scopesForUserOverridePayload([$key => ['mode' => 'forced', 'value' => true]])
+			);
+		}
 	}
 
 	public function testPayloadScopesAreUniqueAcrossSettingsAndTemplateAssetPreview(): void {

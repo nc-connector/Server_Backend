@@ -374,6 +374,17 @@ Templates remain backend-controlled. The detailed response fields are documented
 | `Email share template` | Defines custom HTML for the main Share block |
 | `Email password template` | Defines custom HTML for separate password delivery |
 
+At the bottom of each Share-policy table, **Thunderbird only – Virtual File System (VFS)** separates two settings that Outlook clients ignore:
+
+| Setting | Operational effect |
+|---|---|
+| `NC Connector as VFS provider` | Allows NC Connector for Thunderbird to grant other compatible add-ons access to the configured Nextcloud account |
+| `External VFS providers` | Allows files from other Thunderbird VFS providers to be added to the Sharing queue |
+
+The external-provider function additionally requires NC Connector Pro and an active assigned seat in Thunderbird. Enabling its policy does not grant a Community user or an unassigned account access. Disabling either VFS policy does not delete saved external-provider connections. Defaults, group overrides, and user overrides use the same **Editable in add-on**, inherit, and forced-value behavior as the other Share settings.
+
+The two VFS settings use the existing Share delegation scopes. A delegated admin needs **Share policies** for defaults and additionally **Share group overrides** or **Share user overrides** for the corresponding override layer.
+
 Operational dependencies:
 
 - **Always share attachments** makes the threshold inactive.
@@ -381,6 +392,7 @@ Operational dependencies:
 - Missing Secrets support disables the Secrets option and uses plain password delivery.
 - **Attachment link target** affects attachment automation only; manual shares keep the standard share page.
 - Custom Share templates should contain `{URL}`, `{LINK_INTRO}`, and `{LINK_LABEL}` so the visible text matches the selected link target.
+- Older Thunderbird and Outlook clients ignore the two VFS keys. A current Thunderbird client connected to an older backend keeps its local VFS choices because missing policy keys are not treated as forced values.
 
 ### 5.4 Talk settings
 

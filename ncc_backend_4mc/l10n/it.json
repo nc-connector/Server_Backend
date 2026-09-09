@@ -317,7 +317,13 @@
         "Select a user to edit delegation.": "Seleziona un utente per modificare la delega.",
         "Select user": "Seleziona utente",
         "Shows which users can administer NC Connector and which areas they can edit.": "Mostra quali utenti possono amministrare NC Connector e quali aree possono modificare.",
-        "Template image was not cached.": "L'immagine del modello non è stata memorizzata nella cache."
+        "Template image was not cached.": "L'immagine del modello non è stata memorizzata nella cache.",
+        "Thunderbird only – Virtual File System (VFS)": "Solo Thunderbird – File system virtuale (VFS)",
+        "These settings apply only to NC Connector for Thunderbird. Outlook clients ignore them.": "Queste impostazioni si applicano solo a NC Connector per Thunderbird. I client Outlook le ignorano.",
+        "NC Connector as VFS provider": "NC Connector come provider VFS",
+        "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.": "Stabilisce se altri componenti aggiuntivi di Thunderbird possono richiedere l’accesso all’account Nextcloud configurato tramite NC Connector.",
+        "External VFS providers": "Provider VFS esterni",
+        "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.": "Stabilisce se gli utenti possono aggiungere alla coda di condivisione file provenienti da altri provider VFS di Thunderbird. Richiede NC Connector Pro e un seat assegnato attivo."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }

@@ -64,6 +64,7 @@
 			isUserOverrideOnlySettingKey,
 			renderSettingControl,
 			renderSettingHelp,
+			renderSettingSectionHeader,
 			renderTalkTemplateFormatControl,
 			settingCategory,
 			settingLabel,
@@ -82,6 +83,7 @@
 		}
 
 		tbody.innerHTML = keys.map((key) => {
+			const sectionHeader = renderSettingSectionHeader(key)
 			const definition = schema[key] || {}
 			const item = items?.[key] || { mode: 'inherit', value: null, effective_value: definition.default, source: 'default', default_mode: 'default' }
 			const mode = item.mode === 'forced' ? 'forced' : 'inherit'
@@ -97,7 +99,7 @@
 						mode !== 'forced'
 					)
 					: ''
-				return `
+				return `${sectionHeader}
 					<tr class="nccb-template-row" ${config.rowAttribute}="${escapeHtml(key)}">
 						<td>
 							<div class="nccb-key-cell">
@@ -116,7 +118,7 @@
 					</tr>
 				`
 			}
-			return `
+			return `${sectionHeader}
 				<tr ${config.rowAttribute}="${escapeHtml(key)}">
 					<td>
 						<div class="nccb-key-cell">

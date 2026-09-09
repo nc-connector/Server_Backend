@@ -317,7 +317,13 @@
         "Select a user to edit delegation.": "Válasszon felhasználót a delegálás szerkesztéséhez.",
         "Select user": "Felhasználó kiválasztása",
         "Shows which users can administer NC Connector and which areas they can edit.": "Megmutatja, mely felhasználók adminisztrálhatják az NC Connectort, és mely területeket szerkeszthetik.",
-        "Template image was not cached.": "A sablon képe nem került gyorsítótárba."
+        "Template image was not cached.": "A sablon képe nem került gyorsítótárba.",
+        "Thunderbird only – Virtual File System (VFS)": "Csak Thunderbird – Virtuális fájlrendszer (VFS)",
+        "These settings apply only to NC Connector for Thunderbird. Outlook clients ignore them.": "Ezek a beállítások csak a Thunderbird NC Connectorjára vonatkoznak. Az Outlook-kliensek figyelmen kívül hagyják őket.",
+        "NC Connector as VFS provider": "NC Connector VFS-szolgáltatóként",
+        "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.": "Meghatározza, hogy más Thunderbird-kiegészítők kérhetnek-e hozzáférést a beállított Nextcloud-fiókhoz az NC Connectoron keresztül.",
+        "External VFS providers": "Külső VFS-szolgáltatók",
+        "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.": "Meghatározza, hogy a felhasználók hozzáadhatnak-e más Thunderbird VFS-szolgáltatóktól származó fájlokat a megosztási várólistához. Ehhez NC Connector Pro és aktív hozzárendelt seat szükséges."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }

@@ -475,6 +475,9 @@ Share:
 - non-custom Share language clears custom template values
 - `attachment_link_target` accepts `zip_download` or `share_page`
 - absent stored link target uses the built-in ZIP default
+- `vfs_provider_enabled` and `vfs_external_providers_enabled` are ordinary boolean Share-policy values with defaults, group overrides, user overrides, and add-on editability
+- both VFS keys map explicitly to `share.policy`; editing their group or user layers also requires `share.group_overrides` or `share.user_overrides`
+- the backend publishes the external-provider switch in every license mode; Thunderbird applies the separate Pro and active-seat entitlement gate at runtime
 
 Talk:
 
@@ -552,6 +555,8 @@ Internal compatibility metadata is removed from both outputs.
 Existing stored customer templates are not rewritten to add new variables. A template without the mode-aware variables produces compatible output in both fields.
 
 `attachment_link_target` is a normal policy value, not another template version. Manual shares remain standard share-page links; attachment clients select ZIP or share-page wording from the effective target.
+
+The admin Share tables place the two VFS settings in a final **Thunderbird only – Virtual File System (VFS)** subsection. They remain in the existing `share` response domain so old clients ignore unknown keys and no endpoint version split is needed. A new Thunderbird client also accepts an older response without these keys and retains the corresponding local setting. Outlook receives the keys but does not act on them.
 
 ### 8.4 Talk rendering
 

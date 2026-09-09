@@ -317,7 +317,13 @@
         "Select a user to edit delegation.": "Vyberte uživatele pro úpravu delegace.",
         "Select user": "Vybrat uživatele",
         "Shows which users can administer NC Connector and which areas they can edit.": "Zobrazuje, kteří uživatelé mohou spravovat NC Connector a které oblasti mohou upravovat.",
-        "Template image was not cached.": "Obrázek šablony nebyl uložen do mezipaměti."
+        "Template image was not cached.": "Obrázek šablony nebyl uložen do mezipaměti.",
+        "Thunderbird only – Virtual File System (VFS)": "Pouze Thunderbird – Virtuální souborový systém (VFS)",
+        "These settings apply only to NC Connector for Thunderbird. Outlook clients ignore them.": "Tato nastavení platí pouze pro NC Connector pro Thunderbird. Klienti Outlook je ignorují.",
+        "NC Connector as VFS provider": "NC Connector jako poskytovatel VFS",
+        "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.": "Určuje, zda mohou jiné doplňky Thunderbirdu požádat prostřednictvím NC Connectoru o přístup ke konfigurovanému účtu Nextcloud.",
+        "External VFS providers": "Externí poskytovatelé VFS",
+        "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.": "Určuje, zda mohou uživatelé přidávat do fronty sdílení soubory od jiných poskytovatelů VFS pro Thunderbird. Vyžaduje NC Connector Pro a aktivní přiřazený seat."
     },
     "pluralForm": "nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;"
 }

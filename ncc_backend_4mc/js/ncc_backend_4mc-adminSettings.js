@@ -27,6 +27,8 @@
 	const SHARE_SEND_PASSWORD_MODE_KEY = 'share_send_password_mode'
 	const SHARE_SEND_PASSWORD_MODE_SECRETS = 'secrets'
 	const SHARE_SECRETS_EXPIRE_DAYS_KEY = 'share_secrets_expire_days'
+	const VFS_PROVIDER_ENABLED_KEY = 'vfs_provider_enabled'
+	const VFS_EXTERNAL_PROVIDERS_ENABLED_KEY = 'vfs_external_providers_enabled'
 	const TALK_INVITATION_TEMPLATE_KEY = 'talk_invitation_template'
 	const TALK_INVITATION_TEMPLATE_FORMAT_KEY = 'talk_invitation_template_format'
 	const EMAIL_SIGNATURE_ON_COMPOSE_KEY = 'email_signature_on_compose'
@@ -239,6 +241,7 @@
 			isUserOverrideOnlySettingKey,
 			renderSettingControl,
 			renderSettingHelp,
+			renderSettingSectionHeader,
 			renderTalkTemplateFormatControl,
 			settingCategory,
 			settingLabel,
@@ -401,6 +404,20 @@
 		`
 	}
 
+	function renderSettingSectionHeader(settingKey) {
+		if (settingKey !== VFS_PROVIDER_ENABLED_KEY) {
+			return ''
+		}
+		return `
+			<tr class="nccb-settings-subsection-row">
+				<td colspan="3">
+					<strong>${escapeHtml(tr('Thunderbird only – Virtual File System (VFS)'))}</strong>
+					<span>${escapeHtml(tr('These settings apply only to NC Connector for Thunderbird. Outlook clients ignore them.'))}</span>
+				</td>
+			</tr>
+		`
+	}
+
 	function renderInlineHelp(title, lines = []) {
 		const normalizedLines = Array.isArray(lines)
 			? lines.map((line) => String(tr(line))).filter((line) => line !== '')
@@ -454,6 +471,8 @@
 			'language_share_html_block',
 			SHARE_HTML_TEMPLATE_KEY,
 			SHARE_PASSWORD_TEMPLATE_KEY,
+			VFS_PROVIDER_ENABLED_KEY,
+			VFS_EXTERNAL_PROVIDERS_ENABLED_KEY,
 			'language_talk_description',
 			TALK_INVITATION_TEMPLATE_FORMAT_KEY,
 			TALK_INVITATION_TEMPLATE_KEY,
@@ -1010,6 +1029,7 @@
 		}
 
 		tbody.innerHTML = keys.map((key) => {
+			const sectionHeader = renderSettingSectionHeader(key)
 			const definition = schema[key] || {}
 			const value = Object.prototype.hasOwnProperty.call(defaults || {}, key) ? defaults[key] : definition.default
 			const addonEditableSupported = definition?.addon_editable_supported !== false && !isTemplateEditorSettingKey(key)
@@ -1027,7 +1047,7 @@
 						false
 					)
 					: ''
-				return `
+				return `${sectionHeader}
 					<tr class="nccb-template-row" data-default-setting-key="${escapeHtml(key)}">
 						<td>
 							<div class="nccb-key-cell">
@@ -1044,7 +1064,7 @@
 				`
 			}
 
-			return `
+			return `${sectionHeader}
 				<tr data-default-setting-key="${escapeHtml(key)}">
 					<td>
 						<div class="nccb-key-cell">

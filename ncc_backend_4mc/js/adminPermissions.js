@@ -19,6 +19,13 @@
 	const EMAIL_SIGNATURE_ON_COMPOSE_KEY = 'email_signature_on_compose'
 	const EMAIL_SIGNATURE_ON_REPLY_KEY = 'email_signature_on_reply'
 	const EMAIL_SIGNATURE_ON_FORWARD_KEY = 'email_signature_on_forward'
+	const VFS_PROVIDER_ENABLED_KEY = 'vfs_provider_enabled'
+	const VFS_EXTERNAL_PROVIDERS_ENABLED_KEY = 'vfs_external_providers_enabled'
+
+	const SHARE_POLICY_SETTING_KEYS = new Set([
+		VFS_PROVIDER_ENABLED_KEY,
+		VFS_EXTERNAL_PROVIDERS_ENABLED_KEY,
+	])
 
 	const USER_OVERRIDE_ONLY_SETTING_KEYS = new Set([
 		EMAIL_SIGNATURE_EMAIL_ADDRESS_KEY,
@@ -60,6 +67,9 @@
 	]
 
 	function settingCategory(settingKey) {
+		if (SHARE_POLICY_SETTING_KEYS.has(String(settingKey || ''))) {
+			return 'share'
+		}
 		if (String(settingKey).startsWith('email_signature_')) {
 			return 'email_signature'
 		}

@@ -29,6 +29,11 @@ class AdminPermissionService {
 		'email_signature_on_forward' => true,
 	];
 
+	private const SHARE_POLICY_SETTINGS = [
+		ClientSettingsDefinitionService::VFS_PROVIDER_ENABLED_KEY => true,
+		ClientSettingsDefinitionService::VFS_EXTERNAL_PROVIDERS_ENABLED_KEY => true,
+	];
+
 	private const TEMPLATE_DEFAULT_SETTINGS = [
 		'share_html_block_template' => 'share.templates',
 		'share_password_template' => 'share.templates',
@@ -202,6 +207,9 @@ class AdminPermissionService {
 	}
 
 	private function settingDomain(string $key): string {
+		if (isset(self::SHARE_POLICY_SETTINGS[$key])) {
+			return 'share';
+		}
 		if (str_starts_with($key, 'talk_') || str_starts_with($key, 'language_talk_')) {
 			return 'talk';
 		}

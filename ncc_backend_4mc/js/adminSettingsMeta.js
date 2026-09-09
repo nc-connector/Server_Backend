@@ -92,6 +92,14 @@
 			label: 'Attachment link target',
 			tooltip: ['Choose whether attachment mode inserts a normal Nextcloud share page link or a ZIP download link; manual shares are unchanged.'],
 		},
+		vfs_provider_enabled: {
+			label: 'NC Connector as VFS provider',
+			tooltip: ['Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.'],
+		},
+		vfs_external_providers_enabled: {
+			label: 'External VFS providers',
+			tooltip: ['Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.'],
+		},
 		share_html_block_template: {
 			label: 'Email share template',
 			tooltip: [

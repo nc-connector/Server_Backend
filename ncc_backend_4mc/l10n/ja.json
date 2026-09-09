@@ -317,7 +317,13 @@
         "Select a user to edit delegation.": "委任を編集するユーザーを選択してください。",
         "Select user": "ユーザーを選択",
         "Shows which users can administer NC Connector and which areas they can edit.": "NC Connector を管理できるユーザーと編集可能な領域を表示します。",
-        "Template image was not cached.": "テンプレート画像はキャッシュされませんでした。"
+        "Template image was not cached.": "テンプレート画像はキャッシュされませんでした。",
+        "Thunderbird only – Virtual File System (VFS)": "Thunderbird のみ – 仮想ファイルシステム (VFS)",
+        "These settings apply only to NC Connector for Thunderbird. Outlook clients ignore them.": "これらの設定は Thunderbird 用 NC Connector にのみ適用されます。Outlook クライアントでは無視されます。",
+        "NC Connector as VFS provider": "VFS プロバイダーとしての NC Connector",
+        "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.": "他の Thunderbird アドオンが NC Connector を通じて設定済みの Nextcloud アカウントへのアクセスを要求できるかどうかを制御します。",
+        "External VFS providers": "外部 VFS プロバイダー",
+        "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.": "他の Thunderbird VFS プロバイダーのファイルを共有キューに追加できるかどうかを制御します。NC Connector Pro と有効な割り当て済み seat が必要です。"
     },
     "pluralForm": "nplurals=1; plural=0;"
 }

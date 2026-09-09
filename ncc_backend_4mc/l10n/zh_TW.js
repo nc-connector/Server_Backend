@@ -319,7 +319,13 @@ OC.L10N.register(
   "Select a user to edit delegation.": "請選擇使用者以編輯委派。",
   "Select user": "選擇使用者",
   "Shows which users can administer NC Connector and which areas they can edit.": "顯示哪些使用者可以管理 NC Connector，以及他們可以編輯哪些區域。",
-  "Template image was not cached.": "範本圖片未快取。"
+  "Template image was not cached.": "範本圖片未快取。",
+  "Thunderbird only – Virtual File System (VFS)": "僅限 Thunderbird – 虛擬檔案系統 (VFS)",
+  "These settings apply only to NC Connector for Thunderbird. Outlook clients ignore them.": "這些設定僅適用於 Thunderbird 版 NC Connector。Outlook 用戶端會忽略它們。",
+  "NC Connector as VFS provider": "將 NC Connector 作為 VFS 提供者",
+  "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.": "控制其他 Thunderbird 附加元件是否可以透過 NC Connector 請求存取已設定的 Nextcloud 帳號。",
+  "External VFS providers": "外部 VFS 提供者",
+  "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.": "控制使用者是否可以將其他 Thunderbird VFS 提供者的檔案加入分享佇列。此功能需要 NC Connector Pro 和有效的已指派席位。"
 },
     'nplurals=1; plural=0;'
 );

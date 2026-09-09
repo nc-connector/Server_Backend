@@ -311,3 +311,19 @@ textarea.nccb-setting-control {
 	min-height: 56px;
 	resize: vertical;
 }
+
+.nccb-settings-subsection-row td {
+	padding-top: 24px;
+	border-bottom: 1px solid var(--color-border, #ddd);
+}
+
+.nccb-settings-subsection-row strong,
+.nccb-settings-subsection-row span {
+	display: block;
+}
+
+.nccb-settings-subsection-row span {
+	margin-top: 4px;
+	color: var(--color-text-maxcontrast, #666);
+	font-size: 13px;
+}

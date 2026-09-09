@@ -27,6 +27,7 @@ The mail add-ons can work directly with a Nextcloud account. The backend is used
 - delegate NC Connector administration without making users full Nextcloud admins
 - control separate password delivery as plaintext mail or Nextcloud Secret link
 - expose setup state so Thunderbird and Outlook can explain backend problems clearly
+- control Thunderbird's own VFS-provider switch and its Pro-only use of external VFS providers
 
 ## Backend Or No Backend
 
@@ -41,6 +42,8 @@ The mail add-ons can work directly with a Nextcloud account. The backend is used
 | Delegated NC Connector admins | No | Yes |
 | Separate password delivery policies | No | Yes |
 | Nextcloud Secret links for password delivery | No | Yes, with the Secrets app |
+| NC Connector as a Thunderbird VFS provider | Local setting | Central policy or local setting |
+| Other Thunderbird VFS providers in the Sharing queue | No | Yes, with Pro and an active assigned seat |
 
 ## Admin Delegation
 
@@ -73,6 +76,7 @@ Policy areas:
 - Talk room defaults
 - email-signature behavior for compose, reply, and forward
 - template language and custom template usage
+- Thunderbird-only VFS provider and external-source switches
 
 ## Seats And License Modes
 

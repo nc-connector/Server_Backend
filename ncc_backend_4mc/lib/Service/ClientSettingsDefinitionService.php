@@ -18,6 +18,8 @@ class ClientSettingsDefinitionService {
 	public const ATTACHMENT_LINK_TARGET_KEY = 'attachment_link_target';
 	public const ATTACHMENT_LINK_TARGET_ZIP_DOWNLOAD = 'zip_download';
 	public const ATTACHMENT_LINK_TARGET_SHARE_PAGE = 'share_page';
+	public const VFS_PROVIDER_ENABLED_KEY = 'vfs_provider_enabled';
+	public const VFS_EXTERNAL_PROVIDERS_ENABLED_KEY = 'vfs_external_providers_enabled';
 
 	// Legacy relative and CID sources keep resolving to the historical asset so
 	// stored customer templates are never silently migrated to a new default.
@@ -207,6 +209,8 @@ HTML;
 		self::ATTACHMENT_LINK_TARGET_KEY => ['type' => 'enum', 'default' => self::ATTACHMENT_LINK_TARGET_ZIP_DOWNLOAD, 'options' => [
 			self::ATTACHMENT_LINK_TARGET_ZIP_DOWNLOAD, self::ATTACHMENT_LINK_TARGET_SHARE_PAGE,
 		]],
+		self::VFS_PROVIDER_ENABLED_KEY => ['type' => 'bool', 'default' => false],
+		self::VFS_EXTERNAL_PROVIDERS_ENABLED_KEY => ['type' => 'bool', 'default' => false],
 		'share_html_block_template' => ['type' => 'string', 'default' => self::DEFAULT_SHARE_HTML_BLOCK_TEMPLATE, 'max_length' => 32768],
 		'share_password_template' => ['type' => 'string', 'default' => self::DEFAULT_SHARE_PASSWORD_TEMPLATE, 'max_length' => 32768],
 
