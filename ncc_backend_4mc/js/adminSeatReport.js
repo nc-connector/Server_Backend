@@ -151,6 +151,7 @@
 			const policy = {
 				...(payload?.policy?.share || {}),
 				...(payload?.policy?.talk || {}),
+				...(payload?.policy?.email_signature || {}),
 			}
 			return { seat, payload, policy }
 		})

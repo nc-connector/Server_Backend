@@ -33,7 +33,8 @@
     "check:l10n": "node scripts/check-backend-l10n.mjs",
     "check:js": [
       "node scripts/check-backend-js.mjs",
-      "node --test tests/JavaScript/AdminApiTest.mjs"
+      "node --test tests/JavaScript/AdminApiTest.mjs",
+      "node --test tests/JavaScript/AdminSeatReportTest.mjs"
     ]
   },
   "config": {
