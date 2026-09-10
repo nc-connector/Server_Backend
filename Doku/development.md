@@ -368,6 +368,10 @@ License flow:
 4. The service requests entitlement state.
 5. Seat count, status, expiry, timestamp, or error are stored.
 
+Saving credentials compares the lowercased email and case-insensitive license key with the stored values, matching the license-server lookup rules. A changed pair clears cached status, expiry, Seat entitlement, and synchronization metadata before it can be used. Saving an equivalent pair keeps the cache for offline operation. Mode changes keep both credentials and cached entitlement.
+
+Effective license status respects server rejection states before evaluating dates. Unknown, inactive, and invalid states remain unusable. An expired state with a future date remains expired; an elapsed expiry may enter the 14-day grace period because the license server reports elapsed active licenses as expired.
+
 Manual **Sync now** uses the same license service.
 
 ---
@@ -764,6 +768,7 @@ The matrix produces ten executions across six jobs.
 
 Test coverage includes:
 
+- license credential ownership, status transitions, and grace handling
 - setting definitions and value normalization
 - runtime policy dependencies
 - template and signature rendering

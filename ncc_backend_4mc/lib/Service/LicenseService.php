@@ -86,9 +86,14 @@ class LicenseService {
 			throw new \InvalidArgumentException('Invalid email address');
 		}
 
+		$encryptedLicenseKey = $this->crypto->encrypt($licenseKey);
+		$credentialsChanged = !$this->storedCredentialsMatch($email, $licenseKey);
 		$now = time();
+		if ($credentialsChanged) {
+			$this->clearCachedEntitlement($now);
+		}
 		$this->settings->setValue(self::KEY_LICENSE_EMAIL, $email, $now);
-		$this->settings->setValue(self::KEY_LICENSE_KEY, $this->crypto->encrypt($licenseKey), $now);
+		$this->settings->setValue(self::KEY_LICENSE_KEY, $encryptedLicenseKey, $now);
 	}
 
 	public function getPurchasedSeats(): int {
@@ -269,12 +274,12 @@ class LicenseService {
 		if ($expiresAt === null) {
 			return $base;
 		}
-		if ($base === 'INACTIVE' || $base === 'INVALID') {
+		if ($base === 'INACTIVE' || $base === 'INVALID' || $base === 'UNKNOWN') {
 			return $base;
 		}
 
 		if ($expiresAt > $now) {
-			return 'ACTIVE';
+			return $base === 'EXPIRED' ? 'EXPIRED' : 'ACTIVE';
 		}
 
 		$graceUntil = $expiresAt + (self::GRACE_PERIOD_DAYS * 86400);
@@ -283,6 +288,34 @@ class LicenseService {
 		}
 
 		return 'EXPIRED';
+	}
+
+	private function storedCredentialsMatch(string $email, string $licenseKey): bool {
+		$storedEmail = trim(strtolower((string)$this->settings->getValue(self::KEY_LICENSE_EMAIL, '')));
+		$encryptedLicenseKey = trim((string)$this->settings->getValue(self::KEY_LICENSE_KEY, ''));
+		if ($storedEmail === '' || $encryptedLicenseKey === '') {
+			return false;
+		}
+
+		try {
+			$storedLicenseKey = $this->crypto->decrypt($encryptedLicenseKey);
+		} catch (\Throwable $exception) {
+			$this->logger->warning('Stored license credentials could not be compared', [
+				'exception' => $exception,
+			]);
+			return false;
+		}
+
+		return $storedEmail === $email
+			&& strtoupper(trim($storedLicenseKey)) === strtoupper($licenseKey);
+	}
+
+	private function clearCachedEntitlement(int $updatedAt): void {
+		$this->settings->setValue(self::KEY_LICENSE_PURCHASED_SEATS, '0', $updatedAt);
+		$this->settings->setValue(self::KEY_LICENSE_STATUS_RAW, '', $updatedAt);
+		$this->settings->setValue(self::KEY_LICENSE_EXPIRES_AT, '', $updatedAt);
+		$this->settings->setValue(self::KEY_LICENSE_LAST_SYNC_AT, '', $updatedAt);
+		$this->settings->setValue(self::KEY_LICENSE_LAST_ERROR, '', $updatedAt);
 	}
 
 	private function parseExpiresAt(mixed $expiresAt): ?int {

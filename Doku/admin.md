@@ -297,6 +297,8 @@ Expected result: the status becomes active or grace where applicable, and the Se
 
 The scheduled Pro synchronization runs every 24 hours when Pro mode and complete credentials are present. Community mode does not contact the license endpoint.
 
+Saving a different license email or key clears the previously synchronized entitlement until the new credentials synchronize successfully. Existing Seat assignments remain stored and are suspended while no entitlement is available. Saving the same credentials again, including case-only differences, keeps the cached entitlement so a temporary network failure does not interrupt the existing offline or grace behavior. Switching between Community and Pro mode also keeps the stored Pro entitlement and Seat assignments.
+
 ### 4.4 Backend update status
 
 The General tab shows:
