@@ -104,7 +104,9 @@ class AdminClientSettingsController extends Controller {
 		}
 
 		$templateAssetData = $this->clientSettings->getEditorTemplateAssetDataForDefaults($stored['defaults'] ?? [], $templateAssetPreview);
-		$schemaTemplateAssetData = $this->clientSettings->getEditorTemplateAssetDataForSchemaDefaults();
+		$schemaTemplateAssetData = $this->clientSettings->getEditorTemplateAssetDataForSchemaDefaults(
+			$templateAssetPreview !== [] ? array_keys($templateAssetPreview) : null
+		);
 		return new DataResponse($this->filterDefaultPayload([
 			'schema' => $this->clientSettings->getSchema(),
 			'defaults' => $stored['defaults'] ?? [],
@@ -263,7 +265,9 @@ class AdminClientSettingsController extends Controller {
 		}
 
 		$templateAssetData = $this->clientSettings->getEditorTemplateAssetDataForUser($targetUserId, $items, $templateAssetPreview);
-		$schemaTemplateAssetData = $this->clientSettings->getEditorTemplateAssetDataForSchemaDefaults();
+		$schemaTemplateAssetData = $this->clientSettings->getEditorTemplateAssetDataForSchemaDefaults(
+			$templateAssetPreview !== [] ? array_keys($templateAssetPreview) : null
+		);
 		return new DataResponse($this->filterUserPayload([
 			'user_id' => $targetUserId,
 			'schema' => $this->clientSettings->getSchema(),
@@ -334,7 +338,9 @@ class AdminClientSettingsController extends Controller {
 
 		$items = is_array($groupSettings['items'] ?? null) ? $groupSettings['items'] : [];
 		$templateAssetData = $this->clientSettings->getEditorTemplateAssetDataForGroup($targetGroupId, $items, $templateAssetPreview);
-		$schemaTemplateAssetData = $this->clientSettings->getEditorTemplateAssetDataForSchemaDefaults();
+		$schemaTemplateAssetData = $this->clientSettings->getEditorTemplateAssetDataForSchemaDefaults(
+			$templateAssetPreview !== [] ? array_keys($templateAssetPreview) : null
+		);
 		return new DataResponse($this->filterGroupPayload([
 			'group_id' => $targetGroupId,
 			'priority' => (int)($groupSettings['priority'] ?? 100),

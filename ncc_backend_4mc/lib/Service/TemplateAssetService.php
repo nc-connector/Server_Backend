@@ -20,6 +20,11 @@ class TemplateAssetService {
 	private const MAX_REDIRECTS = 3;
 	private const BLOCKED_IMAGE_DATA_URI = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 
+	/**
+	 * @var array<string, array{asset:?string, warning:?array<string, mixed>}>
+	 */
+	private array $requestImageResults = [];
+
 	public function __construct(
 		private IClientService $clientService,
 		private IURLGenerator $urlGenerator,
@@ -93,6 +98,19 @@ class TemplateAssetService {
 	 * @return array{asset:?string, warning:?array<string, mixed>}
 	 */
 	private function cacheImage(string $contextKey, string $source): array {
+		if (array_key_exists($source, $this->requestImageResults)) {
+			return $this->requestImageResults[$source];
+		}
+
+		$result = $this->downloadImage($contextKey, $source);
+		$this->requestImageResults[$source] = $result;
+		return $result;
+	}
+
+	/**
+	 * @return array{asset:?string, warning:?array<string, mixed>}
+	 */
+	protected function downloadImage(string $contextKey, string $source): array {
 		try {
 			$urlWarning = $this->validateDownloadUrl($source);
 			if ($urlWarning !== null) {

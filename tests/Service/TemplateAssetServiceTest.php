@@ -68,6 +68,35 @@ final class TemplateAssetServiceTest extends TestCase {
 		self::assertNull($this->invoke('detectImageExtension', '<svg></svg>'));
 	}
 
+	public function testDownloadsEachSourceOncePerServiceInstance(): void {
+		$service = new class extends TemplateAssetService {
+			public int $downloadCount = 0;
+
+			public function __construct() {
+			}
+
+			protected function downloadImage(string $contextKey, string $source): array {
+				$this->downloadCount++;
+				return [
+					'asset' => '/runtime/' . $contextKey . '.png',
+					'warning' => null,
+				];
+			}
+		};
+		$template = '<img src="https://cdn.example.org/logo.png">';
+
+		$first = $service->buildAssetResult('first', $template);
+		$second = $service->buildAssetResult('second', $template);
+
+		self::assertSame(1, $service->downloadCount);
+		self::assertSame($first['assets'], $second['assets']);
+
+		$serviceClass = $service::class;
+		$freshService = new $serviceClass();
+		$freshService->buildAssetResult('fresh', $template);
+		self::assertSame(1, $freshService->downloadCount);
+	}
+
 	private function invoke(string $method, mixed ...$arguments): mixed {
 		$reflection = new \ReflectionMethod(TemplateAssetService::class, $method);
 		return $reflection->invoke($this->service, ...$arguments);

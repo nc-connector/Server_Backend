@@ -256,7 +256,7 @@ final class TestClientSettingsService extends ClientSettingsService {
 		return ['assets' => [], 'warnings' => []];
 	}
 
-	public function getEditorTemplateAssetDataForSchemaDefaults(): array {
+	public function getEditorTemplateAssetDataForSchemaDefaults(?array $templateKeys = null): array {
 		return ['assets' => [], 'warnings' => []];
 	}
 

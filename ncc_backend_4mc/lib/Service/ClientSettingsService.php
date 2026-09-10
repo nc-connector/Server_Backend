@@ -88,10 +88,12 @@ class ClientSettingsService {
 	 */
 	public function getEditorTemplateAssetDataForDefaults(?array $defaults = null, ?array $templateAssetPreview = null): array {
 		$defaults ??= $this->getDefaults();
+		$previewRequested = $templateAssetPreview !== null && $templateAssetPreview !== [];
 		$templateAssetPreview = $this->settingDefinitions->normalizeTemplateAssetPreview($templateAssetPreview);
 		$assets = [];
 		$warnings = [];
-		foreach ($this->settingDefinitions->all() as $key => $definition) {
+		$definitions = $this->getTemplateEditorDefinitions($previewRequested ? array_keys($templateAssetPreview) : null);
+		foreach ($definitions as $key => $definition) {
 			if (!$this->settingDefinitions->isTemplateEditorSetting($key)) {
 				continue;
 			}
@@ -118,10 +120,10 @@ class ClientSettingsService {
 	/**
 	 * @return array{assets:array<string, array<string, string>>, warnings:array<string, list<array<string, mixed>>>}
 	 */
-	public function getEditorTemplateAssetDataForSchemaDefaults(): array {
+	public function getEditorTemplateAssetDataForSchemaDefaults(?array $templateKeys = null): array {
 		$assets = [];
 		$warnings = [];
-		foreach ($this->settingDefinitions->all() as $key => $definition) {
+		foreach ($this->getTemplateEditorDefinitions($templateKeys) as $key => $definition) {
 			if (!$this->settingDefinitions->isTemplateEditorSetting($key)) {
 				continue;
 			}
@@ -329,10 +331,12 @@ class ClientSettingsService {
 	 */
 	public function getEditorTemplateAssetDataForUser(string $userId, ?array $items = null, ?array $templateAssetPreview = null): array {
 		$items ??= $this->getUserSettings($userId);
+		$previewRequested = $templateAssetPreview !== null && $templateAssetPreview !== [];
 		$templateAssetPreview = $this->settingDefinitions->normalizeTemplateAssetPreview($templateAssetPreview);
 		$assets = [];
 		$warnings = [];
-		foreach ($this->settingDefinitions->all() as $key => $definition) {
+		$definitions = $this->getTemplateEditorDefinitions($previewRequested ? array_keys($templateAssetPreview) : null);
+		foreach ($definitions as $key => $definition) {
 			if (!$this->settingDefinitions->isTemplateEditorSetting($key)) {
 				continue;
 			}
@@ -374,10 +378,12 @@ class ClientSettingsService {
 			$groupSettings = $this->getGroupSettings($groupId);
 			$items = is_array($groupSettings['items'] ?? null) ? $groupSettings['items'] : [];
 		}
+		$previewRequested = $templateAssetPreview !== null && $templateAssetPreview !== [];
 		$templateAssetPreview = $this->settingDefinitions->normalizeTemplateAssetPreview($templateAssetPreview);
 		$assets = [];
 		$warnings = [];
-		foreach ($this->settingDefinitions->all() as $key => $definition) {
+		$definitions = $this->getTemplateEditorDefinitions($previewRequested ? array_keys($templateAssetPreview) : null);
+		foreach ($definitions as $key => $definition) {
 			if (!$this->settingDefinitions->isTemplateEditorSetting($key)) {
 				continue;
 			}
@@ -400,6 +406,19 @@ class ClientSettingsService {
 			'assets' => $assets,
 			'warnings' => $warnings,
 		];
+	}
+
+	/**
+	 * @param list<string>|null $templateKeys
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function getTemplateEditorDefinitions(?array $templateKeys): array {
+		$definitions = $this->settingDefinitions->all();
+		if ($templateKeys === null) {
+			return $definitions;
+		}
+
+		return array_intersect_key($definitions, array_fill_keys($templateKeys, true));
 	}
 
 	public function setUserSettings(string $userId, array $overrides, ?string $updatedBy): array {
