@@ -475,7 +475,7 @@ Share:
 - non-custom Share language clears custom template values
 - `attachment_link_target` accepts `zip_download` or `share_page`
 - absent stored link target uses the built-in ZIP default
-- `vfs_provider_enabled` and `vfs_external_providers_enabled` are ordinary boolean Share-policy values with defaults, group overrides, user overrides, and add-on editability
+- `vfs_provider_enabled` defaults to `true`; `vfs_external_providers_enabled` defaults to `false`; both are ordinary boolean Share-policy values with group overrides, user overrides, and add-on editability
 - both VFS keys map explicitly to `share.policy`; editing their group or user layers also requires `share.group_overrides` or `share.user_overrides`
 - the backend publishes the external-provider switch in every license mode; Thunderbird applies the separate Pro and active-seat entitlement gate at runtime
 

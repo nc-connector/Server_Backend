@@ -37,7 +37,7 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
   - If a user override is removed and the setting falls back to a group override or the default again, `policy_editable` follows that lower layer again.
   - `policy.share.attachments_min_size_mb` is `null` when `policy.share.attachments_always_via_ncconnector=true`.
   - `policy.share.attachment_link_target` is `"zip_download"` or `"share_page"`. The built-in default is `"zip_download"`; the setting applies only to attachment mode, and manual shares remain unchanged.
-  - `policy.share.vfs_provider_enabled` and `policy.share.vfs_external_providers_enabled` are Thunderbird-only boolean controls. Outlook and older clients ignore them. The external-provider value does not replace Thunderbird's Pro and active-seat check.
+  - `policy.share.vfs_provider_enabled` and `policy.share.vfs_external_providers_enabled` are Thunderbird-only boolean controls. Their built-in defaults are `true` and `false`, respectively. Outlook and older clients ignore them. The external-provider value does not replace Thunderbird's Pro and active-seat check.
   - `policy.share.share_html_block_template`, `policy.share.share_html_block_template_v2`, and `policy.share.share_password_template` are `null` when `policy.share.language_share_html_block != "custom"`.
   - `policy.share.share_send_password_mode` is `"plain"` or `"secrets"`. Missing, empty, or `null` means clients must use the existing plain password mail behavior.
   - `policy.share.share_send_password_mode` and `policy.share.share_secrets_expire_days` are `null` when the Nextcloud Secrets app is not installed or disabled.
@@ -98,7 +98,7 @@ curl -u "alice:APP_PASSWORD" \
       "attachments_always_via_ncconnector": false,
       "attachments_min_size_mb": 5,
       "attachment_link_target": "zip_download",
-      "vfs_provider_enabled": false,
+      "vfs_provider_enabled": true,
       "vfs_external_providers_enabled": false,
       "share_html_block_template": null,
       "share_html_block_template_v2": null,

@@ -381,6 +381,8 @@ At the bottom of each Share-policy table, **Thunderbird only – Virtual File Sy
 | `NC Connector as VFS provider` | Allows NC Connector for Thunderbird to grant other compatible add-ons access to the configured Nextcloud account |
 | `External VFS providers` | Allows files from other Thunderbird VFS providers to be added to the Sharing queue |
 
+The NC Connector provider is enabled by default; every other add-on still needs an explicit user grant. External VFS providers are disabled by default.
+
 The external-provider function additionally requires NC Connector Pro and an active assigned seat in Thunderbird. Enabling its policy does not grant a Community user or an unassigned account access. Disabling either VFS policy does not delete saved external-provider connections. Defaults, group overrides, and user overrides use the same **Editable in add-on**, inherit, and forced-value behavior as the other Share settings.
 
 The two VFS settings use the existing Share delegation scopes. A delegated admin needs **Share policies** for defaults and additionally **Share group overrides** or **Share user overrides** for the corresponding override layer.

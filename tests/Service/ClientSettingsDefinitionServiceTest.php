@@ -68,14 +68,14 @@ final class ClientSettingsDefinitionServiceTest extends TestCase {
 		$this->definitions->normalizeValue(ClientSettingsDefinitionService::ATTACHMENT_LINK_TARGET_KEY, 'direct_download');
 	}
 
-	public function testVfsSwitchesAreAddonControllableBooleansDisabledByDefault(): void {
+	public function testVfsSwitchesAreAddonControllableBooleansWithTheirBuiltInDefaults(): void {
 		foreach ([
-			ClientSettingsDefinitionService::VFS_PROVIDER_ENABLED_KEY,
-			ClientSettingsDefinitionService::VFS_EXTERNAL_PROVIDERS_ENABLED_KEY,
-		] as $key) {
+			ClientSettingsDefinitionService::VFS_PROVIDER_ENABLED_KEY => true,
+			ClientSettingsDefinitionService::VFS_EXTERNAL_PROVIDERS_ENABLED_KEY => false,
+		] as $key => $expectedDefault) {
 			$definition = $this->definitions->get($key);
 			self::assertSame('bool', $definition['type']);
-			self::assertFalse($definition['default']);
+			self::assertSame($expectedDefault, $definition['default']);
 			self::assertTrue($this->definitions->isAddonControllableSetting($key));
 			self::assertTrue($this->definitions->normalizeValue($key, true));
 			self::assertFalse($this->definitions->parseStoredValue($key, '0'));

@@ -209,7 +209,7 @@ HTML;
 		self::ATTACHMENT_LINK_TARGET_KEY => ['type' => 'enum', 'default' => self::ATTACHMENT_LINK_TARGET_ZIP_DOWNLOAD, 'options' => [
 			self::ATTACHMENT_LINK_TARGET_ZIP_DOWNLOAD, self::ATTACHMENT_LINK_TARGET_SHARE_PAGE,
 		]],
-		self::VFS_PROVIDER_ENABLED_KEY => ['type' => 'bool', 'default' => false],
+		self::VFS_PROVIDER_ENABLED_KEY => ['type' => 'bool', 'default' => true],
 		self::VFS_EXTERNAL_PROVIDERS_ENABLED_KEY => ['type' => 'bool', 'default' => false],
 		'share_html_block_template' => ['type' => 'string', 'default' => self::DEFAULT_SHARE_HTML_BLOCK_TEMPLATE, 'max_length' => 32768],
 		'share_password_template' => ['type' => 'string', 'default' => self::DEFAULT_SHARE_PASSWORD_TEMPLATE, 'max_length' => 32768],
