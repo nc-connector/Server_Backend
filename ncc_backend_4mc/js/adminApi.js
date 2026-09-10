@@ -67,6 +67,35 @@
 		return payload
 	}
 
+	async function loadGroups() {
+		const limit = 200
+		const items = []
+		let firstResponse = null
+		let offset = 0
+
+		while (true) {
+			const response = await apiRequest('GET', `/api/v1/admin/groups?limit=${limit}&offset=${offset}`)
+			firstResponse ??= response
+			const pageItems = Array.isArray(response?.items) ? response.items : []
+			items.push(...pageItems)
+			if (pageItems.length < limit) {
+				break
+			}
+			offset += pageItems.length
+		}
+
+		return {
+			...(firstResponse || {}),
+			items,
+			pagination: {
+				...(firstResponse?.pagination || {}),
+				limit,
+				offset: 0,
+				total: items.length,
+			},
+		}
+	}
+
 	window.NCCBackendAdminApi = {
 		loadAdminMe: () => apiRequest('GET', '/api/v1/admin/me'),
 		loadLicense: () => apiRequest('GET', '/api/v1/admin/license'),
@@ -74,7 +103,7 @@
 		saveMode: (mode) => apiRequest('PUT', '/api/v1/admin/license/mode', { mode }),
 		saveCredentials: (email, licenseKey) => apiRequest('PUT', '/api/v1/admin/license/credentials', { email, license_key: licenseKey }),
 		syncLicense: () => apiRequest('POST', '/api/v1/admin/license/sync'),
-		loadGroups: () => apiRequest('GET', '/api/v1/admin/groups?limit=200&offset=0'),
+		loadGroups,
 		loadUsers: (search, groupId, limit, offset) => {
 			const qs = new URLSearchParams({
 				search: search || '',
