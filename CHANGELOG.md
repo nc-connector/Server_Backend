@@ -4,6 +4,27 @@ All notable changes to this repository are documented in this file.
 
 The format is based on **Keep a Changelog** and uses a simple version-first structure.
 
+## [1.4.0] - 2026-09-10
+
+### Added
+- Add centrally managed, Thunderbird-only VFS Share policies for exposing the configured Nextcloud account to compatible add-ons and allowing Thunderbird to add files from external VFS providers. Both settings support defaults, group and user overrides, and add-on editability
+- Allow full Nextcloud administrators to remove retained seat assignments for users that no longer exist in Nextcloud
+
+### Changed
+- Enable the NC Connector VFS provider by default; external providers remain disabled by default and require Pro with an active assigned seat
+- Align the built-in Share and separate-password email templates across clients with transparent branding, Outlook-compatible tables, non-wrapping labels and dates, selectable password text, and consistent permission placement; stored customer templates remain unchanged
+- Preserve approved `nobr` elements and `nowrap` attributes in browser-side and server-side mail-template sanitization
+- Update the bundled DOMPurify template sanitizer to 3.4.13
+- Update the App Store description for delegated administration, custom-branded templates, licensing, diagnostics, and Thunderbird VFS policies
+
+### Fixed
+- Fetch each external template image only once per editor request and restrict preview processing to the requested template, avoiding duplicate downloads
+- Load all Nextcloud groups in the administration interface instead of stopping after the first 200
+- Tie cached license entitlement to the verified credential pair: changed credentials clear the previous entitlement until synchronization succeeds, equivalent credentials preserve offline and grace behavior, and server rejection states take precedence over expiry data
+- Validate complete default, group, and user policy payloads before writing and persist each update transactionally, preventing partial saves after validation or storage failures
+- Keep a group's priority synchronized across all existing Share, Talk, and email-signature overrides, including priority changes made by delegated area administrators
+- Include effective email-signature policies in assigned-seat CSV reports alongside Share and Talk policies while continuing to represent custom template HTML as `Custom`
+
 ## [1.3.0] - 2026-07-24
 
 ### Added

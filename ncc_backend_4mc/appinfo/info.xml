@@ -2,55 +2,30 @@
 <info>
 	<id>ncc_backend_4mc</id>
 	<name>NC Connector for mail integration</name>
-	<summary lang="en">Central policies, templates, signatures and password delivery for NC Connector mail add-ons.</summary>
-	<summary lang="de">Zentrale Richtlinien, Vorlagen, Signaturen und Passwortzustellung für NC Connector Mail-Add-ons.</summary>
+	<summary lang="en">Central policies, templates, signatures, licensing and password delivery for NC Connector mail add-ons.</summary>
+	<summary lang="de">Zentrale Richtlinien, Vorlagen, Signaturen, Lizenzverwaltung und Passwortzustellung für NC Connector Mail-Add-ons.</summary>
 	<description lang="en"><![CDATA[
-# NC Connector for mail integration
+# NC Connector Backend
 
-NC Connector Backend is the central policy and template app for NC Connector mail add-ons.
+NC Connector Backend is the optional Nextcloud app for organizations that centrally manage NC Connector for Thunderbird and Outlook Classic. The mail add-ons continue to work without it.
 
-The Thunderbird and Outlook Classic add-ons can run without this backend. This app adds central policy control, Seat assignment, managed email signatures, custom templates and password delivery rules for organizations.
+Community mode includes one free seat. It gives one assigned Nextcloud user the full Pro feature set. Pro extends this model to teams from five seats. Each seat corresponds to exactly one assigned Nextcloud user.
 
-## What the backend adds
+## Features
 
-- Central Share, Talk and email-signature policies for Thunderbird and Outlook Classic
-- Seat assignment for Nextcloud users
-- Group and user overrides for teams with different rules
-- Managed HTML templates for Share blocks, password mails, Talk invitations and email signatures
-- Separate password delivery as plaintext mail or Nextcloud Secret Link
-- Optional Secrets app integration for expiring password links
-- Setup diagnostics for mail clients when backend access is not available
+- Define Share, Talk, attachment, email-signature and Thunderbird VFS policies
+- Lock selected settings while leaving others editable in the mail add-on
+- Apply defaults with group and user overrides
+- Manage Community and Pro license modes and their user assignments
+- Delegate selected administration tasks without granting full Nextcloud administrator rights
+- Create custom-branded HTML templates for Share blocks, password mails, Talk invitations and email signatures
+- Deliver passwords through a separate mail or an expiring Nextcloud Secrets link
+- Provide backend, license and assignment status for client diagnostics
+- Control NC Connector's Nextcloud VFS provider and access to compatible external VFS sources in Thunderbird
 
-## Share policies
+Email signatures can use Nextcloud profile data and per-user values. Nextcloud Talk and Secrets remain optional integrations.
 
-Admins can define default share folders, share names, permissions, password behavior and expiry days.
-
-Large attachments can be routed into Nextcloud based on central rules. The mail clients insert clean Share blocks with link, password information, rights and expiry date.
-
-## Password delivery
-
-Separate password delivery can use two modes:
-
-- Plaintext: send the password in a separate follow-up mail
-- Nextcloud Secret Link: send an expiring Secrets link instead of the raw password
-
-If the Nextcloud Secrets app is missing or disabled, clients fall back to the existing plaintext password mail behavior.
-
-## Email signatures
-
-The backend can provide one central HTML signature template for Thunderbird and Outlook Classic.
-
-Signature values can come from Nextcloud user profiles and per-user override fields. Empty placeholders remove their surrounding line or table row before the signature is sent to the mail client.
-
-## Talk meetings
-
-Admins can define Talk defaults for calendar-based meeting creation, including room type, lobby, visibility, password behavior and invitation templates.
-
-## When this backend is useful
-
-Use this backend when an organization needs central defaults, locked settings, Seat assignment, managed templates, managed signatures or password delivery rules.
-
-Single users can still use the mail add-ons without this backend.
+The backend does not store email content or attachments.
 
 ## Mail clients
 
@@ -63,52 +38,27 @@ Single users can still use the mail add-ons without this backend.
 - Contact: [https://nc-connector.de/kontakt/](https://nc-connector.de/kontakt/)
 ]]></description>
 	<description lang="de"><![CDATA[
-# NC Connector für Mail-Integration
+# NC Connector Backend
 
-NC Connector Backend ist die zentrale Richtlinien- und Vorlagen-App für die NC Connector Mail-Add-ons.
+NC Connector Backend ist die optionale Nextcloud-App für Organisationen, die NC Connector für Thunderbird und Outlook Classic zentral verwalten möchten. Die Mail-Add-ons funktionieren weiterhin ohne Backend.
 
-Die Thunderbird- und Outlook-Classic-Add-ons können auch ohne dieses Backend genutzt werden. Diese App ergänzt zentrale Richtlinien, Seat-Zuweisung, verwaltete E-Mail-Signaturen, eigene Vorlagen und Passwortzustellregeln für Organisationen.
+Der Community-Modus enthält einen kostenlosen Seat. Damit steht einem zugewiesenen Nextcloud-Benutzer der vollständige Pro-Funktionsumfang zur Verfügung. Pro erweitert dieses Modell auf Teams ab fünf Seats. Jeder Seat entspricht genau einem zugewiesenen Nextcloud-Benutzer.
 
-## Was das Backend ergänzt
+## Funktionen
 
-- Zentrale Freigabe-, Talk- und E-Mail-Signatur-Richtlinien für Thunderbird und Outlook Classic
-- Seat-Zuweisung für Nextcloud-Benutzer
-- Gruppen- und Benutzerüberschreibungen für Teams mit unterschiedlichen Regeln
-- Verwaltete HTML-Vorlagen für Freigabeblöcke, Passwort-Mails, Talk-Einladungen und E-Mail-Signaturen
-- Separate Passwortzustellung als Klartext-Mail oder Nextcloud Secret-Link
-- Optionale Secrets-App-Integration für ablaufende Passwort-Links
-- Setup-Diagnosen für Mail-Clients, wenn der Backend-Zugriff nicht verfügbar ist
+- Freigabe-, Talk-, Anhangs-, E-Mail-Signatur- und Thunderbird-VFS-Richtlinien definieren
+- Ausgewählte Einstellungen sperren und andere im Mail-Add-on änderbar lassen
+- Standardwerte mit Gruppen- und Benutzerüberschreibungen anwenden
+- Community- und Pro-Lizenzmodi samt Benutzerzuweisungen verwalten
+- Ausgewählte Verwaltungsaufgaben delegieren, ohne vollständige Nextcloud-Administratorrechte zu erteilen
+- Individuell gestaltete HTML-Vorlagen für Freigabeblöcke, Passwort-Mails, Talk-Einladungen und E-Mail-Signaturen erstellen
+- Passwörter über eine separate Mail oder einen ablaufenden Nextcloud-Secrets-Link zustellen
+- Backend-, Lizenz- und Zuweisungsstatus für die Client-Diagnose bereitstellen
+- Den Nextcloud-VFS-Anbieter von NC Connector und den Zugriff auf kompatible externe VFS-Quellen in Thunderbird steuern
 
-## Freigabe-Richtlinien
+E-Mail-Signaturen können Nextcloud-Profildaten und benutzerbezogene Werte verwenden. Nextcloud Talk und Secrets bleiben optionale Integrationen.
 
-Admins können Standardordner, Freigabenamen, Berechtigungen, Passwortverhalten und Ablaufdauer zentral festlegen.
-
-Große Anhänge können nach zentralen Regeln in Nextcloud ausgelagert werden. Die Mail-Clients fügen saubere Freigabeblöcke mit Link, Passwortinformation, Rechten und Ablaufdatum ein.
-
-## Passwortzustellung
-
-Separate Passwortzustellung kann zwei Modi nutzen:
-
-- Klartext: Passwort in einer separaten Folge-Mail senden
-- Nextcloud Secret-Link: ablaufenden Secrets-Link statt Rohpasswort senden
-
-Wenn die Nextcloud Secrets App fehlt oder deaktiviert ist, nutzen die Clients weiter die bestehende Klartext-Passwort-Mail.
-
-## E-Mail-Signaturen
-
-Das Backend kann eine zentrale HTML-Signaturvorlage für Thunderbird und Outlook Classic bereitstellen.
-
-Signaturwerte können aus Nextcloud-Benutzerprofilen und benutzerbezogenen Zusatzfeldern kommen. Leere Platzhalter entfernen ihre umgebende Zeile oder Tabellenzeile, bevor die Signatur an den Mail-Client gesendet wird.
-
-## Talk-Meetings
-
-Admins können Talk-Defaults für kalenderbasierte Besprechungen festlegen, inklusive Raumtyp, Lobby, Sichtbarkeit, Passwortverhalten und Einladungsvorlagen.
-
-## Wann dieses Backend sinnvoll ist
-
-Dieses Backend ist sinnvoll, wenn eine Organisation zentrale Defaults, gesperrte Einstellungen, Seat-Zuweisung, verwaltete Vorlagen, verwaltete Signaturen oder Passwortzustellregeln braucht.
-
-Einzelne Nutzer können die Mail-Add-ons weiterhin ohne dieses Backend verwenden.
+Das Backend speichert weder E-Mail-Inhalte noch Anhänge.
 
 ## Mail-Clients
 
@@ -120,7 +70,7 @@ Einzelne Nutzer können die Mail-Add-ons weiterhin ohne dieses Backend verwenden
 - Homepage: [https://nc-connector.de](https://nc-connector.de)
 - Kontakt: [https://nc-connector.de/kontakt/](https://nc-connector.de/kontakt/)
 ]]></description>
-	<version>1.3.0</version>
+	<version>1.4.0</version>
 	<licence>AGPL-3.0-or-later</licence>
 	<author mail="info@nc-connector.de" homepage="https://nc-connector.de">NC Connector</author>
 	<namespace>NcConnector</namespace>
