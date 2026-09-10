@@ -17,6 +17,7 @@ use OCA\NcConnector\Db\GroupOverrideMapper;
 use OCA\NcConnector\Db\SettingMapper;
 use OCP\IGroup;
 use OCP\IGroupManager;
+use OCP\IDBConnection;
 use OCP\IUserManager;
 
 class ClientSettingsService {
@@ -33,6 +34,7 @@ class ClientSettingsService {
 		private SettingMapper $settings,
 		private ClientOverrideMapper $overrides,
 		private GroupOverrideMapper $groupOverrides,
+		private IDBConnection $db,
 		private IGroupManager $groupManager,
 		private IUserManager $userManager,
 		private TemplateAssetService $templateAssets,
@@ -152,48 +154,22 @@ class ClientSettingsService {
 	}
 
 	public function setDefaults(array $defaults): array {
+		$changes = $this->normalizeDefaultChanges($defaults);
 		$now = time();
-		foreach ($defaults as $key => $rawValue) {
-			$this->assertKnownSetting($key);
-			$this->assertDefaultSetting($key);
-			$mode = $this->getBuiltInDefaultMode($key);
-			$valueToStore = $rawValue;
 
-			if (is_array($rawValue) && array_key_exists('mode', $rawValue)) {
-				$mode = $this->normalizeDefaultMode($key, (string)($rawValue['mode'] ?? self::MODE_DEFAULT));
-				$this->settings->setValue(self::DEFAULT_MODE_KEY_PREFIX . $key, $mode, $now);
-
-				if ($mode === self::MODE_USER_CHOICE) {
-					if (array_key_exists('value', $rawValue)) {
-						$normalized = $this->settingDefinitions->normalizeValue($key, $rawValue['value']);
-						$this->settings->setValue(
-							self::DEFAULT_KEY_PREFIX . $key,
-							$this->settingDefinitions->serializeValue($key, $normalized),
-							$now
-						);
-					}
-					continue;
+		return $this->writeAtomically(function () use ($changes, $now): array {
+			foreach ($changes as $key => $change) {
+				$this->settings->setValue(self::DEFAULT_MODE_KEY_PREFIX . $key, $change['mode'], $now);
+				if (array_key_exists('value', $change)) {
+					$this->settings->setValue(self::DEFAULT_KEY_PREFIX . $key, $change['value'], $now);
 				}
-
-				if (!array_key_exists('value', $rawValue)) {
-					throw new \InvalidArgumentException(sprintf('Missing default value for "%s"', $key));
-				}
-				$valueToStore = $rawValue['value'];
-			} else {
-				$this->settings->setValue(self::DEFAULT_MODE_KEY_PREFIX . $key, $this->getBuiltInDefaultMode($key), $now);
 			}
 
-			$normalized = $this->settingDefinitions->normalizeValue($key, $valueToStore);
-			$this->settings->setValue(
-				self::DEFAULT_KEY_PREFIX . $key,
-				$this->settingDefinitions->serializeValue($key, $normalized),
-				$now
-			);
-		}
-		return [
-			'defaults' => $this->getDefaults(),
-			'default_modes' => $this->getDefaultModes(),
-		];
+			return [
+				'defaults' => $this->getDefaults(),
+				'default_modes' => $this->getDefaultModes(),
+			];
+		});
 	}
 
 	public function getUserSettings(string $userId): array {
@@ -422,43 +398,21 @@ class ClientSettingsService {
 	}
 
 	public function setUserSettings(string $userId, array $overrides, ?string $updatedBy): array {
+		$changes = $this->normalizeOverrideChanges($overrides, false);
 		$now = time();
-		foreach ($overrides as $key => $payload) {
-			$this->assertKnownSetting($key);
-			if (!is_array($payload)) {
-				throw new \InvalidArgumentException(sprintf('Override for "%s" must be an object', $key));
+
+		return $this->writeAtomically(function () use ($changes, $now, $updatedBy, $userId): array {
+			foreach ($changes as $key => $value) {
+				if ($value === null) {
+					$this->overrides->deleteForUserAndKey($userId, $key);
+					continue;
+				}
+
+				$this->overrides->upsert($userId, $key, self::MODE_FORCED, $value, $now, $updatedBy);
 			}
 
-			$mode = strtolower(trim((string)($payload['mode'] ?? '')));
-			if ($mode === self::MODE_INHERIT) {
-				$this->overrides->deleteForUserAndKey($userId, $key);
-				continue;
-			}
-
-			if ($mode === self::MODE_USER_CHOICE) {
-				$this->overrides->deleteForUserAndKey($userId, $key);
-				continue;
-			}
-
-			if ($mode !== self::MODE_FORCED) {
-				throw new \InvalidArgumentException(sprintf('Invalid mode for "%s"', $key));
-			}
-			if (!array_key_exists('value', $payload)) {
-				throw new \InvalidArgumentException(sprintf('Missing value for "%s" in forced mode', $key));
-			}
-
-			$normalized = $this->settingDefinitions->normalizeValue($key, $payload['value']);
-			$this->overrides->upsert(
-				$userId,
-				$key,
-				self::MODE_FORCED,
-				$this->settingDefinitions->serializeValue($key, $normalized),
-				$now,
-				$updatedBy
-			);
-		}
-
-		return $this->getUserSettings($userId);
+			return $this->getUserSettings($userId);
+		});
 	}
 
 	/**
@@ -466,40 +420,30 @@ class ClientSettingsService {
 	 */
 	public function setGroupSettings(string $groupId, int $priority, array $overrides, ?string $updatedBy): array {
 		$priority = $this->normalizeGroupOverridePriority($priority);
+		$changes = $this->normalizeOverrideChanges($overrides, true);
 		$now = time();
-		foreach ($overrides as $key => $payload) {
-			$this->assertKnownSetting($key);
-			$this->assertGroupOverrideSetting($key);
-			if (!is_array($payload)) {
-				throw new \InvalidArgumentException(sprintf('Override for "%s" must be an object', $key));
+
+		return $this->writeAtomically(function () use ($changes, $groupId, $now, $priority, $updatedBy): array {
+			$this->groupOverrides->updatePriorityForGroup($groupId, $priority, $now, $updatedBy);
+			foreach ($changes as $key => $value) {
+				if ($value === null) {
+					$this->groupOverrides->deleteForGroupAndKey($groupId, $key);
+					continue;
+				}
+
+				$this->groupOverrides->upsert(
+					$groupId,
+					$priority,
+					$key,
+					self::MODE_FORCED,
+					$value,
+					$now,
+					$updatedBy
+				);
 			}
 
-			$mode = strtolower(trim((string)($payload['mode'] ?? '')));
-			if ($mode === self::MODE_INHERIT || $mode === self::MODE_USER_CHOICE) {
-				$this->groupOverrides->deleteForGroupAndKey($groupId, $key);
-				continue;
-			}
-
-			if ($mode !== self::MODE_FORCED) {
-				throw new \InvalidArgumentException(sprintf('Invalid mode for "%s"', $key));
-			}
-			if (!array_key_exists('value', $payload)) {
-				throw new \InvalidArgumentException(sprintf('Missing value for "%s" in forced mode', $key));
-			}
-
-			$normalized = $this->settingDefinitions->normalizeValue($key, $payload['value']);
-			$this->groupOverrides->upsert(
-				$groupId,
-				$priority,
-				$key,
-				self::MODE_FORCED,
-				$this->settingDefinitions->serializeValue($key, $normalized),
-				$now,
-				$updatedBy
-			);
-		}
-
-		return $this->getGroupSettings($groupId);
+			return $this->getGroupSettings($groupId);
+		});
 	}
 
 	public function getEffectiveForUser(string $userId): array {
@@ -606,6 +550,125 @@ class ClientSettingsService {
 		}
 
 		return $map;
+	}
+
+	/**
+	 * @param array<string, mixed> $defaults
+	 * @return array<string, array{mode:string, value?:string}>
+	 */
+	private function normalizeDefaultChanges(array $defaults): array {
+		$changes = [];
+		foreach ($defaults as $key => $rawValue) {
+			if (!is_string($key)) {
+				throw new \InvalidArgumentException('Setting key must be a string');
+			}
+			$this->assertKnownSetting($key);
+			$this->assertDefaultSetting($key);
+
+			$mode = $this->getBuiltInDefaultMode($key);
+			$valueToStore = $rawValue;
+			$hasValue = true;
+			if (is_array($rawValue) && array_key_exists('mode', $rawValue)) {
+				$mode = $this->normalizeSubmittedDefaultMode($key, $rawValue['mode'] ?? null);
+				$hasValue = array_key_exists('value', $rawValue);
+				if ($mode !== self::MODE_USER_CHOICE && !$hasValue) {
+					throw new \InvalidArgumentException(sprintf('Missing default value for "%s"', $key));
+				}
+				$valueToStore = $rawValue['value'] ?? null;
+			}
+
+			$change = ['mode' => $mode];
+			if ($hasValue) {
+				$normalized = $this->settingDefinitions->normalizeValue($key, $valueToStore);
+				$change['value'] = $this->settingDefinitions->serializeValue($key, $normalized);
+			}
+			$changes[$key] = $change;
+		}
+
+		return $changes;
+	}
+
+	/**
+	 * @param array<string, mixed> $overrides
+	 * @return array<string, string|null>
+	 */
+	private function normalizeOverrideChanges(array $overrides, bool $forGroup): array {
+		$changes = [];
+		foreach ($overrides as $key => $payload) {
+			if (!is_string($key)) {
+				throw new \InvalidArgumentException('Setting key must be a string');
+			}
+			$this->assertKnownSetting($key);
+			if ($forGroup) {
+				$this->assertGroupOverrideSetting($key);
+			}
+			if (!is_array($payload)) {
+				throw new \InvalidArgumentException(sprintf('Override for "%s" must be an object', $key));
+			}
+
+			$mode = $this->normalizeSubmittedOverrideMode($key, $payload['mode'] ?? null);
+			if ($mode === self::MODE_INHERIT || $mode === self::MODE_USER_CHOICE) {
+				$changes[$key] = null;
+				continue;
+			}
+			if (!array_key_exists('value', $payload)) {
+				throw new \InvalidArgumentException(sprintf('Missing value for "%s" in forced mode', $key));
+			}
+
+			$normalized = $this->settingDefinitions->normalizeValue($key, $payload['value']);
+			$changes[$key] = $this->settingDefinitions->serializeValue($key, $normalized);
+		}
+
+		return $changes;
+	}
+
+	private function normalizeSubmittedDefaultMode(string $key, mixed $mode): string {
+		if (!is_string($mode)) {
+			throw new \InvalidArgumentException(sprintf('Invalid default mode for "%s"', $key));
+		}
+		$normalized = strtolower(trim($mode));
+		if ($normalized !== self::MODE_DEFAULT && $normalized !== self::MODE_USER_CHOICE) {
+			throw new \InvalidArgumentException(sprintf('Invalid default mode for "%s"', $key));
+		}
+
+		return $this->normalizeDefaultMode($key, $normalized);
+	}
+
+	private function normalizeSubmittedOverrideMode(string $key, mixed $mode): string {
+		if (!is_string($mode)) {
+			throw new \InvalidArgumentException(sprintf('Invalid mode for "%s"', $key));
+		}
+		$normalized = strtolower(trim($mode));
+		if (!in_array($normalized, [self::MODE_INHERIT, self::MODE_USER_CHOICE, self::MODE_FORCED], true)) {
+			throw new \InvalidArgumentException(sprintf('Invalid mode for "%s"', $key));
+		}
+
+		return $normalized;
+	}
+
+	/**
+	 * @template T
+	 * @param callable():T $operation
+	 * @return T
+	 */
+	private function writeAtomically(callable $operation): mixed {
+		$ownsTransaction = !$this->db->inTransaction();
+		if ($ownsTransaction) {
+			$this->db->beginTransaction();
+		}
+
+		try {
+			$result = $operation();
+			if ($ownsTransaction) {
+				$this->db->commit();
+			}
+			return $result;
+		} catch (\Throwable $exception) {
+			if ($ownsTransaction && $this->db->inTransaction()) {
+				$this->db->rollBack();
+			}
+			throw $exception;
+		}
 	}
 
 	private function normalizeGroupOverridePriority(mixed $priority): int {

@@ -109,6 +109,26 @@ class GroupOverrideMapper extends QBMapper {
 		$qb->executeStatement();
 	}
 
+	public function updatePriorityForGroup(
+		string $groupId,
+		int $priority,
+		int $updatedAt,
+		?string $updatedBy,
+	): void {
+		$qb = $this->db->getQueryBuilder();
+		$qb->update($this->getTableName())
+			->set('priority', $qb->createNamedParameter($priority, IQueryBuilder::PARAM_INT))
+			->set('updated_at', $qb->createNamedParameter($updatedAt, IQueryBuilder::PARAM_INT))
+			->set(
+				'updated_by',
+				$updatedBy !== null
+					? $qb->createNamedParameter($updatedBy, IQueryBuilder::PARAM_STR)
+					: $qb->createNamedParameter(null, IQueryBuilder::PARAM_NULL)
+			)
+			->where($qb->expr()->eq('group_id', $qb->createNamedParameter($groupId, IQueryBuilder::PARAM_STR)));
+		$qb->executeStatement();
+	}
+
 	public function deleteForGroupAndKey(string $groupId, string $settingKey): void {
 		$qb = $this->db->getQueryBuilder();
 		$qb->delete($this->getTableName())

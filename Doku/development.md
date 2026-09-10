@@ -325,13 +325,13 @@ Save flow:
 ```text
 Admin payload
   -> permission check
-  -> setting definition normalization
+  -> validation and normalization of the complete payload
   -> template sanitizing where applicable
-  -> layer-specific persistence
+  -> transactional layer-specific persistence
   -> refreshed layer and warnings
 ```
 
-The browser collects values in `adminSettingsPayload.js`. Server services re-check every permission and value. Browser state never grants authority.
+The browser collects values in `adminSettingsPayload.js`. Server services re-check every permission and value. Browser state never grants authority. No setting is written before the full payload has passed validation. Defaults, user overrides, and group overrides are then persisted together with the refreshed response read in one database transaction, so an exception rolls back the complete request.
 
 ### 5.3 Template edit and preview
 
@@ -392,6 +392,8 @@ The configured Nextcloud prefix is prepended to every table name.
 
 `lib/Setup/InstallSchema.php` describes the current schema.
 
+For schema compatibility, the group priority is stored on every `nccb_group_overrides` row. It is nevertheless one group-wide value: saving a group writes the selected priority to every existing row for that group before applying the submitted setting changes. A delegated area admin therefore cannot create different hidden priorities for Share, Talk, and email-signature rows.
+
 Seat rows are keyed by the stored Nextcloud user ID. Assignment requires that the user currently resolves through `IUserManager`; unassignment deliberately requires only the stored ID. This lets a full admin release a Seat after its Nextcloud user was deleted. An unresolved assignment remains visible, assigned, and counted until that explicit action. Never auto-delete these rows: a transient LDAP or other external-directory outage is indistinguishable from a deleted user at lookup time.
 
 ### 6.2 Install and migration rules
@@ -445,10 +447,12 @@ Group selection:
 
 - collect the user's matching groups
 - ignore inherited rows
-- compare numeric priority
+- compare the group-wide numeric priority
 - use the lowest priority number
 
-The resolved value, source layer, policy mode, and add-on editability are carried together so the runtime response and assigned-Seat report use the same result.
+Changing a group priority applies to every existing override row for that group, including policy domains outside a delegated administrator's content scopes. Only the priority crosses those domain boundaries; the other domains' values are not changed.
+
+The resolved value, source layer, policy mode, and add-on editability are carried together so the runtime response and assigned-Seat report use the same result. The CSV report merges the effective Share, Talk, and email-signature policy groups and represents template HTML only as `Custom`.
 
 ### 7.2 Editable client values
 

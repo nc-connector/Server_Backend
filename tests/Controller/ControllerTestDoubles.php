@@ -206,6 +206,11 @@ final class TestClientSettingsService extends ClientSettingsService {
 	public array $setUserCalls = [];
 
 	/**
+	 * @var list<array{group_id:string, priority:int, overrides:array<string, mixed>, updated_by:?string}>
+	 */
+	public array $setGroupCalls = [];
+
+	/**
 	 * @param array<string, array<string, mixed>> $schema
 	 * @param array<string, array<string, mixed>> $userSettings
 	 * @param array<string, mixed> $effectiveSettings
@@ -265,6 +270,12 @@ final class TestClientSettingsService extends ClientSettingsService {
 	}
 
 	public function setGroupSettings(string $groupId, int $priority, array $overrides, ?string $updatedBy): array {
+		$this->setGroupCalls[] = [
+			'group_id' => $groupId,
+			'priority' => $priority,
+			'overrides' => $overrides,
+			'updated_by' => $updatedBy,
+		];
 		return [
 			'priority' => $priority,
 			'items' => $overrides,

@@ -196,6 +196,28 @@ final class AdminClientSettingsControllerPermissionTest extends TestCase {
 		self::assertSame(403, $talkController->setGroupSettings()->getStatus());
 	}
 
+	public function testDelegatedShareAdminCanChangeTheSharedGroupPriority(): void {
+		[$controller, $settings] = $this->controller(
+			['share.group_overrides', 'share.policy'],
+			[
+				'group_id' => 'group-a',
+				'priority' => 50,
+				'overrides' => [
+					'share_send_password_mode' => ['mode' => 'forced', 'value' => 'plain'],
+				],
+			]
+		);
+
+		$response = $controller->setGroupSettings();
+
+		self::assertSame(200, $response->getStatus());
+		self::assertCount(1, $settings->setGroupCalls);
+		self::assertSame('group-a', $settings->setGroupCalls[0]['group_id']);
+		self::assertSame(50, $settings->setGroupCalls[0]['priority']);
+		self::assertSame(['share_send_password_mode'], array_keys($settings->setGroupCalls[0]['overrides']));
+		self::assertSame('delegate', $settings->setGroupCalls[0]['updated_by']);
+	}
+
 	public function testDelegatedSharePolicyAdminSeesAttachmentLinkTarget(): void {
 		[$controller] = $this->controller(['share.user_overrides', 'share.policy']);
 

@@ -336,7 +336,7 @@ The effective order is:
 
 `inherit` moves to the next lower layer.
 
-If several group overrides apply, the group with the lowest numeric priority wins. Use distinct priorities for overlapping groups so the result is easy to audit.
+If several group overrides apply, the group with the lowest numeric priority wins. The priority belongs to the group as a whole and therefore applies equally to its Share, Talk, and email-signature overrides. Use distinct priorities for overlapping groups so the result is easy to audit.
 
 ### 5.2 Editable in add-on
 
@@ -505,7 +505,7 @@ The assigned-Seat table shows assignment state and links to matching group or us
 
 If an assigned user no longer exists in the Nextcloud user directory, its stored user ID remains in **Assigned seats** and still consumes a Seat until a full admin removes it. The backend does not remove such assignments automatically because a temporarily unavailable external user directory must not release Seats unexpectedly.
 
-The CSV report omits raw template HTML and reports an effective custom template as `Custom`.
+The CSV report includes the effective Share, Talk, and email-signature policies. It omits raw template HTML and reports an effective custom template as `Custom`.
 
 ### 5.8 Group overrides
 
@@ -519,6 +519,8 @@ Per setting:
 Group overrides may be created before Seats are assigned. They become effective only for Seat users in the group.
 
 Lower numeric priority wins when a user belongs to several matching groups.
+
+Changing a group's priority updates every existing override for that group. This also applies when a delegated admin can edit only one policy area: the other Share, Talk, or email-signature values remain unchanged, but they use the same new group priority.
 
 ### 5.9 User overrides
 
