@@ -32,6 +32,7 @@ This app is localized via Nextcloud app l10n files (`ncc_backend_4mc/l10n/*.json
 - Additional update: new template-related keys were translated for all locales (`en`, `de`, `fr`, `cs`, `es`, `hu`, `it`, `ja`, `nl`, `pl`, `pt_BR`, `pt_PT`, `ru`, `zh_CN`, `zh_TW`).
 - Additional update: the visible seat/report texts that were still left in English were localized for every supported locale.
 - Additional update: email signature user-override labels and tooltips were localized for every supported locale.
+- License capacity, grace deadlines, activation, connection failures, migration support, and renewal messages are translated in all 15 locales. German uses `Nachfrist` for the grace period. Trial and support actions use the website forms.
 
 ## Template editor language helper
 

@@ -157,6 +157,12 @@ namespace OCP\AppFramework\Http\Attribute {
 }
 
 namespace OCP {
+	if (!interface_exists('OCP\IConfig')) {
+		interface IConfig {
+			public function getSystemValueString(string $key, string $default = ''): string;
+		}
+	}
+
 	if (!interface_exists('OCP\IRequest')) {
 		interface IRequest {
 		}

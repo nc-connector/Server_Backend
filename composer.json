@@ -34,7 +34,8 @@
     "check:js": [
       "node scripts/check-backend-js.mjs",
       "node --test tests/JavaScript/AdminApiTest.mjs",
-      "node --test tests/JavaScript/AdminSeatReportTest.mjs"
+      "node --test tests/JavaScript/AdminSeatReportTest.mjs",
+      "node --test tests/JavaScript/AdminGeneralStatusUiTest.mjs"
     ]
   },
   "config": {

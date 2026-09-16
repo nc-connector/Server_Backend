@@ -1588,6 +1588,7 @@
 		}
 
 		let licenseSnapshot = null
+		let assignedSeatCount = null
 		let searchTimer = null
 		const fullAdminFallback = root.dataset.fullAdminFallback === '1'
 		const settingsPayload = settingsPayloadModule.createPayloadHelpers({
@@ -1677,7 +1678,7 @@
 		}
 
 		const renderLicenseStatus = (snapshot) => {
-			generalStatusUi.renderLicenseStatus(refs, snapshot, getGeneralStatusUiHelpers())
+			generalStatusUi.renderLicenseStatus(refs, snapshot, { ...getGeneralStatusUiHelpers(), assignedSeats: assignedSeatCount })
 		}
 
 		const renderProFunnel = (snapshot) => {
@@ -1875,6 +1876,8 @@
 		const refreshAssignedSeatOverview = async () => {
 			const { seats, seatStatus } = await loadAssignedSeats()
 			state.assignedSeats = seats
+			assignedSeatCount = seatStatus?.assigned ?? seats.length
+			if (licenseSnapshot) renderLicenseStatus(licenseSnapshot)
 			renderSeatUsage(seatStatus)
 			renderAssignedSeats(refs.assignedSeats, seats, Boolean(state.admin?.is_nextcloud_admin))
 			if (canUseAnyUserOverridePanel(state)) {
@@ -2075,7 +2078,7 @@
 				await refreshSeatsAndUsers(false)
 
 				if (syncError) {
-					setMessage(refs.licenseMessage, `${tr('License data saved, automatic sync failed')}: ${syncError.message || tr('Unknown error')}`, 'error')
+					setMessage(refs.licenseMessage, tr('License data saved, automatic sync failed'), 'error')
 					return
 				}
 				setMessage(refs.licenseMessage, tr('License data saved and synchronized.'), 'success')
@@ -2094,7 +2097,12 @@
 				setMessage(refs.licenseMessage, tr('License synchronized.'), 'success')
 			} catch (error) {
 				console.error('nccb manual license sync failed', error)
-				setMessage(refs.licenseMessage, error.message || tr('Synchronization failed.'), 'error')
+				try {
+					await refreshLicense()
+				} catch (error) {
+					console.error('nccb license status refresh failed', error)
+				}
+				setMessage(refs.licenseMessage, tr('Synchronization failed.'), 'error')
 			}
 		})
 

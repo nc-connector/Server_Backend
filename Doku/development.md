@@ -365,14 +365,37 @@ License flow:
 1. `LicenseSyncJob` starts every 24 hours.
 2. Community mode or incomplete credentials stop the flow before an external request.
 3. Pro credentials are decrypted through Nextcloud crypto.
-4. The service requests entitlement state.
-5. Seat count, status, expiry, timestamp, or error are stored.
+4. `LicenseService` reads `instanceid` from `IConfig` and obtains the installation proof described below.
+5. The existing HTTPS request sends `email`, `license_key`, `instance_id`, and `installation_secret`. Redirects are disabled to avoid forwarding credentials to another endpoint.
+6. A successful response stores Seat capacity, commercial status, activation metadata, expiry, and synchronization timestamps together. A failed request stores a reason code without replacing the previous result.
 
 Saving credentials compares the lowercased email and case-insensitive license key with the stored values, matching the license-server lookup rules. A changed pair clears cached status, expiry, Seat entitlement, and synchronization metadata before it can be used. Saving an equivalent pair keeps the cache for offline operation. Mode changes keep both credentials and cached entitlement.
 
 Effective license status respects server rejection states before evaluating dates. Unknown, inactive, and invalid states remain unusable. An expired state with a future date remains expired; an elapsed expiry may enter the 14-day grace period because the license server reports elapsed active licenses as expired.
 
 Manual **Sync now** uses the same license service.
+
+#### Installation proof and response handling
+
+`license.installation_secret` holds 32 random bytes encoded as 64 lowercase hex characters and encrypted with `ICrypto`. `SettingMapper::getOrCreateValue()` persists it before the first request; the unique setting key chooses the winner when requests overlap. Later requests reuse the stored value. An unreadable proof fails the request instead of silently generating a new identity. Community makes no license request. Manual/trial requests may carry a proof, but the server determines whether activation is required.
+
+The server returns the existing `status`, `seats`, and `expires_at` fields plus an optional `activation` object:
+
+- `required`, `enforced`, and `verified` are booleans.
+- `state` is `not_required`, `activated`, `proof_required`, `invalid_proof`, `conflict`, `license_unavailable`, or `credentials_changed`.
+- A confirmed activation includes `activated_at` in UTC. Only these display fields are stored and exposed; server allocation IDs are not needed by clients.
+- Enforced refusals use HTTP 200 with `status: invalid`, the underlying commercial state in `license_status`, and the activation reason. Revoked credentials may return the original invalid response without activation metadata. Both cases end access immediately; neither is a network failure.
+- HTTP errors or malformed replies retain the previous confirmed result and record a localized error code. Raw HTTP exceptions, request bodies, credentials, and proofs are not logged.
+
+Legacy replies without activation metadata remain accepted until this credential pair has received the extended protocol. Thereafter missing metadata cannot silently downgrade a successful reply to an unbound grant. Explicit invalid replies remain refusals. No second request retries without the installation proof.
+
+`license.commercial_status` preserves the underlying license state; existing `license.status_raw` retains the top-level response. `license.activation` stores the filtered activation object. `license.last_verified_at` is updated only by a response confirming both this installation and usable entitlement. While enforcement is known to be enabled, access ends at the earlier of this timestamp plus 14 days and the existing expiry-plus-grace deadline. A failed request cannot extend either deadline. Disabling enforcement in a successful response removes the extra offline limit without replacing the proof.
+
+`getSnapshot()` separates `license_status_effective` from the final `status_effective` and `is_valid`. The final status can additionally be `ACTIVATION_REQUIRED` or `OFFLINE_EXPIRED`. `AccessService` and existing Seat checks continue using `isLicenseValid()`; explanatory fields never grant access. Seat assignments are not deleted or reassigned by synchronization.
+
+Credential replacement and response persistence use `SettingMapper::setValuesIfUnchanged()`: a transaction locks the stored encrypted credential row and compares it with the request's captured value before writing related state. A response for credentials replaced during its request is discarded. Equivalent credential saves retain entitlement; a changed pair clears entitlement and confirmation but keeps the installation proof. `setValue()` updates first and checks whether a zero-row result means an unchanged value before inserting. This avoids duplicate inserts aborting PostgreSQL transactions for existing settings.
+
+The client-facing subset is documented in [endpoints.md](endpoints.md). Operational status, renewal, rollout and migration instructions are in [admin.md](admin.md#43-license-synchronization).
 
 ---
 
@@ -765,14 +788,16 @@ The repository workflow runs:
 | Backend static checks | PHP 8.3 |
 | Database-schema checks | PHP 8.3 |
 | Localization checks | Node.js 24 |
-| JavaScript syntax | Node.js 24 |
+| JavaScript syntax and behavior | Node.js 24 |
 | PHPUnit | PHP 8.3, 8.4, and 8.5 |
 
 The matrix produces ten executions across six jobs.
 
 Test coverage includes:
 
-- license credential ownership, status transitions, and grace handling
+- license credential ownership, status transitions, grace, activation refusals, and offline deadlines
+- transactional license-state persistence and first-writer installation-proof storage
+- license status presentation, renewal actions, and additive client-status fields
 - setting definitions and value normalization
 - runtime policy dependencies
 - template and signature rendering

@@ -5,6 +5,24 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
 
 ## Read endpoints
 
+### License status fields
+
+These fields extend `status`; existing fields retain their types and meanings. Feature access still requires `is_valid`, an active assigned Seat, and no overlicensing. Do not derive entitlement from dates, activation labels, or the administration flag.
+
+| Field | Meaning |
+|---|---|
+| `license_status` | Commercial state: `COMMUNITY`, `ACTIVE`, `GRACE`, `EXPIRED`, `INACTIVE`, `INVALID`, or `UNKNOWN`. |
+| `access_status` | Effective result, including installation checks. Uses the commercial states above, plus `ACTIVATION_REQUIRED` and `OFFLINE_EXPIRED`. |
+| `can_manage_license` | Whether the authenticated caller is a full Nextcloud admin, including admins without a Seat. Inspecting another user does not change the caller's permission. Delegated policy admins do not receive license-management rights. |
+| `license_activation` | `null` for Community or a legacy result; otherwise `{required, enforced, state, verified, activated_at}`. The timestamp is UTC in `YYYY-MM-DD HH:MM:SS` format or `null`. This object never contains the installation ID, secret, allocation ID, email, or license key. |
+| `license_last_sync_at_iso` | Time of the last successfully processed license reply, including refusals, or `null`. |
+| `license_connection_error` | Boolean indicating a failed synchronization. It does not turn a previously valid cached reply into an explicit refusal. |
+| `license_offline_until_iso` | Applicable enforced-activation offline deadline, or `null`. Existing `expires_at_iso` and `grace_until_iso` remain separate. |
+
+Activation states are `not_required`, `activated`, `proof_required`, `invalid_proof`, `conflict`, `license_unavailable`, and `credentials_changed`. `verified` confirms this installation, not commercial validity. A conflict with `enforced=false` does not itself block access. Manual/trial licenses return `required=false` and `state=not_required` unless the key was revoked during the check.
+
+Old clients may ignore the added fields and keep using `is_valid` and Seat checks. New clients talking to an older backend must use their existing generic warning when these fields are absent, not infer an expiry or activation reason. Administrative actions remain protected by server-side permissions; `can_manage_license` is only a UI hint. Installation verification does not require a mail-client update.
+
 ### 1) Combined status + policies
 - **HTTP method:** `GET`
 - **Path:** `/apps/ncc_backend_4mc/api/v1/status`
@@ -21,6 +39,7 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
   - `policy_editable`: add-on editability grouped into `share`, `talk`, and `email_signature`
   - There is **no** separate `default` block in the runtime response.
 - **Policy null rules:**
+  - For ordinary users, an unusable license also returns `null` policies. Full Nextcloud admins retain the existing inspection path for assigned, non-overlicensed users; this does not grant Pro access to mail clients.
   - `policy.share`, `policy.talk`, and `policy.email_signature` are `null` when `status.overlicensed=true` or `status.seat_assigned=false`.
   - `policy_editable.share`, `policy_editable.talk`, and `policy_editable.email_signature` are also `null` when `status.overlicensed=true` or `status.seat_assigned=false`.
   - For settings with **Editable in add-on** enabled, `policy` still returns the configured backend default value.
@@ -81,7 +100,14 @@ curl -u "alice:APP_PASSWORD" \
     "mode": "pro",
     "is_valid": true,
     "expires_at_iso": "2026-04-18T00:00:00+00:00",
-    "grace_until_iso": "2026-05-02T00:00:00+00:00"
+    "grace_until_iso": "2026-05-02T00:00:00+00:00",
+    "license_status": "ACTIVE",
+    "access_status": "ACTIVE",
+    "can_manage_license": false,
+    "license_activation": null,
+    "license_last_sync_at_iso": "2026-04-10T00:00:00+00:00",
+    "license_connection_error": false,
+    "license_offline_until_iso": null
   },
   "policy": {
     "share": {

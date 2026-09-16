@@ -10,6 +10,46 @@ use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/ControllerTestDoubles.php';
 
 final class StatusControllerContractTest extends TestCase {
+	public function testLicenseDetailsExplainDenialWithoutRemovingSeatAssignments(): void {
+		foreach (['EXPIRED', 'INACTIVE', 'INVALID', 'ACTIVATION_REQUIRED', 'OFFLINE_EXPIRED'] as $reason) {
+			$controller = new StatusController(
+				'ncc_backend_4mc', new TestRequest(), new TestAccessService(), new TestSeatService(['alice']),
+				new TestLicenseService(false, [
+					'mode' => 'pro', 'status_effective' => $reason, 'license_status_effective' => 'EXPIRED',
+					'last_error' => 'private connection detail', 'email' => 'private@example.test',
+					'last_sync_at_iso' => '2026-09-16T00:00:00+00:00',
+				]),
+				new TestClientSettingsService(), 'alice'
+			);
+			$data = $controller->status()->getData();
+			self::assertFalse($data['status']['is_valid']);
+			self::assertTrue($data['status']['seat_assigned']);
+			self::assertSame('active', $data['status']['seat_state']);
+			self::assertSame($reason, $data['status']['access_status']);
+			self::assertSame('EXPIRED', $data['status']['license_status']);
+			self::assertFalse($data['status']['can_manage_license']);
+			self::assertTrue($data['status']['license_connection_error']);
+			self::assertNull($data['policy']['share']);
+			self::assertNull($data['status']['license_activation']);
+			self::assertStringNotContainsString('private', json_encode($data));
+		}
+	}
+
+	public function testLicenseManagementFlagBelongsToAuthenticatedAdminWithoutRequiringASeat(): void {
+		foreach (['admin' => true, 'delegated' => false, 'seatless' => false] as $actor => $expected) {
+			$controller = new StatusController(
+				'ncc_backend_4mc', new TestRequest(), new TestAccessService(['admin']), new TestSeatService(),
+				new TestLicenseService(true, ['mode' => 'pro', 'status_effective' => 'GRACE', 'license_status_effective' => 'GRACE']),
+				new TestClientSettingsService(), $actor
+			);
+			$status = $controller->status()->getData()['status'];
+			self::assertSame($expected, $status['can_manage_license']);
+			self::assertFalse($status['seat_assigned']);
+			self::assertTrue($status['is_valid']);
+			self::assertSame('GRACE', $status['license_status']);
+		}
+	}
+
 	public function testStatusApiGroupsEffectivePolicyForSeatUser(): void {
 		$versionedShareTemplate = '<div lang="de"><p>{LINK_INTRO}</p><p>{LINK_LABEL}: <a href="{URL}">{URL}</a></p></div>';
 		$controller = new StatusController(
@@ -56,6 +96,7 @@ final class StatusControllerContractTest extends TestCase {
 
 		self::assertSame(200, $response->getStatus());
 		self::assertSame('target', $data['status']['user_id']);
+		self::assertTrue($data['status']['can_manage_license']);
 		self::assertTrue($data['status']['seat_assigned']);
 		self::assertSame('active', $data['status']['seat_state']);
 		self::assertFalse($data['status']['overlicensed']);

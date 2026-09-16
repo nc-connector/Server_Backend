@@ -44,6 +44,29 @@
 	margin-top: 6px;
 }
 
+.nccb-license-facts {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 12px 24px;
+	margin: 14px 0;
+	color: var(--color-main-text);
+}
+
+.nccb-license-facts dt {
+	font-weight: 600;
+}
+
+.nccb-license-facts dd {
+	margin: 3px 0 0;
+	overflow-wrap: anywhere;
+}
+
+.nccb-license-warning {
+	padding: 8px 12px;
+	border-left: 3px solid var(--color-warning, #edbc00);
+	color: var(--color-main-text);
+}
+
 .nccb-recommended-apps {
 	margin-top: 10px;
 	display: grid;

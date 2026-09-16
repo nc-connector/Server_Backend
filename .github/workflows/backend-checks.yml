@@ -94,6 +94,9 @@ jobs:
       - name: JS syntax
         run: node scripts/check-backend-js.mjs
 
+      - name: JavaScript behavior
+        run: node --test tests/JavaScript/*.mjs
+
   phpunit:
     name: PHPUnit
     runs-on: ubuntu-latest

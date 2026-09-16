@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace OCA\NcConnector\Db;
 
 use OCP\AppFramework\Db\QBMapper;
+use OCP\DB\Exception;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -49,15 +50,23 @@ class SettingMapper extends QBMapper {
 		$qb->update($this->getTableName())
 			->set('config_value', $qb->createNamedParameter($value, IQueryBuilder::PARAM_STR))
 			->set('updated_at', $qb->createNamedParameter($updatedAt, IQueryBuilder::PARAM_INT))
-			->where(
-				$qb->expr()->eq('config_key', $qb->createNamedParameter($key, IQueryBuilder::PARAM_STR))
-			);
-
-		$affected = $qb->executeStatement();
-		if ($affected > 0) {
+			->where($qb->expr()->eq('config_key', $qb->createNamedParameter($key, IQueryBuilder::PARAM_STR)));
+		$updated = $qb->executeStatement();
+		// Unchanged rows may report zero; a duplicate INSERT would abort a PostgreSQL transaction.
+		if ($updated > 0 || $this->getValue($key) !== null) {
 			return;
 		}
+		$qb = $this->db->getQueryBuilder();
+		$qb->insert($this->getTableName())->values([
+			'config_key' => $qb->createNamedParameter($key, IQueryBuilder::PARAM_STR),
+			'config_value' => $qb->createNamedParameter($value, IQueryBuilder::PARAM_STR),
+			'updated_at' => $qb->createNamedParameter($updatedAt, IQueryBuilder::PARAM_INT),
+		]);
+		$qb->executeStatement();
+	}
 
+	/** The unique setting key decides which concurrent creator wins */
+	public function getOrCreateValue(string $key, string $value, int $updatedAt): string {
 		$qb = $this->db->getQueryBuilder();
 		$qb->insert($this->getTableName())
 			->values([
@@ -65,6 +74,42 @@ class SettingMapper extends QBMapper {
 				'config_value' => $qb->createNamedParameter($value, IQueryBuilder::PARAM_STR),
 				'updated_at' => $qb->createNamedParameter($updatedAt, IQueryBuilder::PARAM_INT),
 			]);
-		$qb->executeStatement();
+		try {
+			$qb->executeStatement();
+		} catch (Exception $exception) {
+			if (!in_array($exception->getReason(), [Exception::REASON_CONSTRAINT_VIOLATION, Exception::REASON_UNIQUE_CONSTRAINT_VIOLATION], true)) {
+				throw $exception;
+			}
+		}
+		$stored = $this->getValue($key);
+		if ($stored === null) {
+			throw new \RuntimeException('Setting could not be persisted');
+		}
+		return $stored;
+	}
+
+	/** Commit a related state only while its stored credentials are unchanged */
+	public function setValuesIfUnchanged(array $values, int $updatedAt, string $guardKey, ?string $expected): bool {
+		$this->db->beginTransaction();
+		try {
+			// An UPDATE takes a row lock on every supported database, including NC 32.0.
+			$qb = $this->db->getQueryBuilder();
+			$qb->update($this->getTableName())
+				->set('config_value', $qb->createFunction($qb->getColumnName('config_value')))
+				->where($qb->expr()->eq('config_key', $qb->createNamedParameter($guardKey)));
+			$qb->executeStatement();
+			if ($this->getValue($guardKey) !== $expected) {
+				$this->db->rollBack();
+				return false;
+			}
+			foreach ($values as $key => $value) {
+				$this->setValue($key, $value, $updatedAt);
+			}
+			$this->db->commit();
+			return true;
+		} catch (\Throwable $exception) {
+			$this->db->rollBack();
+			throw $exception;
+		}
 	}
 }

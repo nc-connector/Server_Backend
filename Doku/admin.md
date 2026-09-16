@@ -131,7 +131,7 @@ Delegated NC Connector admins can manage only their assigned scopes. They cannot
 
 Allow DNS resolution, TLS validation, and outbound HTTPS through the Nextcloud proxy or firewall where these functions are required.
 
-The update check runs independently of Pro mode and license credentials. It sends product, installed version, stable channel, and a daily pseudonymous identifier. The license request is sent only in Pro mode with stored credentials.
+The update check runs independently of Pro mode and license credentials. It sends product, installed version, stable channel, and a daily pseudonymous identifier. The license request is sent only in Pro mode with stored credentials. It sends the license email and key, Nextcloud's installation ID, and a separate installation proof over HTTPS. It never sends Nextcloud's own encryption secret, password salt, users, or files.
 
 Template image retrieval rejects non-HTTPS URLs, private or reserved destinations, excessive redirects, files larger than 4 MB, unsupported image formats, and mismatched content types.
 
@@ -291,13 +291,34 @@ In Pro mode:
 1. Enter **License email** and **License key**.
 2. Save the credentials.
 3. Select **Sync now**.
-4. Review status, validity, grace period, purchased Seats, available Seats, last sync, and any error.
+4. Review license state, validity, grace period, capacity, assigned Seats, last successful sync, and any error.
 
 Expected result: the status becomes active or grace where applicable, and the Seat totals match the license.
 
 The scheduled Pro synchronization runs every 24 hours when Pro mode and complete credentials are present. Community mode does not contact the license endpoint.
 
 Saving a different license email or key clears the previously synchronized entitlement until the new credentials synchronize successfully. Existing Seat assignments remain stored and are suspended while no entitlement is available. Saving the same credentials again, including case-only differences, keeps the cached entitlement so a temporary network failure does not interrupt the existing offline or grace behavior. Switching between Community and Pro mode also keeps the stored Pro entitlement and Seat assignments.
+
+**Reading the license status**
+
+- **Active** and **Grace period** allow Pro use for users with an active assigned Seat. Grace lasts 14 days after expiry.
+- **Expired** after grace, **Inactive**, and **Invalid** do not allow Pro use. Inactive and invalid licenses have no grace, even if a future expiry date is shown.
+- **License capacity** is the recorded number of Seats, not a promise of current access. Assignments remain stored while Pro is unavailable; renewal restores access within the available capacity. The backend does not switch to Community automatically.
+- A synchronization error is shown separately from the last successful status. Basic add-on features remain available with local settings.
+
+**Automatic activation of purchased licenses**
+
+After updating, the next scheduled or manual synchronization activates an eligible purchased license for this Nextcloud. No additional setup or re-entry of existing credentials is needed. Manual licenses and manually issued trials are exempt. A trial converted into a purchased license activates at its next successful check.
+
+**Activated for this Nextcloud** confirms the installation assignment, not the commercial validity of the license. The first qualifying installation receives the assignment. During rollout, registration is already active, but a notice about a different installation does not block otherwise valid access until the license-server operator enables verification.
+
+Once verification is enabled, a license already assigned to another installation cannot provide Pro access here. Existing Seat assignments and settings remain stored. Use [Contact support](https://nc-connector.de/support/) to resolve an incorrect assignment; buying additional Seats does not resolve an activation conflict.
+
+If the server cannot be reached after enforced activation has been confirmed, the cached grant lasts at most 14 days from the last successful proof and entitlement check, and never beyond the license's existing grace deadline. Failed checks, repeated saves, and mode changes do not restart this period. An explicit refusal or revoked key ends Pro access when received. There is no added offline deadline during the non-enforcing rollout phase or for exempt manual/trial licenses.
+
+For a full server move, preserve the Nextcloud configuration and database. A domain or IP change alone does not require a new activation. A fresh installation or lost configuration may need a replacement license key: [contact support](https://nc-connector.de/support/), enter the supplied key in the intended backend, save, and synchronize. There is no deactivate or transfer button. Switching to Community does not release the assignment.
+
+For evaluation with more than one Seat, use the [30-day trial request form](https://nc-connector.de/testlizenz/). Community retains its free Seat without license-server communication.
 
 ### 4.4 Backend update status
 
@@ -762,7 +783,7 @@ The app-owned tables use the configured Nextcloud table prefix and these suffixe
 - `nccb_group_overrides`
 - `nccb_admin_delegations`
 
-The settings table contains policies, encrypted license credentials, license state, and cached update metadata. License-key decryption depends on the Nextcloud instance secrets, so the normal Nextcloud configuration backup is required as well.
+The settings table contains policies, encrypted license credentials and installation proof, license state, and cached update metadata. Decryption depends on the Nextcloud instance secrets, so the normal Nextcloud configuration backup is required as well. Preserve the original installation ID and the matching database when moving the server. Do not delete or recreate the installation proof to resolve an activation conflict; request a replacement license key through support instead.
 
 Keep:
 
