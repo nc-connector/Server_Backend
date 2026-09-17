@@ -5,6 +5,8 @@ OC.L10N.register(
   "License capacity": "授權容量",
   "Grace period ends on": "寬限期結束日期",
   "Grace period ended on": "寬限期已結束於",
+  "Your license has expired. Please renew your license.": "您的授權已到期。請續訂授權。",
+  "Your license has expired. Pro features are not available.": "您的授權已到期。Pro 功能無法使用。",
   "Pro features are available.": "Pro 功能可用。",
   "Pro features are not available. Basic features remain available.": "Pro 功能無法使用。基本功能仍可使用。",
   "Seat assignments remain stored and can be used again after renewal, subject to available capacity.": "席位指派會保留。續訂後，只要容量充足，即可重新使用。",

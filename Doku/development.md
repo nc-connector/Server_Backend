@@ -221,6 +221,8 @@ The main entry point is `js/ncc_backend_4mc-adminSettings.js`. New responsibilit
 
 Style files follow the same UI areas. Shared layout stays in `adminSettings.css`; status, Seats, templates, and delegation use their matching files.
 
+`adminGeneralStatusUi.js` displays license notices from the snapshot's commercial status, effective access status, activation result and synchronization error. Blocking notices precede advisory ones; `is_valid` alone supplies the availability message. The browser does not calculate grace or offline entitlement from dates. Status facts use a single-column list with scoped definition-list resets; activation help is positioned within its row to avoid horizontal overflow.
+
 Do not add new `fetch(...)` wrappers to the main entry point. Use `adminApi.js`.
 
 Default rows remain separate from override rows:

@@ -3,6 +3,8 @@
         "License capacity": "ライセンスの利用枠数",
         "Grace period ends on": "猶予期間の終了日",
         "Grace period ended on": "猶予期間の終了日（終了済み）",
+        "Your license has expired. Please renew your license.": "ライセンスの有効期限が切れています。ライセンスを更新してください。",
+        "Your license has expired. Pro features are not available.": "ライセンスの有効期限が切れています。Pro 機能は利用できません。",
         "Pro features are available.": "Pro 機能を利用できます。",
         "Pro features are not available. Basic features remain available.": "Pro 機能は利用できません。基本機能は引き続き利用できます。",
         "Seat assignments remain stored and can be used again after renewal, subject to available capacity.": "シートの割り当ては保存されます。更新後、十分な利用枠があれば再び使用できます。",

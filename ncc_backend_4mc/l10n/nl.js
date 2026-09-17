@@ -5,6 +5,8 @@ OC.L10N.register(
   "License capacity": "Licentiecapaciteit",
   "Grace period ends on": "Respijtperiode eindigt op",
   "Grace period ended on": "Respijtperiode geëindigd op",
+  "Your license has expired. Please renew your license.": "Uw licentie is verlopen. Verleng uw licentie.",
+  "Your license has expired. Pro features are not available.": "Uw licentie is verlopen. De Pro-functies zijn niet beschikbaar.",
   "Pro features are available.": "Pro-functies zijn beschikbaar.",
   "Pro features are not available. Basic features remain available.": "Pro-functies zijn niet beschikbaar. Basisfuncties blijven beschikbaar.",
   "Seat assignments remain stored and can be used again after renewal, subject to available capacity.": "Seat-toewijzingen blijven opgeslagen en kunnen na verlenging opnieuw worden gebruikt, mits er voldoende capaciteit is.",

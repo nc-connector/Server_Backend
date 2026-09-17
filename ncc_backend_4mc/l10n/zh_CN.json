@@ -3,6 +3,8 @@
         "License capacity": "许可证容量",
         "Grace period ends on": "宽限期结束日期",
         "Grace period ended on": "宽限期已结束于",
+        "Your license has expired. Please renew your license.": "您的许可证已过期。请续订许可证。",
+        "Your license has expired. Pro features are not available.": "您的许可证已过期。Pro 功能不可用。",
         "Pro features are available.": "Pro 功能可用。",
         "Pro features are not available. Basic features remain available.": "Pro 功能不可用。基本功能仍然可用。",
         "Seat assignments remain stored and can be used again after renewal, subject to available capacity.": "席位分配会保留。续订后，只要容量充足，即可重新使用。",

@@ -3,6 +3,8 @@
         "License capacity": "Объём лицензии",
         "Grace period ends on": "Льготный период заканчивается",
         "Grace period ended on": "Льготный период закончился",
+        "Your license has expired. Please renew your license.": "Срок действия вашей лицензии истёк. Продлите лицензию.",
+        "Your license has expired. Pro features are not available.": "Срок действия вашей лицензии истёк. Функции Pro недоступны.",
         "Pro features are available.": "Функции Pro доступны.",
         "Pro features are not available. Basic features remain available.": "Функции Pro недоступны. Базовые функции остаются доступными.",
         "Seat assignments remain stored and can be used again after renewal, subject to available capacity.": "Назначения мест сохраняются и снова станут доступны после продления при достаточном количестве мест.",

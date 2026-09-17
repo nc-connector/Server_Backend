@@ -46,10 +46,32 @@
 
 .nccb-license-facts {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-	gap: 12px 24px;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 10px;
+	max-width: 760px;
 	margin: 14px 0;
+	padding: 0;
 	color: var(--color-main-text);
+}
+
+.nccb-license-facts > div {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 250px) minmax(0, 1fr);
+	gap: 4px 16px;
+	min-width: 0;
+}
+
+/* Nextcloud lays out definition terms inline with a fixed width. */
+.nccb-license-facts dt,
+.nccb-license-facts dd {
+	display: block;
+	min-width: 0;
+	width: auto;
+	padding: 0;
+	white-space: normal;
+	text-align: start;
+	overflow-wrap: anywhere;
 }
 
 .nccb-license-facts dt {
@@ -57,14 +79,49 @@
 }
 
 .nccb-license-facts dd {
-	margin: 3px 0 0;
-	overflow-wrap: anywhere;
+	margin: 0;
+}
+
+.nccb-license-facts .nccb-help-wrap {
+	position: static;
+}
+
+.nccb-license-facts .nccb-help-tooltip {
+	top: auto;
+	bottom: 100%;
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+}
+
+.nccb-license-facts > div:hover .nccb-help-tooltip {
+	display: block;
+}
+
+@media (max-width: 600px) {
+	.nccb-license-facts > div {
+		grid-template-columns: minmax(0, 1fr);
+	}
 }
 
 .nccb-license-warning {
+	box-sizing: border-box;
+	max-width: 760px;
+	margin: 12px 0;
 	padding: 8px 12px;
 	border-left: 3px solid var(--color-warning, #edbc00);
+	border-radius: 4px;
+	background: color-mix(in srgb, var(--color-warning, #edbc00) 12%, var(--color-main-background, #fff));
 	color: var(--color-main-text);
+}
+
+.nccb-license-warning--error {
+	border-left-color: var(--color-error, #e9322d);
+	background: color-mix(in srgb, var(--color-error, #e9322d) 12%, var(--color-main-background, #fff));
+}
+
+.nccb-license-warning p {
+	margin: 6px 0 0;
 }
 
 .nccb-recommended-apps {

@@ -3,6 +3,8 @@
         "License capacity": "Licenckapacitás",
         "Grace period ends on": "A türelmi idő vége",
         "Grace period ended on": "A türelmi idő lejárt",
+        "Your license has expired. Please renew your license.": "A licence lejárt. Kérjük, újítsa meg a licencét.",
+        "Your license has expired. Pro features are not available.": "A licence lejárt. A Pro funkciók nem érhetők el.",
         "Pro features are available.": "A Pro-funkciók elérhetők.",
         "Pro features are not available. Basic features remain available.": "A Pro-funkciók nem érhetők el. Az alapfunkciók továbbra is használhatók.",
         "Seat assignments remain stored and can be used again after renewal, subject to available capacity.": "A helyek hozzárendelései megmaradnak, és megújítás után elegendő kapacitás esetén újra használhatók.",

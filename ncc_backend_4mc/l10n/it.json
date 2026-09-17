@@ -3,6 +3,8 @@
         "License capacity": "Capacità della licenza",
         "Grace period ends on": "Il periodo di tolleranza termina il",
         "Grace period ended on": "Il periodo di tolleranza è terminato il",
+        "Your license has expired. Please renew your license.": "La licenza è scaduta. Rinnovi la licenza.",
+        "Your license has expired. Pro features are not available.": "La licenza è scaduta. Le funzionalità Pro non sono disponibili.",
         "Pro features are available.": "Le funzioni Pro sono disponibili.",
         "Pro features are not available. Basic features remain available.": "Le funzioni Pro non sono disponibili. Le funzioni di base restano disponibili.",
         "Seat assignments remain stored and can be used again after renewal, subject to available capacity.": "Le assegnazioni dei posti vengono conservate e potranno essere riutilizzate dopo il rinnovo, se la capacità disponibile è sufficiente.",

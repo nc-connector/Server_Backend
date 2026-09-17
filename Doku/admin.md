@@ -306,6 +306,8 @@ Saving a different license email or key clears the previously synchronized entit
 - **License capacity** is the recorded number of Seats, not a promise of current access. Assignments remain stored while Pro is unavailable; renewal restores access within the available capacity. The backend does not switch to Community automatically.
 - A synchronization error is shown separately from the last successful status. Basic add-on features remain available with local settings.
 
+License facts appear one per row. Warnings sit above them: yellow for grace, incomplete setup, an unconfirmed status or a failed synchronization; red when the license is expired, inactive or invalid, activation is refused, or the offline period has ended. Blocking errors appear before advisory warnings. The availability message states whether Pro can currently be used; a connection failure alone does not invalidate a previously confirmed license. During grace, the warning includes the deadline. Activation help remains within the status area and can be opened by mouse or keyboard.
+
 **Automatic activation of purchased licenses**
 
 After updating, the next scheduled or manual synchronization activates an eligible purchased license for this Nextcloud. No additional setup or re-entry of existing credentials is needed. Manual licenses and manually issued trials are exempt. A trial converted into a purchased license activates at its next successful check.

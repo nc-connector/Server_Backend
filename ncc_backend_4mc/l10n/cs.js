@@ -5,6 +5,8 @@ OC.L10N.register(
   "License capacity": "Kapacita licence",
   "Grace period ends on": "Ochranná lhůta končí",
   "Grace period ended on": "Ochranná lhůta skončila",
+  "Your license has expired. Please renew your license.": "Platnost vaší licence vypršela. Obnovte prosím licenci.",
+  "Your license has expired. Pro features are not available.": "Platnost vaší licence vypršela. Funkce Pro nejsou dostupné.",
   "Pro features are available.": "Funkce Pro jsou dostupné.",
   "Pro features are not available. Basic features remain available.": "Funkce Pro nejsou dostupné. Základní funkce zůstávají dostupné.",
   "Seat assignments remain stored and can be used again after renewal, subject to available capacity.": "Přiřazení míst zůstávají uložená a po obnovení licence je lze znovu využít, pokud je k dispozici dostatečná kapacita.",

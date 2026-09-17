@@ -9,12 +9,17 @@
 
 	function renderLicenseStatus(refs, snapshot, helpers) {
 		const { tr, escapeHtml, formatDate, formatDateTime, renderInlineHelp } = helpers
+		const notice = (message, body = '', error = false) => ({
+			error,
+			html: '<div class="nccb-license-warning' + (error ? ' nccb-license-warning--error' : '')
+				+ '" role="' + (error ? 'alert' : 'status') + '"><strong>' + escapeHtml(message) + '</strong>' + body + '</div>',
+		})
 		if (refs.licenseHint instanceof HTMLElement) {
 			refs.licenseHint.hidden = true
 			refs.licenseHint.innerHTML = ''
 		}
 		if (!snapshot) {
-			refs.licenseStatus.textContent = tr('No license data available.')
+			refs.licenseStatus.innerHTML = notice(tr('No license data available.')).html
 			return
 		}
 		if (snapshot.mode === 'community') {
@@ -22,7 +27,7 @@
 			return
 		}
 		if (!snapshot.has_credentials) {
-			refs.licenseStatus.textContent = tr('Pro mode active: Please provide license email and license key.')
+			refs.licenseStatus.innerHTML = notice(tr('Pro mode active: Please provide license email and license key.')).html
 			if (refs.licenseHint instanceof HTMLElement) {
 				refs.licenseHint.hidden = false
 				refs.licenseHint.innerHTML = `${escapeHtml(tr('Ready for productive team use? You can get your license key at'))} <a href="https://nc-connector.de" target="_blank" rel="noopener">nc-connector.de</a>`
@@ -38,9 +43,10 @@
 			UNKNOWN: tr('Unknown'),
 		}
 		const commercial = String(snapshot.license_status_effective || snapshot.status_effective || 'UNKNOWN')
+		const effective = String(snapshot.status_effective || commercial)
 		const status = statusLabels[commercial] || tr('Unknown')
 		const row = (label, value, help = '') => '<div><dt>' + escapeHtml(label) + '</dt><dd>' + escapeHtml(String(value)) + help + '</dd></div>'
-		const graceLabel = commercial === 'EXPIRED' ? tr('Grace period ended on') : tr('Grace period ends on')
+		const graceLabel = commercial === 'EXPIRED' ? tr('Grace until') : tr('Grace period ends on')
 		const rows = [
 			row(tr('License'), status),
 			row(tr('Valid until'), formatDate(snapshot.expires_at)),
@@ -51,12 +57,25 @@
 		if (snapshot.grace_until && (commercial === 'GRACE' || commercial === 'EXPIRED')) {
 			rows.splice(2, 0, row(graceLabel, formatDate(snapshot.grace_until)))
 		}
-		let details = '<p>' + escapeHtml(snapshot.is_valid ? tr('Pro features are available.') : tr('Pro features are not available. Basic features remain available.')) + '</p>'
+		const notices = []
+		if (commercial === 'GRACE') {
+			const deadline = snapshot.grace_until
+				? '<p>' + escapeHtml(tr('Grace period ends on') + ': ' + formatDate(snapshot.grace_until)) + '</p>' : ''
+			notices.push(notice(tr('Your license has expired. Please renew your license.'), deadline))
+		} else if (commercial === 'EXPIRED') {
+			notices.push(notice(tr('Your license has expired. Pro features are not available.'), '', true))
+		} else if (commercial === 'INACTIVE' || commercial === 'INVALID') {
+			notices.push(notice(tr('License') + ': ' + status, '', true))
+		} else if (commercial !== 'ACTIVE') {
+			notices.push(notice(tr('Pro is selected, but no valid license is active yet.')))
+		}
+		const availability = '<p>' + escapeHtml(snapshot.is_valid ? tr('Pro features are available.') : tr('Pro features are not available. Basic features remain available.')) + '</p>'
+		let details = ''
 		if (!snapshot.is_valid && commercial !== 'ACTIVE' && commercial !== 'GRACE') {
 			details += '<p>' + escapeHtml(tr('Seat assignments remain stored and can be used again after renewal, subject to available capacity.')) + '</p>'
 		}
-		if (snapshot.status_effective === 'OFFLINE_EXPIRED') {
-			details += '<p class="nccb-license-warning">' + escapeHtml(tr('Offline period ended. Synchronize the license to restore Pro access.')) + '</p>'
+		if (effective === 'OFFLINE_EXPIRED') {
+			notices.push(notice(tr('Offline period ended. Synchronize the license to restore Pro access.'), '', true))
 		}
 		const syncErrors = {
 			license_sync_unavailable: tr('The license server could not be reached. Check the connection and try again.'),
@@ -64,29 +83,35 @@
 			installation_proof_unavailable: tr('The installation proof could not be loaded. Please contact support.'),
 		}
 		if (snapshot.last_error) {
-			details += '<p class="nccb-license-warning" role="status">' + escapeHtml(syncErrors[snapshot.last_error] || tr('Synchronization failed.')) + '</p>'
+			notices.push(notice(syncErrors[snapshot.last_error] || tr('Synchronization failed.')))
 		}
 		const activation = snapshot.activation
-		if (activation?.required) {
-			const confirmed = activation.verified && activation.state === 'activated'
+		if (activation?.required || effective === 'ACTIVATION_REQUIRED' || activation?.state === 'credentials_changed') {
+			const confirmed = activation?.verified && activation?.state === 'activated'
 			const activationLabel = confirmed ? tr('Activated for this Nextcloud')
-				: activation.state === 'conflict' ? tr('This license is already activated for another Nextcloud.')
+				: activation?.state === 'conflict' ? tr('This license is already activated for another Nextcloud.')
 					: tr('License activation could not be confirmed. Check your license key or contact support.')
 			const help = confirmed ? renderInlineHelp('License activation', [
 				'The license is automatically assigned to this Nextcloud. A complete server migration preserving configuration and database normally keeps the activation.',
 			]) : ''
 			rows.push(row(tr('License activation'), activationLabel, help))
 			if (!confirmed) {
-				if (!activation.enforced) {
-					details += '<p>' + escapeHtml(tr('Installation verification is not enforced yet. This notice does not block access.')) + '</p>'
+				let explanation = ''
+				if (!activation?.enforced && snapshot.is_valid && activation?.state !== 'credentials_changed') {
+					explanation += '<p>' + escapeHtml(tr('Installation verification is not enforced yet. This notice does not block access.')) + '</p>'
 				}
-				if (activation.state === 'conflict' || activation.state === 'invalid_proof') {
-					details += '<p class="nccb-license-warning">' + escapeHtml(tr('Moved your server or reinstalled Nextcloud? Contact support. We can help you with a replacement license key.')) + '</p>'
+				if (activation?.state === 'conflict' || activation?.state === 'invalid_proof') {
+					explanation += '<p>' + escapeHtml(tr('Moved your server or reinstalled Nextcloud? Contact support. We can help you with a replacement license key.')) + '</p>'
 				}
-				details += '<a class="button" href="https://nc-connector.de/support/" target="_blank" rel="noopener">' + escapeHtml(tr('Contact support')) + '</a>'
+				explanation += '<p><a class="button" href="https://nc-connector.de/support/" target="_blank" rel="noopener">' + escapeHtml(tr('Contact support')) + '</a></p>'
+				notices.push(notice(activationLabel, explanation, !snapshot.is_valid))
 			}
 		}
-		refs.licenseStatus.innerHTML = '<dl class="nccb-license-facts">' + rows.join('') + '</dl>' + details
+		if (effective === 'INVALID' && commercial !== 'INVALID' && activation?.state !== 'credentials_changed') {
+			notices.push(notice(tr('License') + ': ' + tr('Invalid'), '', true))
+		}
+		const warnings = notices.sort((left, right) => Number(right.error) - Number(left.error)).map((item) => item.html).join('')
+		refs.licenseStatus.innerHTML = warnings + availability + '<dl class="nccb-license-facts">' + rows.join('') + '</dl>' + details
 	}
 
 	function renderProFunnel(refs, snapshot, helpers) {

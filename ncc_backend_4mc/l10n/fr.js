@@ -5,6 +5,8 @@ OC.L10N.register(
   "License capacity": "Capacité de la licence",
   "Grace period ends on": "Fin du délai de grâce le",
   "Grace period ended on": "Délai de grâce terminé le",
+  "Your license has expired. Please renew your license.": "Votre licence a expiré. Veuillez renouveler votre licence.",
+  "Your license has expired. Pro features are not available.": "Votre licence a expiré. Les fonctionnalités Pro ne sont pas disponibles.",
   "Pro features are available.": "Les fonctions Pro sont disponibles.",
   "Pro features are not available. Basic features remain available.": "Les fonctions Pro ne sont pas disponibles. Les fonctions de base restent disponibles.",
   "Seat assignments remain stored and can be used again after renewal, subject to available capacity.": "Les attributions de sièges sont conservées et pourront être réutilisées après renouvellement, dans la limite de la capacité disponible.",
