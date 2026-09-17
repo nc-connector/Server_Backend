@@ -4,6 +4,19 @@ All notable changes to this repository are documented in this file.
 
 The format is based on **Keep a Changelog** and uses a simple version-first structure.
 
+## [1.4.1] - 2026-09-17
+
+### Changed
+- Raise the declared Nextcloud maximum version to 36
+- Improve license synchronization, activation status reporting, and offline handling while retaining compatibility with existing mail add-ons
+- Improve the license status overview with separate rows for validity, seat capacity, assignments, synchronization, and activation
+- Show clear warnings for grace periods, unavailable Pro access, activation issues, and synchronization failures, with blocking errors displayed first
+- Update license-related messages and translations across all 15 supported languages
+
+### Fixed
+- Prevent overlapping license labels and keep activation tooltips accessible by mouse and keyboard without horizontal scrolling
+- Distinguish temporary synchronization failures from license refusals and show whether Pro features remain available
+
 ## [1.4.0] - 2026-09-10
 
 ### Added

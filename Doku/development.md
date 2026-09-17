@@ -95,7 +95,7 @@ Use:
 - Node.js 24 for CI parity
 - PHP DOM, libxml, and SimpleXML extensions
 - Git
-- a Nextcloud 32–35 test instance for integration checks
+- a Nextcloud 32–36 test instance for integration checks
 
 The PHP and Nextcloud support range is declared in `ncc_backend_4mc/appinfo/info.xml`.
 

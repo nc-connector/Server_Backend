@@ -87,7 +87,7 @@ The backend does not store mail content or attachments. Templates, policies, lic
 
 | Component | Requirement |
 |---|---|
-| Nextcloud | 32 through 35 |
+| Nextcloud | 32 through 36 |
 | PHP | 8.3 or newer |
 | Transport | HTTPS for production access |
 | Background jobs | Nextcloud background jobs must run regularly; system cron is recommended |

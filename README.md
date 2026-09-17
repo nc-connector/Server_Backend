@@ -114,7 +114,7 @@ The default Secrets link lifetime is 7 days.
 
 ## Requirements
 
-- Nextcloud 32 through 35
+- Nextcloud 32 through 36
 - PHP 8.3 or newer
 - NC Connector for Thunderbird or NC Connector for Outlook Classic
 - Nextcloud Files Sharing

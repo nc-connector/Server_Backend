@@ -70,7 +70,7 @@ Das Backend speichert weder E-Mail-Inhalte noch Anhänge.
 - Homepage: [https://nc-connector.de](https://nc-connector.de)
 - Kontakt: [https://nc-connector.de/kontakt/](https://nc-connector.de/kontakt/)
 ]]></description>
-	<version>1.4.0</version>
+	<version>1.4.1</version>
 	<licence>AGPL-3.0-or-later</licence>
 	<author mail="info@nc-connector.de" homepage="https://nc-connector.de">NC Connector</author>
 	<namespace>NcConnector</namespace>
@@ -87,7 +87,7 @@ Das Backend speichert weder E-Mail-Inhalte noch Anhänge.
 	<screenshot>https://raw.githubusercontent.com/nc-connector/NC_Connector_for_Thunderbird/main/screenshots/filelink_wizzard1.png</screenshot>
 
 	<dependencies>
-		<nextcloud min-version="32" max-version="35"/>
+		<nextcloud min-version="32" max-version="36"/>
 		<php min-version="8.3"/>
 	</dependencies>
 
