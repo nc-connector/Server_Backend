@@ -136,6 +136,22 @@ test('manual trials have no activation warning; the trial action uses the form',
   assert.doesNotMatch(community.proFunnel.innerHTML, /mailto:/)
 })
 
+test('Community offers the same functions while Pro adds users', () => {
+  for (const mode of ['community', 'pro']) {
+    const refs = render({ mode, has_credentials: false })
+    assert.match(refs.proFunnel.innerHTML, /Community includes all features for one user\. Activate Pro for additional users\./)
+    assert.doesNotMatch(refs.proFunnel.innerHTML, /For teams, central policies and more Seats/)
+  }
+})
+
+test('external VFS policy help describes the setting without repeating Seat requirements', () => {
+  const context = { window: {} }
+  vm.runInNewContext(readFileSync('ncc_backend_4mc/js/adminSettingsMeta.js', 'utf8'), context)
+  const tooltip = context.window.NCCBackendAdminSettingsMeta.settingMeta.vfs_external_providers_enabled.tooltip.join(' ')
+  assert.equal(tooltip, 'Controls whether users may add files from other Thunderbird VFS providers to the sharing queue.')
+  assert.doesNotMatch(tooltip, /Seat|Community|NC Connector Pro/)
+})
+
 test('unknown status does not claim that a previously usable license expired', () => {
   const refs = render({ status_effective: 'UNKNOWN', license_status_effective: 'UNKNOWN', is_valid: false })
   assert.doesNotMatch(refs.proFunnel.innerHTML, /no longer usable/)

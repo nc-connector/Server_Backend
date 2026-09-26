@@ -307,7 +307,7 @@
         "Activate Pro for teams": "Включить Pro для команд",
         "NC Connector currently runs in Community mode with one free Seat.": "NC Connector сейчас работает в режиме Community с одним бесплатным Seat.",
         "Pro is selected, but no valid license is active yet.": "Выбран Pro, но действующая лицензия еще не активна.",
-        "For teams, central policies and more Seats, activate Pro.": "Для команд, центральных политик и большего числа Seat включите Pro.",
+        "Community includes all features for one user. Activate Pro for additional users.": "Community включает все функции для одного пользователя. Активируйте Pro для дополнительных пользователей.",
         "Buy Pro license": "Купить лицензию Pro",
         "Request 30-day trial key": "Запросить пробный ключ на 30 дней",
         "You can keep using Community mode for tests and single-user setups.": "Для тестов и установки для одного пользователя можно продолжать использовать режим Community.",
@@ -346,7 +346,7 @@
         "NC Connector as VFS provider": "NC Connector как поставщик VFS",
         "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.": "Определяет, могут ли другие дополнения Thunderbird запрашивать через NC Connector доступ к настроенной учётной записи Nextcloud.",
         "External VFS providers": "Внешние поставщики VFS",
-        "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.": "Определяет, могут ли пользователи добавлять в очередь публикации файлы от других поставщиков VFS для Thunderbird. Требуются NC Connector Pro и активный назначенный seat."
+        "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue.": "Определяет, могут ли пользователи добавлять в очередь публикации файлы от других поставщиков VFS для Thunderbird."
     },
     "pluralForm": "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2));"
 }

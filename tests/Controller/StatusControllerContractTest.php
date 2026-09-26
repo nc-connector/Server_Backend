@@ -5,11 +5,108 @@ declare(strict_types=1);
 namespace OCA\NcConnector\Tests\Controller;
 
 use OCA\NcConnector\Controller\StatusController;
+use OCA\NcConnector\Db\Seat;
+use OCA\NcConnector\Db\SeatMapper;
+use OCA\NcConnector\Db\SettingMapper;
+use OCA\NcConnector\Service\AccessService;
+use OCA\NcConnector\Service\LicenseService;
+use OCA\NcConnector\Service\SeatService;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/ControllerTestDoubles.php';
 
 final class StatusControllerContractTest extends TestCase {
+	public function testCapacityChangesPreservePoliciesForActiveSeatsInBothModes(): void {
+		$mapper = $this->assignedSeatMapper();
+		$mapper->expects(self::never())->method('assign');
+		$mapper->expects(self::never())->method('unassign');
+		$previousPolicy = null;
+		foreach ([['pro', 12], ['pro', 10], ['community', 1], ['pro', 12]] as [$mode, $capacity]) {
+			$license = $this->createMock(LicenseService::class);
+			$license->method('getTotalSeats')->willReturn($capacity);
+			$license->method('isLicenseValid')->willReturn(true);
+			$license->method('getSnapshot')->willReturn(['mode' => $mode]);
+			$seats = new SeatService($mapper, $this->createMock(SettingMapper::class), $license);
+			$access = new AccessService(new TestGroupManager(), $seats, $license, new TestAdminDelegationService());
+			for ($index = 1; $index <= 12; $index++) {
+				$user = 'user-' . $index;
+				$data = (new StatusController('ncc_backend_4mc', new TestRequest(), $access, $seats,
+					$license, new TestClientSettingsService(effectiveSettings: [
+						'vfs_external_providers_enabled' => true, 'share_send_password_mode' => 'secrets',
+						'talk_lobby_enabled' => true, 'email_signature_on_compose' => true,
+					], effectiveEditable: ['share_send_password_mode' => true]), $user))->status()->getData();
+				$active = $index <= $capacity;
+				self::assertTrue($data['status']['seat_assigned']);
+				self::assertSame($active ? 'active' : 'suspended_overlimit', $data['status']['seat_state']);
+				self::assertSame($capacity < 12, $data['status']['overlicensed']);
+				self::assertSame($mode, $data['status']['mode']);
+				self::assertSame($active, $access->isSeatUserWithValidLicense($user));
+				foreach (['share', 'talk', 'email_signature'] as $area) {
+					self::assertSame($active, is_array($data['policy'][$area]));
+					self::assertSame($active, is_array($data['policy_editable'][$area]));
+				}
+				if ($active) {
+					self::assertTrue($data['policy']['share']['vfs_external_providers_enabled']);
+					if ($previousPolicy !== null) {
+						self::assertSame($previousPolicy, $data['policy']);
+					}
+					$previousPolicy = $data['policy'];
+				}
+			}
+			self::assertSame(12, $seats->getAssignedSeats());
+			self::assertSame($capacity, $seats->getSeatUsage()['active_assigned']);
+			self::assertSame(12 - $capacity, $seats->getSeatUsage()['suspended_assigned']);
+		}
+	}
+
+	public function testPersonalAccessAndAdminInspectionStaySeparateAcrossLicenseStates(): void {
+		foreach (['COMMUNITY', 'ACTIVE', 'GRACE', 'EXPIRED', 'INACTIVE', 'INVALID', 'ACTIVATION_REQUIRED', 'OFFLINE_EXPIRED', 'UNKNOWN'] as $state) {
+			$valid = in_array($state, ['COMMUNITY', 'ACTIVE', 'GRACE'], true);
+			foreach ([false, true] as $admin) {
+				$license = $this->createMock(LicenseService::class);
+				$license->method('getTotalSeats')->willReturn($state === 'COMMUNITY' ? 1 : 10);
+				$license->method('isLicenseValid')->willReturn($valid);
+				$license->method('getSnapshot')->willReturn([
+					'mode' => $state === 'COMMUNITY' ? 'community' : 'pro',
+					'status_effective' => $state,
+					'license_status_effective' => $state,
+				]);
+				$seats = new SeatService($this->assignedSeatMapper(), $this->createMock(SettingMapper::class), $license);
+				$access = new AccessService(new TestGroupManager($admin ? ['admin'] : []), $seats, $license, new TestAdminDelegationService());
+				foreach (['user-1' => 'active', 'user-12' => 'suspended_overlimit', 'seatless' => 'none'] as $target => $seatState) {
+					$data = (new StatusController('ncc_backend_4mc', new TestRequest(['user_id' => $target]), $access,
+						$seats, $license, new TestClientSettingsService(), $admin ? 'admin' : $target))->status()->getData();
+					self::assertSame($target, $data['status']['user_id']);
+					self::assertSame($seatState, $data['status']['seat_state']);
+					self::assertSame($admin, $data['status']['can_manage_license']);
+					self::assertSame($valid, $data['status']['is_valid']);
+					self::assertSame($state, $data['status']['access_status']);
+					self::assertSame($valid && $seatState === 'active', $access->isSeatUserWithValidLicense($target));
+					foreach (['share', 'talk', 'email_signature'] as $area) {
+						self::assertSame($seatState === 'active' && ($admin || $valid), is_array($data['policy'][$area]));
+						self::assertSame($seatState === 'active' && ($admin || $valid), is_array($data['policy_editable'][$area]));
+					}
+				}
+			}
+		}
+	}
+
+	private function assignedSeatMapper(): SeatMapper {
+		$rows = [];
+		// Match the mapper's newest-first assignment order.
+		for ($index = 12; $index >= 1; $index--) {
+			$seat = new Seat();
+			$seat->setId($index);
+			$seat->setUserId('user-' . $index);
+			$seat->setAssignedAt($index);
+			$rows[$seat->getUserId()] = $seat;
+		}
+		$mapper = $this->createMock(SeatMapper::class);
+		$mapper->method('listAllAssigned')->willReturn(array_values($rows));
+		$mapper->method('getSeatForUser')->willReturnCallback(static fn(string $user): ?Seat => $rows[$user] ?? null);
+		return $mapper;
+	}
+
 	public function testLicenseDetailsExplainDenialWithoutRemovingSeatAssignments(): void {
 		foreach (['EXPIRED', 'INACTIVE', 'INVALID', 'ACTIVATION_REQUIRED', 'OFFLINE_EXPIRED'] as $reason) {
 			$controller = new StatusController(

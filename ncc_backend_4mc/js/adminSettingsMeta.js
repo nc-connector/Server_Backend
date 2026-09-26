@@ -98,7 +98,7 @@
 		},
 		vfs_external_providers_enabled: {
 			label: 'External VFS providers',
-			tooltip: ['Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.'],
+			tooltip: ['Controls whether users may add files from other Thunderbird VFS providers to the sharing queue.'],
 		},
 		share_html_block_template: {
 			label: 'Email share template',

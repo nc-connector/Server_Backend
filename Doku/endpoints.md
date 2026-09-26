@@ -7,7 +7,7 @@ For mail clients, **only one public read-only runtime endpoint** is exposed: `GE
 
 ### License status fields
 
-These fields extend `status`; existing fields retain their types and meanings. Feature access still requires `is_valid`, an active assigned Seat, and no overlicensing. Do not derive entitlement from dates, activation labels, or the administration flag.
+These fields extend `status`; existing fields retain their types and meanings. Feature access requires `is_valid` and an active assigned Seat, equally in Community and Pro. `overlicensed` describes global capacity, not the personal suspension of every assigned Seat. Do not derive entitlement from dates, activation labels, or the administration flag.
 
 | Field | Meaning |
 |---|---|
@@ -39,9 +39,9 @@ Old clients may ignore the added fields and keep using `is_valid` and Seat check
   - `policy_editable`: add-on editability grouped into `share`, `talk`, and `email_signature`
   - There is **no** separate `default` block in the runtime response.
 - **Policy null rules:**
-  - For ordinary users, an unusable license also returns `null` policies. Full Nextcloud admins retain the existing inspection path for assigned, non-overlicensed users; this does not grant Pro access to mail clients.
-  - `policy.share`, `policy.talk`, and `policy.email_signature` are `null` when `status.overlicensed=true` or `status.seat_assigned=false`.
-  - `policy_editable.share`, `policy_editable.talk`, and `policy_editable.email_signature` are also `null` when `status.overlicensed=true` or `status.seat_assigned=false`.
+  - For ordinary users, an unusable license also returns `null` policies. Full Nextcloud admins retain the existing inspection path for users with an active Seat, including when the license is unusable; this does not grant feature access to mail clients.
+  - All groups in `policy` and `policy_editable` are `null` when the resolved user's `seat_state` is `none` or `suspended_overlimit`, including admin inspection.
+  - An active Seat retains its policies when `status.overlicensed=true`. Only the newest assignments exceeding capacity are paused; assignments are retained and become usable again when capacity increases. The same rule applies in Community with one available Seat.
   - For settings with **Editable in add-on** enabled, `policy` still returns the configured backend default value.
   - Whether a setting may be changed in the add-on is returned separately in `policy_editable` as `true` or `false`.
   - Effective precedence is:
@@ -56,7 +56,7 @@ Old clients may ignore the added fields and keep using `is_valid` and Seat check
   - If a user override is removed and the setting falls back to a group override or the default again, `policy_editable` follows that lower layer again.
   - `policy.share.attachments_min_size_mb` is `null` when `policy.share.attachments_always_via_ncconnector=true`.
   - `policy.share.attachment_link_target` is `"zip_download"` or `"share_page"`. The built-in default is `"zip_download"`; the setting applies only to attachment mode, and manual shares remain unchanged.
-  - `policy.share.vfs_provider_enabled` and `policy.share.vfs_external_providers_enabled` are Thunderbird-only boolean controls. Their built-in defaults are `true` and `false`, respectively. Outlook and older clients ignore them. The external-provider value does not replace Thunderbird's Pro and active-seat check.
+  - `policy.share.vfs_provider_enabled` and `policy.share.vfs_external_providers_enabled` are Thunderbird-only boolean controls. Their built-in defaults are `true` and `false`, respectively. Outlook and older clients ignore them. The external-provider value does not replace the valid active assigned Seat check, which includes the free Community Seat.
   - `policy.share.share_html_block_template`, `policy.share.share_html_block_template_v2`, and `policy.share.share_password_template` are `null` when `policy.share.language_share_html_block != "custom"`.
   - `policy.share.share_send_password_mode` is `"plain"` or `"secrets"`. Missing, empty, or `null` means clients must use the existing plain password mail behavior.
   - `policy.share.share_send_password_mode` and `policy.share.share_secrets_expire_days` are `null` when the Nextcloud Secrets app is not installed or disabled.

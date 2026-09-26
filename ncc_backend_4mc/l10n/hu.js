@@ -309,7 +309,7 @@ OC.L10N.register(
   "Activate Pro for teams": "Pro aktivalasa csapatoknak",
   "NC Connector currently runs in Community mode with one free Seat.": "Az NC Connector jelenleg Community modban fut egy ingyenes Seattel.",
   "Pro is selected, but no valid license is active yet.": "A Pro van kivalasztva, de meg nincs aktiv ervenyes licenc.",
-  "For teams, central policies and more Seats, activate Pro.": "Csapatokhoz, kozponti szabalyokhoz es tobb Seathoz aktivalja a Pro verziot.",
+  "Community includes all features for one user. Activate Pro for additional users.": "A Community minden funkciót biztosít egy felhasználó számára. További felhasználókhoz aktiválja a Pro verziót.",
   "Buy Pro license": "Pro licenc vasarlasa",
   "Request 30-day trial key": "30 napos probakulcs kerese",
   "You can keep using Community mode for tests and single-user setups.": "Tesztekhez es egyfelhasznalos beallitasokhoz tovabbra is hasznalhatja a Community modot.",
@@ -348,7 +348,7 @@ OC.L10N.register(
   "NC Connector as VFS provider": "NC Connector VFS-szolgáltatóként",
   "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.": "Meghatározza, hogy más Thunderbird-kiegészítők kérhetnek-e hozzáférést a beállított Nextcloud-fiókhoz az NC Connectoron keresztül.",
   "External VFS providers": "Külső VFS-szolgáltatók",
-  "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.": "Meghatározza, hogy a felhasználók hozzáadhatnak-e más Thunderbird VFS-szolgáltatóktól származó fájlokat a megosztási várólistához. Ehhez NC Connector Pro és aktív hozzárendelt seat szükséges."
+  "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue.": "Meghatározza, hogy a felhasználók hozzáadhatnak-e más Thunderbird VFS-szolgáltatóktól származó fájlokat a megosztási várólistához."
 },
     'nplurals=2; plural=(n != 1);'
 );

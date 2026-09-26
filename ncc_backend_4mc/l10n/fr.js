@@ -309,7 +309,7 @@ OC.L10N.register(
   "Activate Pro for teams": "Activer Pro pour les equipes",
   "NC Connector currently runs in Community mode with one free Seat.": "NC Connector fonctionne actuellement en mode Community avec un Seat gratuit.",
   "Pro is selected, but no valid license is active yet.": "Pro est selectionne, mais aucune licence valide n est encore active.",
-  "For teams, central policies and more Seats, activate Pro.": "Pour les equipes, les politiques centrales et plus de Seats, activez Pro.",
+  "Community includes all features for one user. Activate Pro for additional users.": "Community inclut toutes les fonctions pour un utilisateur. Activez Pro pour des utilisateurs supplémentaires.",
   "Buy Pro license": "Acheter une licence Pro",
   "Request 30-day trial key": "Demander une cle d essai de 30 jours",
   "You can keep using Community mode for tests and single-user setups.": "Vous pouvez continuer a utiliser le mode Community pour les tests et les installations mono-utilisateur.",
@@ -348,7 +348,7 @@ OC.L10N.register(
   "NC Connector as VFS provider": "NC Connector comme fournisseur VFS",
   "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.": "Détermine si d’autres modules Thunderbird peuvent demander l’accès au compte Nextcloud configuré via NC Connector.",
   "External VFS providers": "Fournisseurs VFS externes",
-  "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.": "Détermine si les utilisateurs peuvent ajouter à la file de partage des fichiers provenant d’autres fournisseurs VFS Thunderbird. NC Connector Pro et un seat attribué actif sont requis."
+  "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue.": "Détermine si les utilisateurs peuvent ajouter à la file de partage des fichiers provenant d’autres fournisseurs VFS Thunderbird."
 },
     'nplurals=2; plural=(n > 1);'
 );

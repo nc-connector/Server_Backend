@@ -309,7 +309,7 @@ OC.L10N.register(
   "Activate Pro for teams": "チーム向けProを有効化",
   "NC Connector currently runs in Community mode with one free Seat.": "NC Connectorは現在、無料Seat 1件のCommunityモードで動作しています。",
   "Pro is selected, but no valid license is active yet.": "Proが選択されていますが、有効なライセンスはまだありません。",
-  "For teams, central policies and more Seats, activate Pro.": "チーム、中央ポリシー、追加SeatにはProを有効化してください。",
+  "Community includes all features for one user. Activate Pro for additional users.": "Community では 1 人のユーザーがすべての機能を利用できます。ユーザーを追加するには Pro を有効にしてください。",
   "Buy Pro license": "Proライセンスを購入",
   "Request 30-day trial key": "30日間の試用キーを依頼",
   "You can keep using Community mode for tests and single-user setups.": "テストや単一ユーザー構成ではCommunityモードを引き続き利用できます。",
@@ -348,7 +348,7 @@ OC.L10N.register(
   "NC Connector as VFS provider": "VFS プロバイダーとしての NC Connector",
   "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.": "他の Thunderbird アドオンが NC Connector を通じて設定済みの Nextcloud アカウントへのアクセスを要求できるかどうかを制御します。",
   "External VFS providers": "外部 VFS プロバイダー",
-  "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.": "他の Thunderbird VFS プロバイダーのファイルを共有キューに追加できるかどうかを制御します。NC Connector Pro と有効な割り当て済み seat が必要です。"
+  "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue.": "他の Thunderbird VFS プロバイダーのファイルを共有キューに追加できるかどうかを制御します。"
 },
     'nplurals=1; plural=0;'
 );

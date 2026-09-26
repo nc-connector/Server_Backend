@@ -282,6 +282,8 @@ The interface contains:
 | `Community` | One Seat | None |
 | `Pro` | Purchased Seat entitlement | Required after credentials are stored |
 
+An active assigned Community Seat has the same functions as an active assigned Pro Seat, including central policies, managed signatures, separate password delivery, and external Thunderbird VFS providers. Pro adds capacity for more users, not additional functions for an individual Seat. The same app dependencies, provider permissions, and administrator settings apply in both modes.
+
 Changing mode does not delete settings or Seats. A mode or license state with insufficient entitlement can pause Seat access until capacity becomes valid again.
 
 ### 4.3 License synchronization
@@ -408,7 +410,7 @@ At the bottom of each Share-policy table, **Thunderbird only – Virtual File Sy
 
 The NC Connector provider is enabled by default; every other add-on still needs an explicit user grant. External VFS providers are disabled by default.
 
-The external-provider function additionally requires NC Connector Pro and an active assigned seat in Thunderbird. Enabling its policy does not grant a Community user or an unassigned account access. Disabling either VFS policy does not delete saved external-provider connections. Defaults, group overrides, and user overrides use the same **Editable in add-on**, inherit, and forced-value behavior as the other Share settings.
+The external-provider function requires valid access with an active assigned NC Connector Seat, including the free Community Seat. Enabling its policy does not grant access to an unassigned or paused account. Use a current Thunderbird add-on: older versions may still incorrectly require Pro mode, which a backend update alone cannot correct. Disabling either VFS policy does not delete saved external-provider connections. Defaults, group overrides, and user overrides use the same **Editable in add-on**, inherit, and forced-value behavior as the other Share settings.
 
 The two VFS settings use the existing Share delegation scopes. A delegated admin needs **Share policies** for defaults and additionally **Share group overrides** or **Share user overrides** for the corresponding override layer.
 

@@ -309,7 +309,7 @@ OC.L10N.register(
   "Activate Pro for teams": "Activate Pro for teams",
   "NC Connector currently runs in Community mode with one free Seat.": "NC Connector currently runs in Community mode with one free Seat.",
   "Pro is selected, but no valid license is active yet.": "Pro is selected, but no valid license is active yet.",
-  "For teams, central policies and more Seats, activate Pro.": "For teams, central policies and more Seats, activate Pro.",
+  "Community includes all features for one user. Activate Pro for additional users.": "Community includes all features for one user. Activate Pro for additional users.",
   "Buy Pro license": "Buy Pro license",
   "Request 30-day trial key": "Request 30-day trial key",
   "You can keep using Community mode for tests and single-user setups.": "You can keep using Community mode for tests and single-user setups.",
@@ -348,7 +348,7 @@ OC.L10N.register(
   "NC Connector as VFS provider": "NC Connector as VFS provider",
   "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.": "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.",
   "External VFS providers": "External VFS providers",
-  "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.": "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat."
+  "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue.": "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue."
 },
     'nplurals=2; plural=(n != 1);'
 );

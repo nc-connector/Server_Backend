@@ -75,7 +75,7 @@ class StatusController extends Controller {
 			'talk' => null,
 			'email_signature' => null,
 		];
-		if (!$overlicensed && $seatAssigned && $canReadPolicies) {
+		if ($currentSeatState === SeatService::SEAT_STATE_ACTIVE && $canReadPolicies) {
 			$effective = $this->clientSettings->getEffectiveForUser($targetUserId);
 			$policySettings = $this->projectShareTemplateVersions($effective['settings'] ?? []);
 			$policy = $this->groupPolicyByAddonArea($policySettings);

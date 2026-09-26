@@ -147,7 +147,7 @@
 		refs.proFunnel.innerHTML = `
 			<h3>${escapeHtml(tr('Activate Pro for teams'))}</h3>
 			<p>${escapeHtml(tr(intro))}</p>
-			<p>${escapeHtml(tr('For teams, central policies and more Seats, activate Pro.'))}</p>
+			<p>${escapeHtml(tr('Community includes all features for one user. Activate Pro for additional users.'))}</p>
 			<div class="nccb-pro-funnel-actions">
 				<a class="button primary" href="https://nc-connector.de/preise-lizenzierung/#pro-checkout" target="_blank" rel="noopener">${escapeHtml(tr('Buy Pro license'))}</a>
 				<a class="button" href="https://nc-connector.de/testlizenz/" target="_blank" rel="noopener">${escapeHtml(tr('Request 30-day trial key'))}</a>

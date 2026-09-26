@@ -309,7 +309,7 @@ OC.L10N.register(
   "Activate Pro for teams": "Ativar Pro para equipas",
   "NC Connector currently runs in Community mode with one free Seat.": "O NC Connector esta atualmente no modo Community com um Seat gratuito.",
   "Pro is selected, but no valid license is active yet.": "Pro esta selecionado, mas ainda nao existe uma licenca valida ativa.",
-  "For teams, central policies and more Seats, activate Pro.": "Para equipas, politicas centrais e mais Seats, ative o Pro.",
+  "Community includes all features for one user. Activate Pro for additional users.": "O Community inclui todas as funções para um utilizador. Ative o Pro para utilizadores adicionais.",
   "Buy Pro license": "Comprar licenca Pro",
   "Request 30-day trial key": "Pedir chave de teste de 30 dias",
   "You can keep using Community mode for tests and single-user setups.": "Pode continuar a usar o modo Community para testes e configuracoes de utilizador unico.",
@@ -348,7 +348,7 @@ OC.L10N.register(
   "NC Connector as VFS provider": "NC Connector como fornecedor VFS",
   "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.": "Controla se outros extras do Thunderbird podem pedir acesso à conta Nextcloud configurada através do NC Connector.",
   "External VFS providers": "Fornecedores VFS externos",
-  "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.": "Controla se os utilizadores podem adicionar à fila de partilha ficheiros de outros fornecedores VFS do Thunderbird. Requer NC Connector Pro e um seat atribuído ativo."
+  "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue.": "Controla se os utilizadores podem adicionar à fila de partilha ficheiros de outros fornecedores VFS do Thunderbird."
 },
     'nplurals=2; plural=(n != 1);'
 );

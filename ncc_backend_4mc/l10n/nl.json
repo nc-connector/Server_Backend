@@ -307,7 +307,7 @@
         "Activate Pro for teams": "Pro activeren voor teams",
         "NC Connector currently runs in Community mode with one free Seat.": "NC Connector draait momenteel in Community-modus met een gratis Seat.",
         "Pro is selected, but no valid license is active yet.": "Pro is geselecteerd, maar er is nog geen geldige licentie actief.",
-        "For teams, central policies and more Seats, activate Pro.": "Activeer Pro voor teams, centraal beleid en meer Seats.",
+        "Community includes all features for one user. Activate Pro for additional users.": "Community biedt alle functies voor één gebruiker. Activeer Pro voor extra gebruikers.",
         "Buy Pro license": "Pro-licentie kopen",
         "Request 30-day trial key": "30 dagen proefsleutel aanvragen",
         "You can keep using Community mode for tests and single-user setups.": "Voor tests en installaties met een gebruiker kunt u de Community-modus blijven gebruiken.",
@@ -346,7 +346,7 @@
         "NC Connector as VFS provider": "NC Connector als VFS-provider",
         "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.": "Bepaalt of andere Thunderbird-add-ons via NC Connector toegang mogen aanvragen tot het geconfigureerde Nextcloud-account.",
         "External VFS providers": "Externe VFS-providers",
-        "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.": "Bepaalt of gebruikers bestanden van andere Thunderbird-VFS-providers aan de deelwachtrij mogen toevoegen. Hiervoor zijn NC Connector Pro en een actieve toegewezen seat vereist."
+        "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue.": "Bepaalt of gebruikers bestanden van andere Thunderbird-VFS-providers aan de deelwachtrij mogen toevoegen."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }

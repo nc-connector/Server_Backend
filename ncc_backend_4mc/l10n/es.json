@@ -307,7 +307,7 @@
         "Activate Pro for teams": "Activar Pro para equipos",
         "NC Connector currently runs in Community mode with one free Seat.": "NC Connector se ejecuta actualmente en modo Community con un Seat gratuito.",
         "Pro is selected, but no valid license is active yet.": "Pro esta seleccionado, pero todavia no hay una licencia valida activa.",
-        "For teams, central policies and more Seats, activate Pro.": "Para equipos, politicas centrales y mas Seats, active Pro.",
+        "Community includes all features for one user. Activate Pro for additional users.": "Community incluye todas las funciones para un usuario. Active Pro para usuarios adicionales.",
         "Buy Pro license": "Comprar licencia Pro",
         "Request 30-day trial key": "Solicitar clave de prueba de 30 dias",
         "You can keep using Community mode for tests and single-user setups.": "Puede seguir usando el modo Community para pruebas y configuraciones de un solo usuario.",
@@ -346,7 +346,7 @@
         "NC Connector as VFS provider": "NC Connector como proveedor VFS",
         "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.": "Controla si otros complementos de Thunderbird pueden solicitar acceso a la cuenta de Nextcloud configurada mediante NC Connector.",
         "External VFS providers": "Proveedores VFS externos",
-        "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.": "Controla si los usuarios pueden añadir a la cola de compartición archivos de otros proveedores VFS de Thunderbird. Requiere NC Connector Pro y un seat asignado activo."
+        "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue.": "Controla si los usuarios pueden añadir a la cola de compartición archivos de otros proveedores VFS de Thunderbird."
     },
     "pluralForm": "nplurals=2; plural=(n != 1);"
 }

@@ -307,7 +307,7 @@
         "Activate Pro for teams": "为团队启用 Pro",
         "NC Connector currently runs in Community mode with one free Seat.": "NC Connector 当前以 Community 模式运行，包含一个免费 Seat。",
         "Pro is selected, but no valid license is active yet.": "已选择 Pro，但尚未激活有效许可证。",
-        "For teams, central policies and more Seats, activate Pro.": "如需团队、集中策略和更多 Seat，请启用 Pro。",
+        "Community includes all features for one user. Activate Pro for additional users.": "Community 为一位用户提供全部功能。如需增加用户，请启用 Pro。",
         "Buy Pro license": "购买 Pro 许可证",
         "Request 30-day trial key": "申请 30 天试用密钥",
         "You can keep using Community mode for tests and single-user setups.": "测试和单用户环境可以继续使用 Community 模式。",
@@ -346,7 +346,7 @@
         "NC Connector as VFS provider": "将 NC Connector 用作 VFS 提供商",
         "Controls whether other Thunderbird add-ons may request access to the configured Nextcloud account through NC Connector.": "控制其他 Thunderbird 扩展是否可以通过 NC Connector 请求访问已配置的 Nextcloud 账户。",
         "External VFS providers": "外部 VFS 提供商",
-        "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue. This requires NC Connector Pro and an active assigned seat.": "控制用户是否可以将其他 Thunderbird VFS 提供商的文件添加到共享队列。此功能需要 NC Connector Pro 和有效的已分配席位。"
+        "Controls whether users may add files from other Thunderbird VFS providers to the sharing queue.": "控制用户是否可以将其他 Thunderbird VFS 提供商的文件添加到共享队列。"
     },
     "pluralForm": "nplurals=1; plural=0;"
 }

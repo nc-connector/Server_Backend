@@ -510,7 +510,7 @@ Share:
 - absent stored link target uses the built-in ZIP default
 - `vfs_provider_enabled` defaults to `true`; `vfs_external_providers_enabled` defaults to `false`; both are ordinary boolean Share-policy values with group overrides, user overrides, and add-on editability
 - both VFS keys map explicitly to `share.policy`; editing their group or user layers also requires `share.group_overrides` or `share.user_overrides`
-- the backend publishes the external-provider switch in every license mode; Thunderbird applies the separate Pro and active-seat entitlement gate at runtime
+- the backend publishes the external-provider switch for eligible users in either license mode; Thunderbird requires valid access with an active assigned Seat, including the free Community Seat, without an additional Pro-mode gate
 
 Talk:
 
