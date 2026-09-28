@@ -521,7 +521,7 @@ Talk:
 
 - non-custom language clears custom invitation and format
 - custom format is normalized to HTML or plain text
-- `event_description_type` is derived for clients
+- `StatusController` derives `event_description_type` only in `policy.talk`; the shared grouping method adds no fields to `policy_editable`, whose entries remain boolean
 
 Email signature:
 

@@ -15,6 +15,31 @@ use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/ControllerTestDoubles.php';
 
 final class StatusControllerContractTest extends TestCase {
+	public function testTalkOutputTypeIsDerivedOnlyInPolicyValues(): void {
+		foreach (['html', 'plain_text', null, ''] as $format) {
+			foreach ([false, true] as $editable) {
+				$settings = $format === '' ? [] : ['talk_invitation_template_format' => $format];
+				$controller = new StatusController(
+					'ncc_backend_4mc', new TestRequest(), new TestAccessService(validSeatUsers: ['alice']),
+					new TestSeatService(['alice']), new TestLicenseService(),
+					new TestClientSettingsService(
+						effectiveSettings: $settings,
+						effectiveEditable: ['talk_invitation_template_format' => $editable, 'share_set_password' => true, 'email_signature_on_compose' => false],
+					), 'alice',
+				);
+				$data = $controller->status()->getData();
+				self::assertSame($format === 'html' ? 'html' : 'plain_text', $data['policy']['talk']['event_description_type']);
+				self::assertSame($editable, $data['policy_editable']['talk']['talk_invitation_template_format']);
+				foreach ($data['policy_editable'] as $area) {
+					self::assertArrayNotHasKey('event_description_type', $area);
+					foreach ($area as $value) {
+						self::assertIsBool($value);
+					}
+				}
+			}
+		}
+	}
+
 	public function testAdminAccountsStillNeedValidAccessAndAnActiveSeat(): void {
 		foreach (['community' => 1, 'pro' => 10] as $mode => $capacity) {
 			foreach ([false, true] as $valid) {

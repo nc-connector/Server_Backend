@@ -80,6 +80,8 @@ class StatusController extends Controller {
 			$policySettings = $this->projectShareTemplateVersions($effective['settings'] ?? []);
 			$policy = $this->groupPolicyByAddonArea($policySettings);
 			$policyEditable = $this->groupPolicyByAddonArea($effective['addon_editable'] ?? []);
+			$policy['talk']['event_description_type'] = $this->resolveEventDescriptionType($policy['talk']);
+			ksort($policy['talk']);
 			$policy['email_signature']['user_email'] = $this->clientSettings->getEmailSignatureUserEmail($targetUserId);
 			ksort($policy['email_signature']);
 		}
@@ -213,9 +215,6 @@ class StatusController extends Controller {
 		ksort($grouped['share']);
 		ksort($grouped['talk']);
 		ksort($grouped['email_signature']);
-
-		$grouped['talk']['event_description_type'] = $this->resolveEventDescriptionType($grouped['talk']);
-		ksort($grouped['talk']);
 
 		return $grouped;
 	}
