@@ -279,8 +279,6 @@ OC.L10N.register(
   "Only saved events with NC Connector Talk metadata are eligible.": "仅带有 NC Connector Talk 元数据的已保存事件符合条件。",
   "Generic Talk links in location or URL fields are ignored by the mail clients.": "邮件客户端会忽略位置或 URL 字段中的普通 Talk 链接。",
   "Unsaved event cleanup remains active independently.": "未保存事件的清理仍会独立保持启用。",
-  "Your own admin account is not shown here because administrator accounts cannot receive seats.": "Your own admin account is not shown here because administrator accounts cannot receive seats.",
-  "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.",
   "Available variables: {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.": "可用变量：{NAME}、{EMAIL}、{PHONE}、{PHONE_MOBILE}、{ABOUT}、{FUNCTION}、{ORGANISATION}、{CUSTOM1}、{CUSTOM2}。",
   "Signature email address": "签名电子邮件地址",
   "Overrides the profile email used for {EMAIL} and sender matching.": "覆盖用于 {EMAIL} 和发件人匹配的个人资料电子邮件。",

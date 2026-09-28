@@ -144,7 +144,7 @@ Before installing:
 3. Back up the Nextcloud database and configuration.
 4. Keep the currently installed backend package if this is an update.
 5. Verify outbound access required by the selected operating mode.
-6. Select a non-admin pilot user with a working Thunderbird or Outlook setup.
+6. Select a pilot user with a working Thunderbird or Outlook setup.
 7. Decide whether Community mode or Pro mode will be used.
 8. Record the intended defaults, group rules, user exceptions, and delegated-admin scopes.
 
@@ -222,7 +222,7 @@ Steps:
 4. Open **Group Settings → Default Settings**.
 5. Review Share, Talk, and email signature defaults.
 6. Replace example signature postal and legal text before enabling it for production.
-7. Open **Seat assignment** and assign one non-admin pilot user.
+7. Open **Seat assignment** and assign one pilot user.
 8. Configure the mail add-on with the same Nextcloud user.
 9. Test one Share workflow and every enabled Talk or signature workflow.
 
@@ -518,15 +518,9 @@ Seat assignment provides:
 - assigned-Seat overview
 - CSV export of effective policy state
 
-Admin accounts are excluded by default. This avoids accidental license use by administrative or automation accounts.
+Administrator accounts appear in the same search, group filters, and bulk-assignment results as other users. A full Nextcloud admin can assign a Seat to their own account or another administrator directly in this page; no separate command is required.
 
-To allow admin accounts explicitly:
-
-- show state: `php occ ncc:admin-seat-assignment status`
-- enable: `php occ ncc:admin-seat-assignment enable`
-- restore the default: `php occ ncc:admin-seat-assignment disable`
-
-Disabling the override does not remove an existing admin Seat. Remove it from **Assigned seats** if it should no longer consume capacity.
+Existing assignments are unchanged. Administrators do not receive a Seat automatically and consume the same capacity when assigned. Personal Seat functions require valid access and an active Seat in both Community and Pro, regardless of admin rights. Review the filtered user list before bulk assignment because it now includes matching administrator accounts.
 
 The assigned-Seat table shows assignment state and links to matching group or user overrides. Full Nextcloud admins can also remove individual assignments directly from this table. Delegated NC Connector admins retain read-only access to the overview.
 
@@ -704,7 +698,7 @@ The mail-client status endpoint is:
 - Pretty URL: `GET /apps/ncc_backend_4mc/api/v1/status`
 - Front-controller URL: `GET /index.php/apps/ncc_backend_4mc/api/v1/status`
 
-Use an authenticated Seat user. Do not use an administrator account unless admin Seat assignment was explicitly enabled and that account owns a Seat.
+Use an authenticated user with an active assigned Seat. This may be an administrator account, but admin rights alone do not grant personal Seat functions.
 
 Expected result:
 
@@ -889,7 +883,7 @@ Checks:
 2. In Pro, confirm an active or grace license state.
 3. Confirm that the target is a real Nextcloud user.
 4. Clear group and text filters.
-5. If the target is an admin, check `php occ ncc:admin-seat-assignment status`.
+5. Confirm that you are assigning Seats as a full Nextcloud admin, not a delegated NC Connector admin.
 6. Check the Nextcloud log for a Seat-limit or permission warning.
 
 Expected result: the user appears in Seat search and assignment updates the assigned-Seat table.

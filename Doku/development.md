@@ -193,7 +193,6 @@ Metadata in `appinfo/info.xml` registers:
 
 - app dependencies
 - both background jobs
-- the admin Seat command
 - install and uninstall repair steps
 - the full-admin settings section
 
@@ -260,7 +259,7 @@ Controller rules:
 | Service | Ownership |
 |---|---|
 | `LicenseService` | Community/Pro mode, encrypted credentials, entitlement, grace state, and sync |
-| `SeatService` | Assignment, capacity, active/paused state, and admin-seat override |
+| `SeatService` | Assignment, capacity, and active/paused state |
 | `ClientSettingsDefinitionService` | Setting schema, defaults, parsing, serialization, and classification |
 | `ClientSettingsService` | Stored layers, precedence, effective values, and template activation |
 | `ClientPolicyRuntimeService` | Final runtime dependencies and output shaping |
@@ -420,6 +419,8 @@ The configured Nextcloud prefix is prepended to every table name.
 For schema compatibility, the group priority is stored on every `nccb_group_overrides` row. It is nevertheless one group-wide value: saving a group writes the selected priority to every existing row for that group before applying the submitted setting changes. A delegated area admin therefore cannot create different hidden priorities for Share, Talk, and email-signature rows.
 
 Seat rows are keyed by the stored Nextcloud user ID. Assignment requires that the user currently resolves through `IUserManager`; unassignment deliberately requires only the stored ID. This lets a full admin release a Seat after its Nextcloud user was deleted. An unresolved assignment remains visible, assigned, and counted until that explicit action. Never auto-delete these rows: a transient LDAP or other external-directory outage is indistinguishable from a deleted user at lookup time.
+
+Administrator accounts follow the same directory, assignment, capacity, and suspension paths as other users. Directory results no longer exclude administrators, including the caller. Only full Nextcloud admins may change assignments; delegated directory access remains limited to assigned users. The former admin-assignment command and switch are removed. An old stored switch value is ignored; no data migration or automatic assignment is performed.
 
 ### 6.2 Install and migration rules
 

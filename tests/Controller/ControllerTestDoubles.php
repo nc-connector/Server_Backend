@@ -34,7 +34,12 @@ final class TestRequest implements IRequest {
 final class TestUser implements IUser {
 	public function __construct(
 		private string $displayName,
+		private ?string $uid = null,
 	) {
+	}
+
+	public function getUID(): string {
+		return $this->uid ?? $this->displayName;
 	}
 
 	public function getDisplayName(): string {
@@ -45,7 +50,12 @@ final class TestUser implements IUser {
 final class TestGroup implements IGroup {
 	public function __construct(
 		private string $displayName,
+		private array $users = [],
 	) {
+	}
+
+	public function getUsers(): array {
+		return $this->users;
 	}
 
 	public function getDisplayName(): string {
@@ -64,6 +74,14 @@ final class TestUserManager implements IUserManager {
 
 	public function get(string $userId): ?IUser {
 		return $this->users[$userId] ?? null;
+	}
+
+	public function callForAllUsers(callable $callback, string $search = ''): void {
+		foreach ($this->users as $user) {
+			if ($callback($user) === false) {
+				break;
+			}
+		}
 	}
 }
 

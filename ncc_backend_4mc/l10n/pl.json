@@ -277,8 +277,6 @@
         "Only saved events with NC Connector Talk metadata are eligible.": "Kwalifikują się tylko zapisane wydarzenia z metadanymi Talk NC Connector.",
         "Generic Talk links in location or URL fields are ignored by the mail clients.": "Klienci poczty ignorują ogólne linki Talk w polach lokalizacji lub URL.",
         "Unsaved event cleanup remains active independently.": "Czyszczenie niezapisanych wydarzeń pozostaje aktywne niezależnie.",
-        "Your own admin account is not shown here because administrator accounts cannot receive seats.": "Your own admin account is not shown here because administrator accounts cannot receive seats.",
-        "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.",
         "Available variables: {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.": "Dostępne zmienne: {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.",
         "Signature email address": "Adres e-mail podpisu",
         "Overrides the profile email used for {EMAIL} and sender matching.": "Zastępuje e-mail profilu używany dla {EMAIL} i dopasowania nadawcy.",

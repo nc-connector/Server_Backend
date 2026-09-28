@@ -96,10 +96,6 @@ Das Backend speichert weder E-Mail-Inhalte noch Anhänge.
 		<job>OCA\NcConnector\Cron\UpdateCheckJob</job>
 	</background-jobs>
 
-	<commands>
-		<command>OCA\NcConnector\Command\AdminSeatAssignmentCommand</command>
-	</commands>
-
 	<repair-steps>
 		<pre-migration>
 			<step>OCA\NcConnector\Setup\InstallSchema</step>

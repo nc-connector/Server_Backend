@@ -279,8 +279,6 @@ OC.L10N.register(
   "Only saved events with NC Connector Talk metadata are eligible.": "Допускаются только сохранённые события с метаданными Talk NC Connector.",
   "Generic Talk links in location or URL fields are ignored by the mail clients.": "Почтовые клиенты игнорируют обычные ссылки Talk в полях места или URL.",
   "Unsaved event cleanup remains active independently.": "Очистка несохранённых событий остаётся включённой независимо от этого.",
-  "Your own admin account is not shown here because administrator accounts cannot receive seats.": "Your own admin account is not shown here because administrator accounts cannot receive seats.",
-  "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.": "Use a separate non-admin daily-work account for seat assignment, and keep a dedicated admin account for administration tasks.",
   "Available variables: {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.": "Доступные переменные: {NAME}, {EMAIL}, {PHONE}, {PHONE_MOBILE}, {ABOUT}, {FUNCTION}, {ORGANISATION}, {CUSTOM1}, {CUSTOM2}.",
   "Signature email address": "Адрес эл. почты для подписи",
   "Overrides the profile email used for {EMAIL} and sender matching.": "Переопределяет адрес из профиля для {EMAIL} и сопоставления отправителя.",

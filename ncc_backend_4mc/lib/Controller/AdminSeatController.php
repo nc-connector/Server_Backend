@@ -108,22 +108,6 @@ class AdminSeatController extends Controller {
 			]);
 		}
 
-		if (!$this->seats->adminSeatAssignmentAllowed() && $this->access->isAdmin($targetUserId)) {
-			if ($assigned) {
-				return $this->warningResponse('Administrator cannot be assigned a seat', Http::STATUS_UNPROCESSABLE_ENTITY, [
-					'actor_user_id' => $this->userId,
-					'target_user_id' => $targetUserId,
-				]);
-			}
-			$this->seats->unassignSeat($targetUserId);
-			$seatUsage = $this->seats->getSeatUsage();
-			return new DataResponse([
-				'target_user_id' => $targetUserId,
-				'assigned' => false,
-				'seats' => $seatUsage,
-			]);
-		}
-
 		if ($assigned && $this->userManager->get($targetUserId) === null) {
 			return $this->warningResponse('User not found', Http::STATUS_NOT_FOUND, [
 				'actor_user_id' => $this->userId,

@@ -10,6 +10,7 @@ use OCA\NcConnector\Db\SeatMapper;
 use OCA\NcConnector\Service\AdminPermissionService;
 use OCA\NcConnector\Service\ClientSettingsService;
 use OCA\NcConnector\Service\SeatService;
+use OCA\NcConnector\Service\SeatLimitExceededException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/ControllerTestDoubles.php';
@@ -17,7 +18,6 @@ require_once __DIR__ . '/ControllerTestDoubles.php';
 final class AdminSeatControllerTest extends TestCase {
 	public function testFullAdminCanRemoveSeatAfterUserWasDeleted(): void {
 		$seats = $this->createMock(SeatService::class);
-		$seats->method('adminSeatAssignmentAllowed')->willReturn(true);
 		$seats->expects(self::once())->method('unassignSeat')->with('deleted-user');
 		$seats->expects(self::never())->method('assignSeat');
 		$seats->method('getSeatUsage')->willReturn(['assigned' => 0]);
@@ -36,7 +36,6 @@ final class AdminSeatControllerTest extends TestCase {
 
 	public function testSeatCannotBeAssignedToMissingUser(): void {
 		$seats = $this->createMock(SeatService::class);
-		$seats->method('adminSeatAssignmentAllowed')->willReturn(true);
 		$seats->expects(self::never())->method('assignSeat');
 		$seats->expects(self::never())->method('unassignSeat');
 
@@ -64,6 +63,36 @@ final class AdminSeatControllerTest extends TestCase {
 
 		self::assertSame(403, $response->getStatus());
 		self::assertSame(['error' => 'Admin required'], $response->getData());
+	}
+
+	public function testFullAdminCanAssignAndRemoveOwnOrAnotherAdminSeat(): void {
+		foreach (['admin', 'other-admin'] as $target) {
+			foreach ([false, true] as $assigned) {
+				$seats = $this->createMock(SeatService::class);
+				$seats->expects($assigned ? self::once() : self::never())->method('assignSeat')->with($target, 'admin');
+				$seats->expects($assigned ? self::never() : self::once())->method('unassignSeat')->with($target);
+				$seats->method('getSeatUsage')->willReturn(['assigned' => $assigned ? 1 : 0]);
+				$response = $this->controller('admin', ['admin', 'other-admin'], [$target => new TestUser($target)], $seats)->setSeat($target, $assigned);
+				self::assertSame(200, $response->getStatus());
+				self::assertSame($assigned, $response->getData()['assigned']);
+			}
+		}
+	}
+
+	public function testAdminAssignmentStillReportsSeatCapacityLimit(): void {
+		$seats = $this->createMock(SeatService::class);
+		$seats->expects(self::once())->method('assignSeat')->with('admin', 'admin')
+			->willThrowException(new SeatLimitExceededException('Not enough free seats'));
+		$response = $this->controller('admin', ['admin'], ['admin' => new TestUser('Admin')], $seats)->setSeat('admin', true);
+		self::assertSame(409, $response->getStatus());
+		self::assertSame(['error' => 'Not enough free seats'], $response->getData());
+	}
+
+	public function testNonAdminCannotAssignAnAdminSeat(): void {
+		$seats = $this->createMock(SeatService::class);
+		$seats->expects(self::never())->method('assignSeat');
+		$response = $this->controller('delegate', ['admin'], ['admin' => new TestUser('Admin')], $seats)->setSeat('admin', true);
+		self::assertSame(403, $response->getStatus());
 	}
 
 	/**

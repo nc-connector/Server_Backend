@@ -84,7 +84,7 @@ Community mode includes one local seat and does not require a license lookup.
 
 Pro mode uses the NC Connector license backend and supports team use with more seats. Seats map to Nextcloud users and can be reassigned by admins.
 
-Admin accounts are not assigned by default. If an organization deliberately wants that, a server admin can enable it with the documented `occ ncc:admin-seat-assignment` command.
+Administrator accounts appear in Seat assignment like other Nextcloud users and can receive a Seat without an extra command. No account receives a Seat automatically; the same capacity and license rules apply to administrators and other users.
 
 ## Templates And Signatures
 
