@@ -218,6 +218,44 @@ final class AdminClientSettingsControllerPermissionTest extends TestCase {
 		self::assertSame('delegate', $settings->setGroupCalls[0]['updated_by']);
 	}
 
+	public function testPriorityOnlyWriteRequiresGroupOverridePermission(): void {
+		$unrelatedScopes = [
+			'share.policy', 'share.templates', 'share.user_overrides',
+			'talk.policy', 'talk.templates', 'talk.user_overrides',
+			'signature.policy', 'signature.templates', 'signature.user_overrides',
+		];
+		foreach ([[], $unrelatedScopes, ...array_map(static fn (string $scope): array => [$scope], $unrelatedScopes)] as $permissions) {
+			foreach ([[], ['overrides' => []]] as $payload) {
+				[$controller, $settings] = $this->controller($permissions, $payload + [
+					'group_id' => 'group-a', 'priority' => 1,
+				]);
+				self::assertSame(403, $controller->getGroupSettings()->getStatus());
+				self::assertSame(403, $controller->setGroupSettings()->getStatus());
+				self::assertSame([], $settings->setGroupCalls);
+			}
+		}
+	}
+
+	public function testEachGroupOverrideScopeAllowsPriorityOnlyWrite(): void {
+		foreach (['share.group_overrides', 'talk.group_overrides', 'signature.group_overrides'] as $scope) {
+			[$controller, $settings] = $this->controller([$scope], [
+				'group_id' => 'group-a', 'priority' => 1, 'overrides' => [],
+			]);
+			self::assertSame(200, $controller->setGroupSettings()->getStatus());
+			self::assertSame([
+				['group_id' => 'group-a', 'priority' => 1, 'overrides' => [], 'updated_by' => 'delegate'],
+			], $settings->setGroupCalls);
+		}
+	}
+
+	public function testFullAdminCanChangePriorityWithoutDelegation(): void {
+		[$controller, $settings] = $this->controller([], [
+			'group_id' => 'group-a', 'priority' => 1,
+		], isFullAdmin: true);
+		self::assertSame(200, $controller->setGroupSettings()->getStatus());
+		self::assertCount(1, $settings->setGroupCalls);
+	}
+
 	public function testDelegatedSharePolicyAdminSeesAttachmentLinkTarget(): void {
 		[$controller] = $this->controller(['share.user_overrides', 'share.policy']);
 
@@ -237,9 +275,10 @@ final class AdminClientSettingsControllerPermissionTest extends TestCase {
 		array $permissions,
 		array $requestParams = [],
 		array $seatUsers = ['target'],
+		bool $isFullAdmin = false,
 	): array {
 		$delegations = new TestAdminDelegationService(['delegate' => $permissions]);
-		$access = new TestAccessService();
+		$access = new TestAccessService(adminUsers: $isFullAdmin ? ['delegate'] : []);
 		$settings = new TestClientSettingsService(
 			[
 				'email_signature_phone_mobile' => ['type' => 'string'],

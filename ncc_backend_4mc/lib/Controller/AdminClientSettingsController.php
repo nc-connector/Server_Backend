@@ -28,6 +28,12 @@ use Psr\Log\LoggerInterface;
 class AdminClientSettingsController extends Controller {
 	use AdminWarningResponseTrait;
 
+	private const GROUP_OVERRIDE_SCOPES = [
+		'share.group_overrides',
+		'talk.group_overrides',
+		'signature.group_overrides',
+	];
+
 	public function __construct(
 		string $appName,
 		IRequest $request,
@@ -165,11 +171,7 @@ class AdminClientSettingsController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function getGroupSettings(string $group_id = ''): DataResponse {
-		$accessDenied = $this->requireAnyAdminScope('client-settings/groups/get', [
-			'share.group_overrides',
-			'talk.group_overrides',
-			'signature.group_overrides',
-		], [
+		$accessDenied = $this->requireAnyAdminScope('client-settings/groups/get', self::GROUP_OVERRIDE_SCOPES, [
 			'group_id' => $group_id,
 		]);
 		if ($accessDenied !== null) {
@@ -281,6 +283,13 @@ class AdminClientSettingsController extends Controller {
 
 	#[NoAdminRequired]
 	public function setGroupSettings(string $group_id = '', array $overrides = []): DataResponse {
+		$accessDenied = $this->requireAnyAdminScope('client-settings/groups/set', self::GROUP_OVERRIDE_SCOPES, [
+			'group_id' => $group_id,
+		]);
+		if ($accessDenied !== null) {
+			return $accessDenied;
+		}
+
 		$targetGroupId = trim((string)$this->request->getParam('group_id', $group_id));
 		if ($targetGroupId === '') {
 			return $this->warningResponse('Group required', Http::STATUS_UNPROCESSABLE_ENTITY, [

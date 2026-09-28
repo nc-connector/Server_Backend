@@ -548,6 +548,8 @@ Lower numeric priority wins when a user belongs to several matching groups.
 
 Changing a group's priority updates every existing override for that group. This also applies when a delegated admin can edit only one policy area: the other Share, Talk, or email-signature values remain unchanged, but they use the same new group priority.
 
+Changing the priority requires at least one **Group overrides** permission, even when no setting values are changed. Permissions for defaults or user overrides alone do not allow this. Changes to individual setting values additionally require the corresponding policy or template permission.
+
 ### 5.9 User overrides
 
 Use user overrides for individual exceptions.

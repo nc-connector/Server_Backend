@@ -662,6 +662,8 @@ Admin interface:
 
 `AdminPermissionService` maps settings and actions to scopes. Browser mapping in `adminPermissions.js` controls visibility but does not replace the server check.
 
+Group reads and writes require at least one group-override scope. `AdminClientSettingsController` checks this independently of the payload because an empty `overrides` map can still change the group-wide priority. Nonempty setting and template-preview payloads also pass the existing per-field scope checks.
+
 Signature scope details:
 
 - compose, reply, and forward activation use signature-policy permission
