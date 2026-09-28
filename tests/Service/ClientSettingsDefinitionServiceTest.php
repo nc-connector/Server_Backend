@@ -45,6 +45,30 @@ final class ClientSettingsDefinitionServiceTest extends TestCase {
 		self::assertNull($this->definitions->parseStoredValue('attachments_min_size_mb', ''));
 	}
 
+	public function testShareExpirationAcceptsOnlyPositiveLifetime(): void {
+		self::assertSame(1, $this->definitions->get('share_expire_days')['min']);
+		foreach ([1, 19, 3650, '1', '19'] as $value) {
+			self::assertSame((int)$value, $this->definitions->normalizeValue('share_expire_days', $value));
+		}
+		foreach ([0, '0', -1, null, 3651] as $value) {
+			try {
+				$this->definitions->normalizeValue('share_expire_days', $value);
+				self::fail('Invalid share lifetime was accepted');
+			} catch (\InvalidArgumentException $exception) {
+				self::assertStringContainsString('share_expire_days', $exception->getMessage());
+			}
+		}
+	}
+
+	public function testStoredShareExpirationUsesTheBackendMinimum(): void {
+		foreach (['0', '-1', ''] as $stored) {
+			self::assertSame(1, $this->definitions->parseStoredValue('share_expire_days', $stored));
+		}
+		foreach (['1', '19', '3650'] as $stored) {
+			self::assertSame((int)$stored, $this->definitions->parseStoredValue('share_expire_days', $stored));
+		}
+	}
+
 	public function testAttachmentLinkTargetIsAddonControllableEnumWithZipDefault(): void {
 		$definition = $this->definitions->get(ClientSettingsDefinitionService::ATTACHMENT_LINK_TARGET_KEY);
 

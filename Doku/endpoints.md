@@ -55,6 +55,7 @@ Old clients may ignore the added fields and keep using `is_valid` and Seat check
   - A **forced override** also sets the corresponding `policy_editable` value to `false` for that user and setting.
   - If a user override is removed and the setting falls back to a group override or the default again, `policy_editable` follows that lower layer again.
   - `policy.share.attachments_min_size_mb` is `null` when `policy.share.attachments_always_via_ncconnector=true`.
+  - `policy.share.share_expire_days` is a positive day count. Writes accept 1–3650; legacy stored zero-day values are resolved to 1 before publication, including group and user overrides. Zero is not an unlimited-expiry setting.
   - `policy.share.attachment_link_target` is `"zip_download"` or `"share_page"`. The built-in default is `"zip_download"`; the setting applies only to attachment mode, and manual shares remain unchanged.
   - `policy.share.vfs_provider_enabled` and `policy.share.vfs_external_providers_enabled` are Thunderbird-only boolean controls. Their built-in defaults are `true` and `false`, respectively. Outlook and older clients ignore them. The external-provider value does not replace the valid active assigned Seat check, which includes the free Community Seat.
   - `policy.share.share_html_block_template`, `policy.share.share_html_block_template_v2`, and `policy.share.share_password_template` are `null` when `policy.share.language_share_html_block != "custom"`.

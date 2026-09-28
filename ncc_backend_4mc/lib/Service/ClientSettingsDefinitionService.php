@@ -202,7 +202,7 @@ HTML;
 			self::SHARE_SEND_PASSWORD_MODE_PLAIN, self::SHARE_SEND_PASSWORD_MODE_SECRETS,
 		]],
 		self::SHARE_SECRETS_EXPIRE_DAYS_KEY => ['type' => 'int', 'default' => 7, 'min' => 1, 'max' => 365],
-		'share_expire_days' => ['type' => 'int', 'default' => 8, 'min' => 0, 'max' => 3650],
+		'share_expire_days' => ['type' => 'int', 'default' => 8, 'min' => 1, 'max' => 3650],
 
 		'attachments_always_via_ncconnector' => ['type' => 'bool', 'default' => false],
 		'attachments_min_size_mb' => ['type' => 'int', 'default' => 5, 'min' => 0, 'max' => 10240],
@@ -372,7 +372,12 @@ HTML;
 	}
 
 	public function parseStoredValue(string $key, string $stored): mixed {
-		$type = $this->get($key)['type'];
+		$definition = $this->get($key);
+		$type = $definition['type'];
+		if ($key === 'share_expire_days') {
+			// Older backends accepted zero; publish the same minimum to every client.
+			return max($definition['min'], (int)$stored);
+		}
 		if ($type === 'int' && $key === 'attachments_min_size_mb' && trim($stored) === '') {
 			return null;
 		}

@@ -22,6 +22,47 @@ use OCP\IUserManager;
 use PHPUnit\Framework\TestCase;
 
 final class ClientSettingsServicePersistenceTest extends TestCase {
+	public function testLegacyZeroDayExpirationIsNormalizedInEveryPolicyLayer(): void {
+		foreach (['default', 'group', 'user'] as $layer) {
+			[$service, $db, $settings] = $this->service(
+				clientOverrides: $layer === 'user' ? [
+					'alice' => ['share_expire_days' => $this->clientOverride('alice', 'share_expire_days', '0')],
+				] : [],
+				groupOverrides: $layer === 'group' ? [
+					'group-a' => ['share_expire_days' => ['priority' => 100, 'value' => '0']],
+				] : [],
+				userGroups: ['group-a'],
+			);
+			if ($layer === 'default') {
+				$settings->setValue('client.default.share_expire_days', '0', 0);
+				self::assertSame(1, $service->getDefaults()['share_expire_days']);
+			}
+			$storedBefore = $settings->values();
+			self::assertSame(1, $service->getEffectiveForUser('alice')['settings']['share_expire_days'], $layer);
+			self::assertSame($storedBefore, $settings->values());
+			self::assertSame(0, $db->beginCount);
+		}
+	}
+
+	public function testZeroDayExpirationIsRejectedBeforeAnyPolicyWrite(): void {
+		foreach (['default', 'group', 'user'] as $layer) {
+			[$service, $db] = $this->service();
+			try {
+				if ($layer === 'default') {
+					$service->setDefaults(['share_expire_days' => ['mode' => 'default', 'value' => 0]]);
+				} elseif ($layer === 'group') {
+					$service->setGroupSettings('group-a', 1, ['share_expire_days' => ['mode' => 'forced', 'value' => 0]], 'delegate');
+				} else {
+					$service->setUserSettings('alice', ['share_expire_days' => ['mode' => 'forced', 'value' => 0]], 'delegate');
+				}
+				self::fail('Zero-day expiration was saved');
+			} catch (\InvalidArgumentException $exception) {
+				self::assertStringContainsString('share_expire_days', $exception->getMessage());
+			}
+			self::assertSame(0, $db->beginCount);
+		}
+	}
+
 	public function testDefaultsAreFullyValidatedBeforeAnyWrite(): void {
 		[$service, $db, $settings] = $this->service();
 

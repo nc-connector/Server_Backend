@@ -495,6 +495,8 @@ The runtime response separates:
 - the effective value in `policy`
 - local editability in `policy_editable`
 
+`share_expire_days` accepts integers from 1 to 3650 in every write layer. Its stored-value parser applies the schema minimum to legacy zero-day values before defaults, overrides, or runtime output are built. Reads do not rewrite the stored rows, and ordinary positive values remain unchanged.
+
 When editability is true, clients may store a local choice. They do not write it to the backend runtime endpoint.
 
 ### 7.3 Runtime dependencies

@@ -393,7 +393,7 @@ Templates remain backend-controlled. The detailed response fields are documented
 | `Send password separately` | Sends the password after the main mail |
 | `Password mode` | Uses a plain password mail or an expiring Secrets link |
 | `Nextcloud Secrets link expiry (days)` | Sets the Secrets-link lifetime |
-| `Expiration (days)` | Sets the public-share lifetime |
+| `Expiration (days)` | Sets the public-share lifetime, from 1 to 3650 days |
 | `Always share attachments via NC Connector` | Routes every attachment through the NC Connector flow |
 | `Offer upload for files larger than (MB)` | Offers NC Connector above the configured threshold |
 | `Attachment link target` | Uses `ZIP download` by default or the `Nextcloud share page` in attachment mode |
@@ -417,6 +417,7 @@ The two VFS settings use the existing Share delegation scopes. A delegated admin
 Operational dependencies:
 
 - **Always share attachments** makes the threshold inactive.
+- **Expiration (days)** never accepts zero. Older saved zero-day defaults or overrides are displayed and supplied to clients as one day. This affects newly created shares, not existing Nextcloud shares.
 - Disabling **Send password separately** makes password mode and Secrets expiry inactive.
 - Missing Secrets support disables the Secrets option and uses plain password delivery.
 - **Attachment link target** affects attachment automation only; manual shares keep the standard share page.
