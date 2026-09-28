@@ -36,10 +36,10 @@ test('activation help stays inside the status row instead of extending beyond it
   assert.match(css, /\.nccb-license-facts > div:hover \.nccb-help-tooltip\s*\{\s*display:\s*block;/)
 })
 
-function render(overrides = {}) {
+function render(overrides = {}, seatStatus = null, previousRefs = null) {
   const context = { window: {}, HTMLElement: Element }
   vm.runInNewContext(readFileSync('ncc_backend_4mc/js/adminGeneralStatusUi.js', 'utf8'), context)
-  const refs = { licenseStatus: new Element(), licenseHint: new Element(), proFunnel: new Element() }
+  const refs = previousRefs || { licenseStatus: new Element(), licenseHint: new Element(), proFunnel: new Element() }
   const snapshot = {
     mode: 'pro', has_credentials: true, is_valid: true,
     status_effective: 'ACTIVE', license_status_effective: 'ACTIVE',
@@ -49,7 +49,7 @@ function render(overrides = {}) {
   const helpers = {
     tr: (key) => key,
     escapeHtml: (value) => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'),
-    formatDate: String, formatDateTime: String, assignedSeats: 6,
+    formatDate: String, formatDateTime: String, assignedSeats: seatStatus?.assigned ?? 6, seatStatus,
     renderInlineHelp: (_title, lines) => '<span role="tooltip">' + lines.join(' ') + '</span>',
   }
   context.window.NCCBackendGeneralStatusUi.renderLicenseStatus(refs, snapshot, helpers)
@@ -131,7 +131,7 @@ test('manual trials have no activation warning; the trial action uses the form',
   const manual = render({ activation: { required: false, enforced: false, verified: false, state: 'not_required' } })
   assert.doesNotMatch(manual.licenseStatus.innerHTML, /License activation|replacement license/)
   const community = render({ mode: 'community' })
-  assert.match(community.licenseStatus.textContent, /1 free seat/)
+  assert.match(community.licenseStatus.innerHTML, /1 free seat/)
   assert.match(community.proFunnel.innerHTML, /https:\/\/nc-connector.de\/testlizenz\//)
   assert.doesNotMatch(community.proFunnel.innerHTML, /mailto:/)
 })
@@ -226,4 +226,123 @@ test('blocking access errors precede grace and synchronization notices', () => {
     assert.match(html, /Grace period ends on/)
     assert.doesNotMatch(html, /Pro features are available|does not block access/)
   }
+})
+
+const overCapacity = {
+  assigned: 108, total: 5, active_assigned: 5, suspended_assigned: 103,
+  free: 0, overlicensed: true, overlicensed_by: 103,
+}
+
+test('overcapacity warns about paused Seats without blocking the active Seats', () => {
+  const refs = render({ purchased_seats: 5 }, overCapacity)
+  const html = refs.licenseStatus.innerHTML
+  assert.match(html, /class="nccb-license-warning" role="status"><strong>License capacity exceeded: Seats are paused\./)
+  assert.match(html, /Active used: 5 \| Paused: 103/)
+  assert.match(html, /Assigned seats<\/dt><dd>108/)
+  assert.match(html, /Users with active Seats can continue using all features\./)
+  assert.match(html, /Reduce Seat assignments or increase the license capacity\./)
+  assert.doesNotMatch(html, /role="alert"|Pro features are not available/)
+  assert.equal(refs.proFunnel.hidden, true)
+})
+
+test('Community also warns when a downgrade leaves assignments beyond its free Seat', () => {
+  const refs = render({ mode: 'community', has_credentials: false }, {
+    ...overCapacity, total: 1, active_assigned: 1, suspended_assigned: 107, overlicensed_by: 107,
+  })
+  assert.match(refs.licenseStatus.innerHTML, /License capacity exceeded/)
+  assert.match(refs.licenseStatus.innerHTML, /Active used: 1 \| Paused: 107/)
+  assert.match(refs.licenseStatus.innerHTML, /1 free seat/)
+  assert.match(refs.licenseStatus.innerHTML, /Users with active Seats can continue using all features/)
+  assert.doesNotMatch(refs.licenseStatus.innerHTML, /role="alert"/)
+})
+
+test('capacity warnings disappear when refreshed Seats are no longer paused', () => {
+  for (const mode of ['pro', 'community']) {
+    const refs = render({ mode }, overCapacity)
+    assert.match(refs.licenseStatus.innerHTML, /License capacity exceeded/)
+    render({ mode }, {
+      assigned: 1, total: 1, active_assigned: 1, suspended_assigned: 0,
+      free: 0, overlicensed: false, overlicensed_by: 0,
+    }, refs)
+    assert.doesNotMatch(refs.licenseStatus.innerHTML, /nccb-license-warning|Paused:|License capacity exceeded/)
+  }
+})
+
+test('capacity notices use server-provided paused counts, not purchased capacity arithmetic', () => {
+  const missing = render({ purchased_seats: 0 })
+  assert.doesNotMatch(missing.licenseStatus.innerHTML, /License capacity exceeded|Paused:/)
+  const noPaused = render({ purchased_seats: 0 }, { ...overCapacity, suspended_assigned: 0 })
+  assert.doesNotMatch(noPaused.licenseStatus.innerHTML, /License capacity exceeded|Paused:/)
+  const paused = render({ purchased_seats: 200 }, { ...overCapacity, overlicensed: false })
+  assert.match(paused.licenseStatus.innerHTML, /Active used: 5 \| Paused: 103/)
+})
+
+test('grace and paused Seats remain separate advisory notices', () => {
+  const refs = render({ status_effective: 'GRACE', license_status_effective: 'GRACE' }, overCapacity)
+  assert.match(refs.licenseStatus.innerHTML, /Your license has expired\. Please renew your license\./)
+  assert.match(refs.licenseStatus.innerHTML, /Grace period ends on: 2001209600/)
+  assert.match(refs.licenseStatus.innerHTML, /Paused: 103/)
+  assert.match(refs.licenseStatus.innerHTML, /Users with active Seats can continue using all features/)
+  assert.doesNotMatch(refs.licenseStatus.innerHTML, /role="alert"/)
+})
+
+test('license refusals precede capacity warnings and never promise usable active Seats', () => {
+  const refusals = ['EXPIRED', 'INACTIVE', 'INVALID'].map((status) => ({
+    license_status_effective: status, status_effective: status,
+  }))
+  refusals.push(
+    { status_effective: 'OFFLINE_EXPIRED', last_error: 'license_sync_unavailable' },
+    { status_effective: 'ACTIVATION_REQUIRED', activation: { required: true, enforced: true, verified: false, state: 'conflict' } },
+  )
+  for (const refusal of refusals) {
+    const html = render({ ...refusal, is_valid: false }, overCapacity).licenseStatus.innerHTML
+    assert.match(html, /License capacity exceeded/)
+    assert.ok(html.indexOf('role="alert"') >= 0)
+    assert.ok(html.indexOf('role="alert"') < html.indexOf('role="status"'))
+    assert.match(html, /Basic features remain available/)
+    assert.doesNotMatch(html, /Pro features are available|Users with active Seats can continue/)
+  }
+})
+
+test('missing credentials do not hide known paused assignments or promise access', () => {
+  const html = render({ has_credentials: false, is_valid: false }, {
+    ...overCapacity, total: 0, active_assigned: 0, suspended_assigned: 108,
+  }).licenseStatus.innerHTML
+  assert.match(html, /Please provide license email and license key/)
+  assert.match(html, /Active used: 0 \| Paused: 108/)
+  assert.doesNotMatch(html, /Users with active Seats can continue|Pro features are available/)
+})
+
+test('Seat refresh forwards the complete server status and rerenders the General overview', async () => {
+  const source = readFileSync('ncc_backend_4mc/js/ncc_backend_4mc-adminSettings.js', 'utf8')
+  let payload = { items: Array.from({ length: 108 }, (_, i) => ({ user_id: `user-${i}` })), seat_status: overCapacity }
+  const calls = []
+  const context = vm.createContext({
+    api: { loadSeats: async () => payload },
+    refs: {}, state: { admin: { is_nextcloud_admin: true } },
+    getGeneralStatusUiHelpers: () => ({}),
+    generalStatusUi: { renderLicenseStatus: (_refs, _snapshot, helpers) => calls.push(helpers) },
+    renderSeatUsage: () => {}, renderAssignedSeats: () => {},
+    canUseAnyUserOverridePanel: () => false,
+  })
+  vm.runInContext('let assignedSeatCount = null; let assignedSeatStatus = null; const licenseSnapshot = { mode: "pro" };', context)
+  for (const [name, next] of [
+    ['renderLicenseStatus', 'renderProFunnel'],
+    ['loadAssignedSeats', 'refreshAssignedSeatOverview'],
+    ['refreshAssignedSeatOverview', 'refreshSeatsAndUsers'],
+  ]) {
+    const start = source.indexOf(`\t\tconst ${name} =`)
+    const end = source.indexOf(`\t\tconst ${next} =`, start)
+    assert.ok(start >= 0 && end > start, `Admin handler boundaries: ${name}`)
+    vm.runInContext(source.slice(start, end), context)
+  }
+  await vm.runInContext('refreshAssignedSeatOverview()', context)
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0].assignedSeats, 108)
+  assert.equal(calls[0].seatStatus, overCapacity)
+  payload = { items: payload.items, seat_status: { ...overCapacity, total: 150, active_assigned: 108, suspended_assigned: 0, overlicensed: false } }
+  await vm.runInContext('refreshAssignedSeatOverview()', context)
+  assert.equal(calls.length, 2)
+  assert.equal(calls[1].seatStatus, payload.seat_status)
+  assert.equal(calls[1].seatStatus.suspended_assigned, 0)
 })

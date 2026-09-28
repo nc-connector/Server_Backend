@@ -3,6 +3,9 @@ OC.L10N.register(
     'ncc_backend_4mc',
 {
   "License capacity": "授權容量",
+  "License capacity exceeded: Seats are paused.": "已超出授權容量：部分席位已暫停。",
+  "Reduce Seat assignments or increase the license capacity.": "請減少指派的席位數量或增加授權容量。",
+  "Users with active Seats can continue using all features.": "擁有有效席位的使用者仍可繼續使用所有功能。",
   "Grace period ends on": "寬限期結束日期",
   "Grace period ended on": "寬限期已結束於",
   "Your license has expired. Please renew your license.": "您的授權已到期。請續訂授權。",

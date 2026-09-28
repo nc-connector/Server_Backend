@@ -1590,6 +1590,7 @@
 
 		let licenseSnapshot = null
 		let assignedSeatCount = null
+		let assignedSeatStatus = null
 		let searchTimer = null
 		const fullAdminFallback = root.dataset.fullAdminFallback === '1'
 		const settingsPayload = settingsPayloadModule.createPayloadHelpers({
@@ -1679,7 +1680,9 @@
 		}
 
 		const renderLicenseStatus = (snapshot) => {
-			generalStatusUi.renderLicenseStatus(refs, snapshot, { ...getGeneralStatusUiHelpers(), assignedSeats: assignedSeatCount })
+			generalStatusUi.renderLicenseStatus(refs, snapshot, {
+				...getGeneralStatusUiHelpers(), assignedSeats: assignedSeatCount, seatStatus: assignedSeatStatus,
+			})
 		}
 
 		const renderProFunnel = (snapshot) => {
@@ -1872,6 +1875,7 @@
 			const { seats, seatStatus } = await loadAssignedSeats()
 			state.assignedSeats = seats
 			assignedSeatCount = seatStatus?.assigned ?? seats.length
+			assignedSeatStatus = seatStatus
 			if (licenseSnapshot) renderLicenseStatus(licenseSnapshot)
 			renderSeatUsage(seatStatus)
 			renderAssignedSeats(refs.assignedSeats, seats, Boolean(state.admin?.is_nextcloud_admin))

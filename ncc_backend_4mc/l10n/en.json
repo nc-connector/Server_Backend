@@ -1,6 +1,9 @@
 {
     "translations": {
         "License capacity": "License capacity",
+        "License capacity exceeded: Seats are paused.": "License capacity exceeded: Seats are paused.",
+        "Reduce Seat assignments or increase the license capacity.": "Reduce Seat assignments or increase the license capacity.",
+        "Users with active Seats can continue using all features.": "Users with active Seats can continue using all features.",
         "Grace period ends on": "Grace period ends on",
         "Grace period ended on": "Grace period ended on",
         "Your license has expired. Please renew your license.": "Your license has expired. Please renew your license.",

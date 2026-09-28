@@ -22,12 +22,25 @@
 			refs.licenseStatus.innerHTML = notice(tr('No license data available.')).html
 			return
 		}
+		const seatStatus = helpers.seatStatus
+		const capacityNotice = seatStatus?.suspended_assigned > 0 ? notice(
+			tr('License capacity exceeded: Seats are paused.'),
+			'<p>' + escapeHtml(tr('Active used') + ': ' + (seatStatus.active_assigned ?? '—')
+				+ ' | ' + tr('Paused') + ': ' + seatStatus.suspended_assigned) + '</p>'
+				+ '<p>' + escapeHtml(tr('Reduce Seat assignments or increase the license capacity.')) + '</p>',
+		) : null
+		const availability = '<p>' + escapeHtml(snapshot.is_valid
+			? (capacityNotice ? tr('Users with active Seats can continue using all features.') : tr('Pro features are available.'))
+			: tr('Pro features are not available. Basic features remain available.')) + '</p>'
 		if (snapshot.mode === 'community') {
-			refs.licenseStatus.textContent = tr('Community mode active: 1 free seat, no license login required.')
+			refs.licenseStatus.innerHTML = (capacityNotice?.html || '')
+				+ '<p>' + escapeHtml(tr('Community mode active: 1 free seat, no license login required.')) + '</p>'
+				+ (capacityNotice ? availability : '')
 			return
 		}
 		if (!snapshot.has_credentials) {
 			refs.licenseStatus.innerHTML = notice(tr('Pro mode active: Please provide license email and license key.')).html
+				+ (capacityNotice?.html || '')
 			if (refs.licenseHint instanceof HTMLElement) {
 				refs.licenseHint.hidden = false
 				refs.licenseHint.innerHTML = `${escapeHtml(tr('Ready for productive team use? You can get your license key at'))} <a href="https://nc-connector.de" target="_blank" rel="noopener">nc-connector.de</a>`
@@ -57,7 +70,7 @@
 		if (snapshot.grace_until && (commercial === 'GRACE' || commercial === 'EXPIRED')) {
 			rows.splice(2, 0, row(graceLabel, formatDate(snapshot.grace_until)))
 		}
-		const notices = []
+		const notices = capacityNotice ? [capacityNotice] : []
 		if (commercial === 'GRACE') {
 			const deadline = snapshot.grace_until
 				? '<p>' + escapeHtml(tr('Grace period ends on') + ': ' + formatDate(snapshot.grace_until)) + '</p>' : ''
@@ -69,7 +82,6 @@
 		} else if (commercial !== 'ACTIVE') {
 			notices.push(notice(tr('Pro is selected, but no valid license is active yet.')))
 		}
-		const availability = '<p>' + escapeHtml(snapshot.is_valid ? tr('Pro features are available.') : tr('Pro features are not available. Basic features remain available.')) + '</p>'
 		let details = ''
 		if (!snapshot.is_valid && commercial !== 'ACTIVE' && commercial !== 'GRACE') {
 			details += '<p>' + escapeHtml(tr('Seat assignments remain stored and can be used again after renewal, subject to available capacity.')) + '</p>'

@@ -1,6 +1,9 @@
 {
     "translations": {
         "License capacity": "Capacidad de la licencia",
+        "License capacity exceeded: Seats are paused.": "Se ha superado la capacidad de la licencia: hay puestos en pausa.",
+        "Reduce Seat assignments or increase the license capacity.": "Reduzca el número de puestos asignados o aumente la capacidad de la licencia.",
+        "Users with active Seats can continue using all features.": "Los usuarios con puestos activos pueden seguir utilizando todas las funciones.",
         "Grace period ends on": "El período de gracia termina el",
         "Grace period ended on": "El período de gracia terminó el",
         "Your license has expired. Please renew your license.": "Su licencia ha caducado. Renueve su licencia.",

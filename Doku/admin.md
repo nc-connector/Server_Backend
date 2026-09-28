@@ -310,6 +310,8 @@ Saving a different license email or key clears the previously synchronized entit
 
 License facts appear one per row. Warnings sit above them: yellow for grace, incomplete setup, an unconfirmed status or a failed synchronization; red when the license is expired, inactive or invalid, activation is refused, or the offline period has ended. Blocking errors appear before advisory warnings. The availability message states whether Pro can currently be used; a connection failure alone does not invalidate a previously confirmed license. During grace, the warning includes the deadline. Activation help remains within the status area and can be opened by mouse or keyboard.
 
+Paused Seats also produce a yellow warning on the General tab, including the number of active and paused assignments. This applies to Pro overcapacity and to a switch back to Community with more than one assignment. For example, 108 assignments with capacity for 5 Seats leave 5 active and 103 paused. With a valid license, users with active Seats retain all features; overcapacity does not block everyone. Reduce assignments or increase capacity to resolve the warning. A separate license or activation refusal still takes precedence and must be resolved independently.
+
 **Automatic activation of purchased licenses**
 
 After updating, the next scheduled or manual synchronization activates an eligible purchased license for this Nextcloud. No additional setup or re-entry of existing credentials is needed. Manual licenses and manually issued trials are exempt. A trial converted into a purchased license activates at its next successful check.

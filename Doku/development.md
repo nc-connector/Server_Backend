@@ -222,6 +222,8 @@ Style files follow the same UI areas. Shared layout stays in `adminSettings.css`
 
 `adminGeneralStatusUi.js` displays license notices from the snapshot's commercial status, effective access status, activation result and synchronization error. Blocking notices precede advisory ones; `is_valid` alone supplies the availability message. The browser does not calculate grace or offline entitlement from dates. Status facts use a single-column list with scoped definition-list resets; activation help is positioned within its row to avoid horizontal overflow.
 
+The General overview also receives the complete `seat_status` from the assigned-Seat refresh. A positive `suspended_assigned` shows a separate yellow capacity warning in both Community and Pro, with the server-provided active and paused counts. The browser does not derive suspension from purchased capacity or treat global overlicensing as a license refusal. When the license is valid, the availability text clarifies that active Seats remain fully usable; otherwise the blocking license notice takes precedence. Synchronization, mode changes and Seat assignment changes refresh this overview through the existing Seat-loading path.
+
 Do not add new `fetch(...)` wrappers to the main entry point. Use `adminApi.js`.
 
 Default rows remain separate from override rows:

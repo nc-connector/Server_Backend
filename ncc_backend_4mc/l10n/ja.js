@@ -3,6 +3,9 @@ OC.L10N.register(
     'ncc_backend_4mc',
 {
   "License capacity": "ライセンスの利用枠数",
+  "License capacity exceeded: Seats are paused.": "ライセンスの利用枠数を超えているため、一部のシートが一時停止されています。",
+  "Reduce Seat assignments or increase the license capacity.": "シートの割り当て数を減らすか、ライセンスの利用枠数を増やしてください。",
+  "Users with active Seats can continue using all features.": "有効なシートが割り当てられたユーザーは、引き続きすべての機能を利用できます。",
   "Grace period ends on": "猶予期間の終了日",
   "Grace period ended on": "猶予期間の終了日（終了済み）",
   "Your license has expired. Please renew your license.": "ライセンスの有効期限が切れています。ライセンスを更新してください。",

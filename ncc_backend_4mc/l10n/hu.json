@@ -1,6 +1,9 @@
 {
     "translations": {
         "License capacity": "Licenckapacitás",
+        "License capacity exceeded: Seats are paused.": "A licenckapacitás túllépése miatt egyes helyek szüneteltetve vannak.",
+        "Reduce Seat assignments or increase the license capacity.": "Csökkentse a hozzárendelt helyek számát, vagy növelje a licenckapacitást.",
+        "Users with active Seats can continue using all features.": "Az aktív hellyel rendelkező felhasználók továbbra is használhatják az összes funkciót.",
         "Grace period ends on": "A türelmi idő vége",
         "Grace period ended on": "A türelmi idő lejárt",
         "Your license has expired. Please renew your license.": "A licence lejárt. Kérjük, újítsa meg a licencét.",

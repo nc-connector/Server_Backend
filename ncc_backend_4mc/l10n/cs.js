@@ -3,6 +3,9 @@ OC.L10N.register(
     'ncc_backend_4mc',
 {
   "License capacity": "Kapacita licence",
+  "License capacity exceeded: Seats are paused.": "Kapacita licence byla překročena: některá místa jsou pozastavena.",
+  "Reduce Seat assignments or increase the license capacity.": "Snižte počet přiřazených míst nebo zvyšte kapacitu licence.",
+  "Users with active Seats can continue using all features.": "Uživatelé s aktivními místy mohou nadále využívat všechny funkce.",
   "Grace period ends on": "Ochranná lhůta končí",
   "Grace period ended on": "Ochranná lhůta skončila",
   "Your license has expired. Please renew your license.": "Platnost vaší licence vypršela. Obnovte prosím licenci.",

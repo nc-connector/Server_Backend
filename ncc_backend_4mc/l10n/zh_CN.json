@@ -1,6 +1,9 @@
 {
     "translations": {
         "License capacity": "许可证容量",
+        "License capacity exceeded: Seats are paused.": "已超出许可证容量：部分席位已暂停。",
+        "Reduce Seat assignments or increase the license capacity.": "请减少分配的席位数量或增加许可证容量。",
+        "Users with active Seats can continue using all features.": "拥有有效席位的用户仍可继续使用所有功能。",
         "Grace period ends on": "宽限期结束日期",
         "Grace period ended on": "宽限期已结束于",
         "Your license has expired. Please renew your license.": "您的许可证已过期。请续订许可证。",
