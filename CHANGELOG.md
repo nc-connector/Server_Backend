@@ -4,6 +4,22 @@ All notable changes to this repository are documented in this file.
 
 The format is based on **Keep a Changelog** and uses a simple version-first structure.
 
+## [1.4.2] - 2026-09-28
+
+### Changed
+- Allow Nextcloud administrator accounts to receive Seats directly through the regular Seat assignment interface, without prior activation through an occ command. Administrators now appear in user searches, group filters, and bulk assignment; they still need an explicitly assigned active Seat and valid access to use Seat functions
+- Remove the former admin-seat assignment command and exclusion notices; existing assignments and capacity limits remain unchanged
+- Require a minimum share lifetime of one day; legacy zero-day policies now resolve to one day for new shares without changing existing Nextcloud shares
+- Limit enabled attachment thresholds to 1–10240 MB while preserving disabled automation and the existing 5 MB behavior for legacy zero values
+- Clarify that active Community and Pro Seats provide the same functions, and simplify the external VFS policy help across all 15 supported languages
+
+### Fixed
+- Show a yellow warning with active and paused Seat counts in the General overview when capacity is exceeded, including Community mode; active Seats remain usable while the license is valid
+- Keep policies available to active assigned Seats when the overall Seat capacity is exceeded; only personally paused Seats lose access
+- Require group-override permission for priority-only changes while retaining the existing permissions for individual policy and template fields
+- Keep the derived Talk output format out of the boolean policy editability map
+- Offer a valid starting value when re-enabling the attachment threshold without silently enabling automation
+
 ## [1.4.1] - 2026-09-17
 
 ### Changed
