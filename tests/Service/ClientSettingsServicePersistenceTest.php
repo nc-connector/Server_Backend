@@ -22,6 +22,54 @@ use OCP\IUserManager;
 use PHPUnit\Framework\TestCase;
 
 final class ClientSettingsServicePersistenceTest extends TestCase {
+	public function testAttachmentThresholdReadsPreserveDisabledAndExistingValuesInEveryLayer(): void {
+		foreach (['default', 'group', 'user'] as $layer) {
+			foreach (['' => null, '0' => 5, '1' => 1, '19' => 19] as $stored => $expected) {
+				[$service, $db, $settings, $users, $groups] = $this->service(
+					clientOverrides: $layer === 'user' ? [
+						'alice' => ['attachments_min_size_mb' => $this->clientOverride('alice', 'attachments_min_size_mb', (string)$stored)],
+					] : [],
+					groupOverrides: $layer === 'group' ? [
+						'group-a' => ['attachments_min_size_mb' => ['priority' => 100, 'value' => (string)$stored]],
+					] : [],
+					userGroups: ['group-a'],
+				);
+				if ($layer === 'default') {
+					$settings->setValue('client.default.attachments_min_size_mb', (string)$stored, 0);
+					self::assertSame($expected, $service->getDefaults()['attachments_min_size_mb']);
+				}
+				$before = [$settings->snapshot(), $users->snapshot(), $groups->snapshot()];
+				self::assertSame($expected, $service->getEffectiveForUser('alice')['settings']['attachments_min_size_mb']);
+				self::assertEquals($before, [$settings->snapshot(), $users->snapshot(), $groups->snapshot()]);
+				self::assertSame(0, $db->beginCount);
+			}
+		}
+	}
+
+	public function testZeroThresholdIsRejectedAndNullCanBeSavedInEveryLayer(): void {
+		foreach (['default', 'group', 'user'] as $layer) {
+			foreach ([0, null, 19] as $value) {
+				[$service, $db] = $this->service(userGroups: ['group-a']);
+				try {
+					if ($layer === 'default') {
+						$service->setDefaults(['attachments_min_size_mb' => ['mode' => 'default', 'value' => $value]]);
+					} elseif ($layer === 'group') {
+						$service->setGroupSettings('group-a', 1, ['attachments_min_size_mb' => ['mode' => 'forced', 'value' => $value]], 'delegate');
+					} else {
+						$service->setUserSettings('alice', ['attachments_min_size_mb' => ['mode' => 'forced', 'value' => $value]], 'delegate');
+					}
+					self::assertNotSame(0, $value, 'Zero threshold was saved');
+					self::assertSame($value, $service->getEffectiveForUser('alice')['settings']['attachments_min_size_mb']);
+					self::assertSame(1, $db->commitCount);
+				} catch (\InvalidArgumentException $exception) {
+					self::assertSame(0, $value);
+					self::assertStringContainsString('attachments_min_size_mb', $exception->getMessage());
+					self::assertSame(0, $db->beginCount);
+				}
+			}
+		}
+	}
+
 	public function testLegacyZeroDayExpirationIsNormalizedInEveryPolicyLayer(): void {
 		foreach (['default', 'group', 'user'] as $layer) {
 			[$service, $db, $settings] = $this->service(

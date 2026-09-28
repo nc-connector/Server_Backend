@@ -23,6 +23,23 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 final class ClientPolicyRuntimeServiceTest extends TestCase {
+	public function testAlwaysShareClearsThresholdWithoutChangingEditability(): void {
+		$service = $this->service($this->emailSignatureRenderer());
+		foreach ([false, true] as $always) {
+			foreach ([false, true] as $editable) {
+				foreach ([null, 1, 5, 19] as $threshold) {
+					$settings = ['attachments_always_via_ncconnector' => $always, 'attachments_min_size_mb' => $threshold];
+					$sources = array_fill_keys(array_keys($settings), 'default');
+					$policies = array_fill_keys(array_keys($settings), 'managed');
+					$addonEditable = array_fill_keys(array_keys($settings), $editable);
+					$service->applyForUser($settings, $sources, $policies, $addonEditable, 'alice');
+					self::assertSame($always ? null : $threshold, $settings['attachments_min_size_mb']);
+					self::assertSame($editable, $addonEditable['attachments_min_size_mb']);
+				}
+			}
+		}
+	}
+
 	public function testEditableDisabledComposeKeepsDependentValuesAndRendersTemplate(): void {
 		$emailSignatures = $this->emailSignatureRenderer();
 		$emailSignatures

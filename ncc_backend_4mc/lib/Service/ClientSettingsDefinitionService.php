@@ -205,7 +205,7 @@ HTML;
 		'share_expire_days' => ['type' => 'int', 'default' => 8, 'min' => 1, 'max' => 3650],
 
 		'attachments_always_via_ncconnector' => ['type' => 'bool', 'default' => false],
-		'attachments_min_size_mb' => ['type' => 'int', 'default' => 5, 'min' => 0, 'max' => 10240],
+		'attachments_min_size_mb' => ['type' => 'int', 'default' => 5, 'min' => 1, 'max' => 10240],
 		self::ATTACHMENT_LINK_TARGET_KEY => ['type' => 'enum', 'default' => self::ATTACHMENT_LINK_TARGET_ZIP_DOWNLOAD, 'options' => [
 			self::ATTACHMENT_LINK_TARGET_ZIP_DOWNLOAD, self::ATTACHMENT_LINK_TARGET_SHARE_PAGE,
 		]],
@@ -378,8 +378,12 @@ HTML;
 			// Older backends accepted zero; publish the same minimum to every client.
 			return max($definition['min'], (int)$stored);
 		}
-		if ($type === 'int' && $key === 'attachments_min_size_mb' && trim($stored) === '') {
-			return null;
+		if ($key === 'attachments_min_size_mb') {
+			if (trim($stored) === '') {
+				return null;
+			}
+			// Both mail clients already treated legacy zero as the built-in threshold.
+			return (int)$stored < $definition['min'] ? $definition['default'] : (int)$stored;
 		}
 		if ($this->isTemplateEditorSetting($key)) {
 			$stored = $this->normalizeTemplateEditorValue($key, $stored);

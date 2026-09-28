@@ -45,6 +45,30 @@ final class ClientSettingsDefinitionServiceTest extends TestCase {
 		self::assertNull($this->definitions->parseStoredValue('attachments_min_size_mb', ''));
 	}
 
+	public function testAttachmentThresholdAcceptsOnlyPositiveSizesOrNull(): void {
+		self::assertSame(1, $this->definitions->get('attachments_min_size_mb')['min']);
+		foreach ([1, 19, 10240, '1', '19'] as $value) {
+			self::assertSame((int)$value, $this->definitions->normalizeValue('attachments_min_size_mb', $value));
+		}
+		foreach ([0, '0', -1, 10241] as $value) {
+			try {
+				$this->definitions->normalizeValue('attachments_min_size_mb', $value);
+				self::fail('Invalid attachment threshold was accepted');
+			} catch (\InvalidArgumentException $exception) {
+				self::assertStringContainsString('attachments_min_size_mb', $exception->getMessage());
+			}
+		}
+	}
+
+	public function testStoredZeroThresholdKeepsTheExistingClientDefault(): void {
+		foreach (['0', '-1'] as $stored) {
+			self::assertSame(5, $this->definitions->parseStoredValue('attachments_min_size_mb', $stored));
+		}
+		foreach (['1', '19', '10240'] as $stored) {
+			self::assertSame((int)$stored, $this->definitions->parseStoredValue('attachments_min_size_mb', $stored));
+		}
+	}
+
 	public function testShareExpirationAcceptsOnlyPositiveLifetime(): void {
 		self::assertSame(1, $this->definitions->get('share_expire_days')['min']);
 		foreach ([1, 19, 3650, '1', '19'] as $value) {

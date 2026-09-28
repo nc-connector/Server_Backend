@@ -858,13 +858,14 @@
 			const notes = renderSettingDependencyNotes(prefix, key, definition)
 			if (key === 'attachments_min_size_mb') {
 				const enabled = value !== null && typeof value !== 'undefined'
+				const threshold = enabled ? numeric : definition.default
 				return `
 					<div class="nccb-threshold-control">
 						<label class="nccb-inline-option nccb-threshold-toggle">
 							<input type="checkbox" class="nccb-threshold-enabled" data-prefix="${escapeHtml(prefix)}" data-setting-key="${escapeHtml(key)}" ${enabled ? 'checked' : ''} ${disabledAttr}>
 							${escapeHtml(tr('Enabled'))}
 						</label>
-						<input id="${escapeHtml(id)}" type="number" ${common} value="${numeric}" ${min} ${max}>
+						<input id="${escapeHtml(id)}" type="number" ${common} value="${threshold}" ${min} ${max}>
 					</div>
 				`
 			}

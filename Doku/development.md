@@ -497,6 +497,8 @@ The runtime response separates:
 
 `share_expire_days` accepts integers from 1 to 3650 in every write layer. Its stored-value parser applies the schema minimum to legacy zero-day values before defaults, overrides, or runtime output are built. Reads do not rewrite the stored rows, and ordinary positive values remain unchanged.
 
+`attachments_min_size_mb` accepts `null` (disabled) or integers from 1 to 10240. Its stored-value parser keeps empty storage as `null` and resolves legacy zero values to the schema default of 5 MB, matching both clients. The disabled UI control displays that default for later activation without changing its unchecked state or `null` payload.
+
 When editability is true, clients may store a local choice. They do not write it to the backend runtime endpoint.
 
 ### 7.3 Runtime dependencies
