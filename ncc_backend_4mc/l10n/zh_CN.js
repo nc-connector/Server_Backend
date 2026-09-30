@@ -2,6 +2,13 @@
 OC.L10N.register(
     'ncc_backend_4mc',
 {
+  "Default values source": "默认值来源",
+  "No preset": "不预设",
+  "Local settings": "本地设置",
+  "Choose where editable starting values come from for shares, Talk, attachments and signatures.": "选择共享、Talk、附件和签名的可编辑初始值来源。",
+  "No preset keeps the registry or local selection. A backend choice takes precedence over the registry.": "不预设会保留注册表或本地选择。后端选择优先于注册表。",
+  "Editable in add-on lets users choose a different source. Locked individual policies still apply.": "启用“可在插件中修改”可让用户选择其他来源。锁定的单项策略仍然适用。",
+  "This setting applies to all users and can only be changed by a Nextcloud administrator.": "此设置适用于所有用户，且只能由 Nextcloud 管理员更改。",
   "License capacity": "许可证容量",
   "License capacity exceeded: Seats are paused.": "已超出许可证容量：部分席位已暂停。",
   "Reduce Seat assignments or increase the license capacity.": "请减少分配的席位数量或增加许可证容量。",

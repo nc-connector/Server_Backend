@@ -2,6 +2,13 @@
 OC.L10N.register(
     'ncc_backend_4mc',
 {
+  "Default values source": "Origine dei valori predefiniti",
+  "No preset": "Nessuna preimpostazione",
+  "Local settings": "Impostazioni locali",
+  "Choose where editable starting values come from for shares, Talk, attachments and signatures.": "Scegli l’origine dei valori iniziali modificabili per condivisioni, Talk, allegati e firme.",
+  "No preset keeps the registry or local selection. A backend choice takes precedence over the registry.": "Nessuna preimpostazione mantiene la scelta del registro o quella locale. Una scelta nel backend ha la precedenza sul registro.",
+  "Editable in add-on lets users choose a different source. Locked individual policies still apply.": "Modificabile nell'add-on consente agli utenti di scegliere un’altra origine. I singoli criteri bloccati restano in vigore.",
+  "This setting applies to all users and can only be changed by a Nextcloud administrator.": "Questa impostazione si applica a tutti gli utenti e può essere modificata solo da un amministratore Nextcloud.",
   "License capacity": "Capacità della licenza",
   "License capacity exceeded: Seats are paused.": "Capacità della licenza superata: alcuni posti sono sospesi.",
   "Reduce Seat assignments or increase the license capacity.": "Riduci il numero di posti assegnati o aumenta la capacità della licenza.",

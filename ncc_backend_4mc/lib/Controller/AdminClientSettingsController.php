@@ -12,6 +12,7 @@ namespace OCA\NcConnector\Controller;
 
 use OCA\NcConnector\Service\AccessService;
 use OCA\NcConnector\Service\AdminPermissionService;
+use OCA\NcConnector\Service\ClientSettingsDefinitionService;
 use OCA\NcConnector\Service\ClientSettingsService;
 use OCA\NcConnector\Service\SeatService;
 use OCP\AppFramework\Controller;
@@ -391,6 +392,11 @@ class AdminClientSettingsController extends Controller {
 	 * @return array<string, mixed>
 	 */
 	private function filterPayloadForLayer(array $payload, string $layer): array {
+		if ($layer !== AdminPermissionService::SETTING_LAYER_DEFAULT) {
+			foreach (['schema', 'items'] as $field) {
+				unset($payload[$field][ClientSettingsDefinitionService::DEFAULTS_SOURCE_KEY]);
+			}
+		}
 		return $this->filterPayload($payload, fn (string $key): array => $this->adminPermissions->scopesForSettingLayer($layer, $key));
 	}
 

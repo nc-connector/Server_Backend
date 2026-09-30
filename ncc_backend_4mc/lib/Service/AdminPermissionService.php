@@ -14,6 +14,7 @@ class AdminPermissionService {
 	public const SETTING_LAYER_DEFAULT = 'default';
 	public const SETTING_LAYER_USER_OVERRIDE = 'user_override';
 	public const SETTING_LAYER_GROUP_OVERRIDE = 'group_override';
+	private const FULL_ADMIN_SCOPE = 'admin.only';
 
 	// Mobile/custom fields change rendered signature content, not whether signatures are inserted.
 	private const SIGNATURE_TEMPLATE_USER_SETTINGS = [
@@ -75,7 +76,7 @@ class AdminPermissionService {
 			return false;
 		}
 		foreach ($scopes as $scope) {
-			if ($this->delegations->hasPermission($userId, $scope)) {
+			if ($scope !== self::FULL_ADMIN_SCOPE && $this->delegations->hasPermission($userId, $scope)) {
 				return true;
 			}
 		}
@@ -151,6 +152,9 @@ class AdminPermissionService {
 	}
 
 	public function scopeForDefaultSetting(string $key): string {
+		if ($key === ClientSettingsDefinitionService::DEFAULTS_SOURCE_KEY) {
+			return self::FULL_ADMIN_SCOPE;
+		}
 		if (isset(self::TEMPLATE_DEFAULT_SETTINGS[$key])) {
 			return self::TEMPLATE_DEFAULT_SETTINGS[$key];
 		}
@@ -169,6 +173,9 @@ class AdminPermissionService {
 	 * @return string[]
 	 */
 	private function requiredOverrideScopes(string $key, string $overrideSuffix): array {
+		if ($key === ClientSettingsDefinitionService::DEFAULTS_SOURCE_KEY) {
+			return [self::FULL_ADMIN_SCOPE];
+		}
 		$domain = $this->settingDomain($key);
 		return $this->uniqueScopes([
 			$domain . '.' . $overrideSuffix,
@@ -177,6 +184,9 @@ class AdminPermissionService {
 	}
 
 	private function contentScopeForOverrideSetting(string $key): string {
+		if ($key === ClientSettingsDefinitionService::DEFAULTS_SOURCE_KEY) {
+			return self::FULL_ADMIN_SCOPE;
+		}
 		if (isset(self::TEMPLATE_DEFAULT_SETTINGS[$key])) {
 			return self::TEMPLATE_DEFAULT_SETTINGS[$key];
 		}

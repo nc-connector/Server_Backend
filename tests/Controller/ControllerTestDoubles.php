@@ -218,6 +218,7 @@ final class TestAdminDelegationService extends AdminDelegationService {
 }
 
 final class TestClientSettingsService extends ClientSettingsService {
+	public array $setDefaultCalls = [];
 	/**
 	 * @var list<array{user_id:string, overrides:array<string, mixed>, updated_by:?string}>
 	 */
@@ -240,7 +241,30 @@ final class TestClientSettingsService extends ClientSettingsService {
 		private array $effectiveSettings = [],
 		private array $effectiveEditable = [],
 		private string $signatureEmail = '',
+		private string $defaultsSource = 'inherit',
+		private bool $defaultsSourceEditable = false,
 	) {
+	}
+
+	public function getDefaults(): array {
+		return ['defaults_source' => $this->defaultsSource];
+	}
+
+	public function getDefaultModes(): array {
+		return ['defaults_source' => $this->defaultsSourceEditable ? 'user_choice' : 'default'];
+	}
+
+	public function setDefaults(array $defaults): array {
+		$this->setDefaultCalls[] = $defaults;
+		return ['defaults' => $defaults, 'default_modes' => $this->getDefaultModes()];
+	}
+
+	public function getRecommendedApps(): array {
+		return [];
+	}
+
+	public function getEditorTemplateAssetDataForDefaults(?array $defaults = null, ?array $templateAssetPreview = null): array {
+		return ['assets' => [], 'warnings' => []];
 	}
 
 	public function getSchema(): array {
@@ -302,6 +326,8 @@ final class TestClientSettingsService extends ClientSettingsService {
 
 	public function getEffectiveForUser(string $userId): array {
 		return [
+			'defaults_source' => $this->defaultsSource,
+			'defaults_source_editable' => $this->defaultsSourceEditable,
 			'settings' => $this->effectiveSettings,
 			'sources' => array_fill_keys(array_keys($this->effectiveSettings), 'default'),
 			'policies' => array_fill_keys(array_keys($this->effectiveSettings), 'managed'),

@@ -1,5 +1,12 @@
 {
     "translations": {
+        "Default values source": "既定値の取得元",
+        "No preset": "指定なし",
+        "Local settings": "ローカル設定",
+        "Choose where editable starting values come from for shares, Talk, attachments and signatures.": "共有、Talk、添付ファイル、署名の変更可能な初期値の取得元を選択します。",
+        "No preset keeps the registry or local selection. A backend choice takes precedence over the registry.": "「指定なし」ではレジストリまたはローカルの選択が維持されます。バックエンドでの選択はレジストリより優先されます。",
+        "Editable in add-on lets users choose a different source. Locked individual policies still apply.": "「アドオンで変更可能」を有効にすると、ユーザーは別の取得元を選択できます。ロックされた個別のポリシーは引き続き適用されます。",
+        "This setting applies to all users and can only be changed by a Nextcloud administrator.": "この設定はすべてのユーザーに適用され、Nextcloud 管理者のみが変更できます。",
         "License capacity": "ライセンスの利用枠数",
         "License capacity exceeded: Seats are paused.": "ライセンスの利用枠数を超えているため、一部のシートが一時停止されています。",
         "Reduce Seat assignments or increase the license capacity.": "シートの割り当て数を減らすか、ライセンスの利用枠数を増やしてください。",

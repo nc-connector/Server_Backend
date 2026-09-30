@@ -15,6 +15,46 @@ use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/ControllerTestDoubles.php';
 
 final class StatusControllerContractTest extends TestCase {
+	public function testDefaultsSourceStaysTopLevelAndPreservesLegacyPolicyValues(): void {
+		foreach (['inherit', 'local', 'backend'] as $source) {
+			foreach ([false, true] as $editable) {
+				$data = (new StatusController(
+					'ncc_backend_4mc', new TestRequest(), new TestAccessService(validSeatUsers: ['alice']),
+					new TestSeatService(['alice']), new TestLicenseService(),
+					new TestClientSettingsService(
+						effectiveSettings: ['defaults_source' => 'local', 'share_set_password' => true, 'talk_lobby_active' => false],
+						effectiveEditable: ['defaults_source' => true, 'share_set_password' => false, 'talk_lobby_active' => true],
+						defaultsSource: $source, defaultsSourceEditable: $editable,
+					), 'alice',
+				))->status()->getData();
+				self::assertSame($source, $data['defaults_source']);
+				self::assertSame($source !== 'inherit' && $editable, $data['defaults_source_editable']);
+				self::assertIsString($data['defaults_source']);
+				self::assertIsBool($data['defaults_source_editable']);
+				self::assertArrayNotHasKey('defaults_source', $data['status']);
+				self::assertTrue($data['policy']['share']['share_set_password']);
+				self::assertFalse($data['policy_editable']['share']['share_set_password']);
+				self::assertFalse($data['policy']['talk']['talk_lobby_active']);
+				self::assertTrue($data['policy_editable']['talk']['talk_lobby_active']);
+				foreach (['policy', 'policy_editable'] as $map) {
+					foreach ($data[$map] as $domain) {
+						self::assertArrayNotHasKey('defaults_source', $domain);
+						self::assertArrayNotHasKey('defaults_source_editable', $domain);
+					}
+				}
+			}
+		}
+	}
+
+	public function testUnconfiguredDefaultsSourceIsInheritAndLocked(): void {
+		$data = (new StatusController(
+			'ncc_backend_4mc', new TestRequest(), new TestAccessService(validSeatUsers: ['alice']),
+			new TestSeatService(['alice']), new TestLicenseService(), new TestClientSettingsService(), 'alice',
+		))->status()->getData();
+		self::assertSame('inherit', $data['defaults_source']);
+		self::assertFalse($data['defaults_source_editable']);
+	}
+
 	public function testTalkOutputTypeIsDerivedOnlyInPolicyValues(): void {
 		foreach (['html', 'plain_text', null, ''] as $format) {
 			foreach ([false, true] as $editable) {
@@ -54,11 +94,13 @@ final class StatusControllerContractTest extends TestCase {
 				$access = new AccessService(new TestGroupManager(['user-1', 'user-12', 'seatless']), $seats, $license, new TestAdminDelegationService());
 				foreach (['user-1' => 'active', 'user-12' => 'suspended_overlimit', 'seatless' => 'none'] as $admin => $state) {
 					$data = (new StatusController('ncc_backend_4mc', new TestRequest(), $access, $seats, $license,
-						new TestClientSettingsService(), $admin))->status()->getData();
+						new TestClientSettingsService(defaultsSource: 'backend', defaultsSourceEditable: true), $admin))->status()->getData();
 					self::assertTrue($data['status']['can_manage_license']);
 					self::assertSame($state, $data['status']['seat_state']);
 					self::assertSame($valid && $state === 'active', $access->isSeatUserWithValidLicense($admin));
 					self::assertSame($state === 'active', is_array($data['policy']['share']));
+					self::assertSame($valid && $state === 'active' ? 'backend' : 'inherit', $data['defaults_source']);
+					self::assertSame($valid && $state === 'active', $data['defaults_source_editable']);
 				}
 				self::assertSame(12, $seats->getAssignedSeats());
 			}
@@ -83,13 +125,15 @@ final class StatusControllerContractTest extends TestCase {
 					$license, new TestClientSettingsService(effectiveSettings: [
 						'vfs_external_providers_enabled' => true, 'share_send_password_mode' => 'secrets',
 						'talk_lobby_enabled' => true, 'email_signature_on_compose' => true,
-					], effectiveEditable: ['share_send_password_mode' => true]), $user))->status()->getData();
+					], effectiveEditable: ['share_send_password_mode' => true], defaultsSource: 'backend', defaultsSourceEditable: true), $user))->status()->getData();
 				$active = $index <= $capacity;
 				self::assertTrue($data['status']['seat_assigned']);
 				self::assertSame($active ? 'active' : 'suspended_overlimit', $data['status']['seat_state']);
 				self::assertSame($capacity < 12, $data['status']['overlicensed']);
 				self::assertSame($mode, $data['status']['mode']);
 				self::assertSame($active, $access->isSeatUserWithValidLicense($user));
+				self::assertSame($active ? 'backend' : 'inherit', $data['defaults_source']);
+				self::assertSame($active, $data['defaults_source_editable']);
 				foreach (['share', 'talk', 'email_signature'] as $area) {
 					self::assertSame($active, is_array($data['policy'][$area]));
 					self::assertSame($active, is_array($data['policy_editable'][$area]));
@@ -124,13 +168,15 @@ final class StatusControllerContractTest extends TestCase {
 				$access = new AccessService(new TestGroupManager($admin ? ['admin'] : []), $seats, $license, new TestAdminDelegationService());
 				foreach (['user-1' => 'active', 'user-12' => 'suspended_overlimit', 'seatless' => 'none'] as $target => $seatState) {
 					$data = (new StatusController('ncc_backend_4mc', new TestRequest(['user_id' => $target]), $access,
-						$seats, $license, new TestClientSettingsService(), $admin ? 'admin' : $target))->status()->getData();
+						$seats, $license, new TestClientSettingsService(defaultsSource: 'local', defaultsSourceEditable: true), $admin ? 'admin' : $target))->status()->getData();
 					self::assertSame($target, $data['status']['user_id']);
 					self::assertSame($seatState, $data['status']['seat_state']);
 					self::assertSame($admin, $data['status']['can_manage_license']);
 					self::assertSame($valid, $data['status']['is_valid']);
 					self::assertSame($state, $data['status']['access_status']);
 					self::assertSame($valid && $seatState === 'active', $access->isSeatUserWithValidLicense($target));
+					self::assertSame($valid && $seatState === 'active' ? 'local' : 'inherit', $data['defaults_source']);
+					self::assertSame($valid && $seatState === 'active', $data['defaults_source_editable']);
 					foreach (['share', 'talk', 'email_signature'] as $area) {
 						self::assertSame($seatState === 'active' && ($admin || $valid), is_array($data['policy'][$area]));
 						self::assertSame($seatState === 'active' && ($admin || $valid), is_array($data['policy_editable'][$area]));

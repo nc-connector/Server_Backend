@@ -32,6 +32,7 @@ Deployment, configuration, policy rollout, update, rollback, backup, monitoring,
 - [7. Policy resolution](#7-policy-resolution)
   - [7.1 Precedence](#71-precedence)
   - [7.2 Editable client values](#72-editable-client-values)
+    - [7.2.1 Global defaults source](#721-global-defaults-source)
   - [7.3 Runtime dependencies](#73-runtime-dependencies)
 - [8. Template and signature processing](#8-template-and-signature-processing)
   - [8.1 Sanitizing](#81-sanitizing)
@@ -232,6 +233,8 @@ Default rows remain separate from override rows:
 - group and user layers use `inherit` or `forced`
 
 These are different state models and should not share one implicit mode.
+
+The global `defaults_source` row appears only in **Group settings -> Default settings -> General** for full Nextcloud admins. Its value selector stays enabled when **Editable in add-on** is checked; other default rows retain their existing disabling behavior. Group/user override selectors and delegated views exclude this row. `adminPermissions.js` mirrors the server's full-admin restriction, including field filtering during save.
 
 ### 4.3 Controllers
 
@@ -504,6 +507,16 @@ The runtime response separates:
 
 When editability is true, clients may store a local choice. They do not write it to the backend runtime endpoint.
 
+#### 7.2.1 Global defaults source
+
+`ClientSettingsDefinitionService` defines `defaults_source` as a global-only enum with `inherit`, `local`, and `backend`; `inherit` is the default. It uses the existing default value and mode storage, not a new table or a group/user override. The existing add-on-editable mode determines whether the user can change a concrete source. `inherit` ignores that mode for runtime output without discarding the stored mode.
+
+`ClientSettingsService` reads the source from the global default layer and excludes it from group/user override resolution, override rows, and the Share/Talk/signature setting maps. Group/user writes reject this key; obsolete or forged stored override rows cannot alter the global source. `AdminPermissionService` requires a full Nextcloud administrator for reads and writes of this setting even if a delegated account has every existing policy scope. Payload validation occurs before persistence, so a rejected source entry cannot partially save unrelated values.
+
+`StatusController` returns the source and its editability as top-level metadata alongside the unchanged policy domains. It uses the existing valid-license and active-assigned-Seat access check for the resolved user, with identical Community/Pro handling. The administrator policy-inspection exception does not bypass that source check. Field types, fallback behavior, source precedence, and compatibility are specified in [endpoints.md](endpoints.md#default-values-source).
+
+Source selection currently belongs to the Outlook client. It changes the preference between editable backend defaults and local choices, not the backend's individual forced-policy resolution or signature-template ownership. A new Outlook client treats absent source metadata from older backends as `inherit`; clients without source support ignore the new fields. No endpoint version or client-mode branch is required.
+
 ### 7.3 Runtime dependencies
 
 `ClientPolicyRuntimeService` applies dependencies after layer resolution.
@@ -664,6 +677,7 @@ Admin interface:
 - delegated admins are limited to active NC Connector scopes
 - delegation management itself remains full-admin only
 - Seat assignment and license settings remain full-admin only
+- the global defaults source remains full-admin only and has no delegated scope or group/user override
 
 `AdminPermissionService` maps settings and actions to scopes. Browser mapping in `adminPermissions.js` controls visibility but does not replace the server check.
 

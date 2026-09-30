@@ -181,6 +181,9 @@ class ClientSettingsService {
 
 		foreach ($this->settingDefinitions->all() as $key => $definition) {
 			$defaultMode = $defaultModes[$key] ?? self::MODE_DEFAULT;
+			if ($this->settingDefinitions->isGlobalOnlySetting($key)) {
+				continue;
+			}
 			$override = $overrideMap[$key] ?? null;
 			if ($this->settingDefinitions->isUserOverrideOnlySetting($key)) {
 				if ($override instanceof ClientOverride && $override->getMode() === self::MODE_FORCED) {
@@ -257,7 +260,8 @@ class ClientSettingsService {
 		$items = [];
 
 		foreach ($this->settingDefinitions->all() as $key => $definition) {
-			if ($this->settingDefinitions->isUserOverrideOnlySetting($key)) {
+			if ($this->settingDefinitions->isUserOverrideOnlySetting($key)
+				|| $this->settingDefinitions->isGlobalOnlySetting($key)) {
 				continue;
 			}
 			$defaultMode = $defaultModes[$key] ?? self::MODE_DEFAULT;
@@ -460,8 +464,17 @@ class ClientSettingsService {
 			$sources[$key] = $item['source'];
 		}
 		$this->runtimePolicy->applyForUser($settings, $sources, $policies, $addonEditable, $userId);
+		$sourceKey = ClientSettingsDefinitionService::DEFAULTS_SOURCE_KEY;
+		$defaultsSource = $this->settingDefinitions->parseStoredValue(
+			$sourceKey, (string)$this->settings->getValue(self::DEFAULT_KEY_PREFIX . $sourceKey, 'inherit')
+		);
+		$sourceMode = $this->normalizeDefaultMode(
+			$sourceKey, (string)$this->settings->getValue(self::DEFAULT_MODE_KEY_PREFIX . $sourceKey, self::MODE_DEFAULT)
+		);
 
 		return [
+			'defaults_source' => $defaultsSource,
+			'defaults_source_editable' => $defaultsSource !== 'inherit' && $sourceMode === self::MODE_USER_CHOICE,
 			'settings' => $settings,
 			'sources' => $sources,
 			'policies' => $policies,
@@ -494,7 +507,8 @@ class ClientSettingsService {
 			foreach ($this->groupOverrides->getForGroups(array_keys($allGroupIds)) as $groupId => $overrideMap) {
 				$hasForcedOverride = false;
 				foreach ($overrideMap as $settingKey => $override) {
-					if ($this->settingDefinitions->isUserOverrideOnlySetting((string)$settingKey)) {
+					if ($this->settingDefinitions->isUserOverrideOnlySetting((string)$settingKey)
+						|| $this->settingDefinitions->isGlobalOnlySetting((string)$settingKey)) {
 						continue;
 					}
 					if ($override instanceof GroupOverride && $override->getMode() === self::MODE_FORCED) {
@@ -599,6 +613,9 @@ class ClientSettingsService {
 				throw new \InvalidArgumentException('Setting key must be a string');
 			}
 			$this->assertKnownSetting($key);
+			if ($this->settingDefinitions->isGlobalOnlySetting($key)) {
+				throw new \InvalidArgumentException(sprintf('Setting "%s" is only available as a global default', $key));
+			}
 			if ($forGroup) {
 				$this->assertGroupOverrideSetting($key);
 			}
@@ -692,8 +709,8 @@ class ClientSettingsService {
 	 */
 	private function getStoredGroupPriority(array $overrideMap): int {
 		$priorities = [];
-		foreach ($overrideMap as $override) {
-			if (!$override instanceof GroupOverride) {
+		foreach ($overrideMap as $key => $override) {
+			if (!$override instanceof GroupOverride || $this->settingDefinitions->isGlobalOnlySetting((string)$key)) {
 				continue;
 			}
 			$priority = $override->getPriority();
@@ -747,7 +764,8 @@ class ClientSettingsService {
 		$overrideMaps = $this->groupOverrides->getForGroups($groupIds);
 		$resolved = [];
 		foreach ($this->settingDefinitions->all() as $key => $_definition) {
-			if ($this->settingDefinitions->isUserOverrideOnlySetting($key)) {
+			if ($this->settingDefinitions->isUserOverrideOnlySetting($key)
+				|| $this->settingDefinitions->isGlobalOnlySetting($key)) {
 				continue;
 			}
 			$bestMatch = null;
@@ -817,7 +835,8 @@ class ClientSettingsService {
 	}
 
 	private function getBuiltInDefaultMode(string $key): string {
-		if (!$this->settingDefinitions->isAddonControllableSetting($key)) {
+		if (!$this->settingDefinitions->isAddonControllableSetting($key)
+			|| $this->settingDefinitions->isGlobalOnlySetting($key)) {
 			return self::MODE_DEFAULT;
 		}
 

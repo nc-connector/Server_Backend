@@ -953,7 +953,7 @@
 			modeSelector: '.nccb-addon-changeable',
 			modeClass: 'nccb-addon-changeable',
 			rowAttribute: 'data-default-setting-key',
-			isDisabledByMode: (control) => Boolean(control.checked),
+			isDisabledByMode: (control) => control.getAttribute('data-setting-key') !== 'defaults_source' && Boolean(control.checked),
 			updateDefaultValueCell: true,
 			disableAttachmentToggleByMode: true,
 		},
@@ -1035,6 +1035,7 @@
 			const value = Object.prototype.hasOwnProperty.call(defaults || {}, key) ? defaults[key] : definition.default
 			const addonEditableSupported = definition?.addon_editable_supported !== false && !isTemplateEditorSettingKey(key)
 			const addonChangeable = addonEditableSupported && defaultModes?.[key] === 'user_choice'
+			const valueDisabledByMode = addonChangeable && key !== 'defaults_source'
 			const controlDisabled = false
 
 			if (isTemplateEditorSettingKey(key)) {
@@ -1080,7 +1081,7 @@
 							</label>`
 							: '<span class="nccb-muted">—</span>'}
 					</td>
-					<td class="nccb-default-value-cell ${addonChangeable ? 'nccb-default-value-cell--disabled' : ''}">${renderSettingControl('default', key, definition, value, controlDisabled || addonChangeable, templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}</td>
+					<td class="nccb-default-value-cell ${valueDisabledByMode ? 'nccb-default-value-cell--disabled' : ''}">${renderSettingControl('default', key, definition, value, controlDisabled || valueDisabledByMode, templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}</td>
 				</tr>
 			`
 		}).join('')
@@ -1215,10 +1216,25 @@
 						<div class="nccb-muted">${escapeHtml(tr('These values apply to all users with an assigned seat unless a user override is set.'))}</div>
 						<div id="nccb-default-message" class="nccb-muted" role="status"></div>
 						<div class="nccb-tabbar nccb-tabbar--sub">
+							<button class="button" data-default-tab-button="general">${escapeHtml(tr('General'))}</button>
 							<button class="button active" data-default-tab-button="share">${escapeHtml(tr('Shares'))}</button>
 							<button class="button" data-default-tab-button="talk">${escapeHtml(tr('Talk'))}</button>
 							<button class="button" data-default-tab-button="email_signature">${escapeHtml(tr('Email signature'))}</button>
 						</div>
+						<section data-default-tab-panel="general" hidden>
+							<div class="nccb-scroll nccb-scroll--settings">
+								<table class="nccb-table">
+									<thead>
+										<tr>
+											<th style="width: 360px;">${escapeHtml(tr('Setting'))}</th>
+											<th style="width: 220px;">${escapeHtml(tr('Editable in add-on'))}</th>
+											<th>${escapeHtml(tr('Value'))}</th>
+										</tr>
+									</thead>
+									<tbody id="nccb-default-tbody-general"></tbody>
+								</table>
+							</div>
+						</section>
 						<section data-default-tab-panel="share">
 							<div class="nccb-scroll nccb-scroll--settings">
 								<table class="nccb-table">
@@ -1550,6 +1566,7 @@
 			backendUpdateStatus: root.querySelector('#nccb-backend-update-status'),
 			recommendedApps: root.querySelector('#nccb-recommended-apps'),
 			defaultMessage: root.querySelector('#nccb-default-message'),
+			defaultTableGeneral: root.querySelector('#nccb-default-tbody-general'),
 			defaultTableShare: root.querySelector('#nccb-default-tbody-share'),
 			defaultTableTalk: root.querySelector('#nccb-default-tbody-talk'),
 			defaultTableEmailSignature: root.querySelector('#nccb-default-tbody-email-signature'),
@@ -1901,6 +1918,7 @@
 			state.schemaTemplateAssetWarnings = response.schema_template_asset_warnings || {}
 			state.recommendedApps = response.recommended_apps || []
 			renderRecommendedApps(state.recommendedApps)
+			renderDefaultsRows(refs.defaultTableGeneral, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'general')
 			renderDefaultsRows(refs.defaultTableShare, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'share')
 			renderDefaultsRows(refs.defaultTableTalk, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'talk')
 			renderDefaultsRows(refs.defaultTableEmailSignature, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'email_signature')
@@ -2257,6 +2275,7 @@
 				state.recommendedApps = response.recommended_apps || state.recommendedApps
 				renderRecommendedApps(state.recommendedApps)
 				templateEditor.removeByPrefix('default')
+				renderDefaultsRows(refs.defaultTableGeneral, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'general')
 				renderDefaultsRows(refs.defaultTableShare, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'share')
 				renderDefaultsRows(refs.defaultTableTalk, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'talk')
 				renderDefaultsRows(refs.defaultTableEmailSignature, state.schema, state.defaults, state.defaultModes, state.defaultTemplateAssets, state.schemaTemplateAssets, 'email_signature')

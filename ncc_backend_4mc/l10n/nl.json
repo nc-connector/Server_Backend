@@ -1,5 +1,12 @@
 {
     "translations": {
+        "Default values source": "Bron van standaardwaarden",
+        "No preset": "Geen voorinstelling",
+        "Local settings": "Lokale instellingen",
+        "Choose where editable starting values come from for shares, Talk, attachments and signatures.": "Kies de bron voor bewerkbare beginwaarden voor shares, Talk, bijlagen en handtekeningen.",
+        "No preset keeps the registry or local selection. A backend choice takes precedence over the registry.": "Geen voorinstelling behoudt de keuze in het register of de lokale keuze. Een keuze in de backend heeft voorrang op het register.",
+        "Editable in add-on lets users choose a different source. Locked individual policies still apply.": "Wijzigbaar in add-on laat gebruikers een andere bron kiezen. Vergrendelde afzonderlijke beleidsregels blijven van toepassing.",
+        "This setting applies to all users and can only be changed by a Nextcloud administrator.": "Deze instelling geldt voor alle gebruikers en kan alleen door een Nextcloud-beheerder worden gewijzigd.",
         "License capacity": "Licentiecapaciteit",
         "License capacity exceeded: Seats are paused.": "Licentiecapaciteit overschreden: seats zijn gepauzeerd.",
         "Reduce Seat assignments or increase the license capacity.": "Verminder het aantal toegewezen seats of verhoog de licentiecapaciteit.",

@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace OCA\NcConnector\Controller;
 
 use OCA\NcConnector\Service\AccessService;
+use OCA\NcConnector\Service\ClientSettingsDefinitionService;
 use OCA\NcConnector\Service\ClientSettingsService;
 use OCA\NcConnector\Service\LicenseService;
 use OCA\NcConnector\Service\SeatService;
@@ -62,8 +63,9 @@ class StatusController extends Controller {
 		$seatAssigned = $currentSeatState !== SeatService::SEAT_STATE_NONE;
 		$overlicensed = (bool)($seatUsage['overlicensed'] ?? false);
 		$licenseSnapshot = $this->license->getSnapshot();
+		$hasSeatAccess = $targetUserId !== '' && $this->access->isSeatUserWithValidLicense($targetUserId);
 		$canReadPolicies = $targetUserId !== ''
-			&& ($isAdmin || $this->access->isSeatUserWithValidLicense($targetUserId));
+			&& ($isAdmin || $hasSeatAccess);
 
 		$policy = [
 			'share' => null,
@@ -75,8 +77,14 @@ class StatusController extends Controller {
 			'talk' => null,
 			'email_signature' => null,
 		];
+		$defaultsSource = 'inherit';
+		$defaultsSourceEditable = false;
 		if ($currentSeatState === SeatService::SEAT_STATE_ACTIVE && $canReadPolicies) {
 			$effective = $this->clientSettings->getEffectiveForUser($targetUserId);
+			if ($hasSeatAccess) {
+				$defaultsSource = (string)($effective['defaults_source'] ?? 'inherit');
+				$defaultsSourceEditable = $defaultsSource !== 'inherit' && ($effective['defaults_source_editable'] ?? false) === true;
+			}
 			$policySettings = $this->projectShareTemplateVersions($effective['settings'] ?? []);
 			$policy = $this->groupPolicyByAddonArea($policySettings);
 			$policyEditable = $this->groupPolicyByAddonArea($effective['addon_editable'] ?? []);
@@ -106,6 +114,8 @@ class StatusController extends Controller {
 			],
 			'policy' => $policy,
 			'policy_editable' => $policyEditable,
+			'defaults_source' => $defaultsSource,
+			'defaults_source_editable' => $defaultsSourceEditable,
 		]);
 	}
 
@@ -208,6 +218,9 @@ class StatusController extends Controller {
 		];
 
 		foreach ($settings as $key => $value) {
+			if ($key === ClientSettingsDefinitionService::DEFAULTS_SOURCE_KEY) {
+				continue;
+			}
 			$bucket = $this->resolvePolicyBucket((string)$key);
 			$grouped[$bucket][(string)$key] = $value;
 		}

@@ -1,5 +1,12 @@
 {
     "translations": {
+        "Default values source": "Alapértékek forrása",
+        "No preset": "Nincs előbeállítás",
+        "Local settings": "Helyi beállítások",
+        "Choose where editable starting values come from for shares, Talk, attachments and signatures.": "Válassza ki a megosztások, a Talk, a mellékletek és az aláírások módosítható kezdőértékeinek forrását.",
+        "No preset keeps the registry or local selection. A backend choice takes precedence over the registry.": "A Nincs előbeállítás megtartja a rendszerleíró adatbázisban vagy helyben megadott választást. A háttérrendszer választása felülírja a rendszerleíró adatbázisét.",
+        "Editable in add-on lets users choose a different source. Locked individual policies still apply.": "Az „A bővítményben módosítható” beállítás lehetővé teszi más forrás kiválasztását. A zárolt egyedi házirendek továbbra is érvényesek.",
+        "This setting applies to all users and can only be changed by a Nextcloud administrator.": "Ez a beállítás minden felhasználóra érvényes, és csak Nextcloud-rendszergazda módosíthatja.",
         "License capacity": "Licenckapacitás",
         "License capacity exceeded: Seats are paused.": "A licenckapacitás túllépése miatt egyes helyek szüneteltetve vannak.",
         "Reduce Seat assignments or increase the license capacity.": "Csökkentse a hozzárendelt helyek számát, vagy növelje a licenckapacitást.",

@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace OCA\NcConnector\Service;
 
 class ClientSettingsDefinitionService {
+	public const DEFAULTS_SOURCE_KEY = 'defaults_source';
 	public const SHARE_SEND_PASSWORD_MODE_KEY = 'share_send_password_mode';
 	public const SHARE_SEND_PASSWORD_MODE_PLAIN = 'plain';
 	public const SHARE_SEND_PASSWORD_MODE_SECRETS = 'secrets';
@@ -191,6 +192,7 @@ HTML;
 	 * @var array<string, array<string, mixed>>
 	 */
 	private const DEFINITIONS = [
+		self::DEFAULTS_SOURCE_KEY => ['type' => 'enum', 'default' => 'inherit', 'options' => ['inherit', 'local', 'backend'], 'global_only' => true],
 		'share_base_directory' => ['type' => 'string', 'default' => 'NC Connector', 'max_length' => 255],
 		'share_name_template' => ['type' => 'string', 'default' => 'Share name', 'max_length' => 120],
 		'share_permission_upload' => ['type' => 'bool', 'default' => true],
@@ -276,6 +278,10 @@ HTML;
 		return isset(self::USER_OVERRIDE_ONLY_SETTINGS[$key]);
 	}
 
+	public function isGlobalOnlySetting(string $key): bool {
+		return (self::DEFINITIONS[$key]['global_only'] ?? false) === true;
+	}
+
 	/**
 	 * @return string[]
 	 */
@@ -341,6 +347,9 @@ HTML;
 		}
 
 		if ($type === 'enum') {
+			if ($key === self::DEFAULTS_SOURCE_KEY && !is_string($value)) {
+				throw new \InvalidArgumentException(sprintf('Setting "%s" has invalid option', $key));
+			}
 			$normalized = strtolower(trim((string)$value));
 			$options = $definition['options'] ?? [];
 			if (!in_array($normalized, $options, true)) {
@@ -374,6 +383,10 @@ HTML;
 	public function parseStoredValue(string $key, string $stored): mixed {
 		$definition = $this->get($key);
 		$type = $definition['type'];
+		if ($key === self::DEFAULTS_SOURCE_KEY) {
+			$normalized = strtolower(trim($stored));
+			return in_array($normalized, $definition['options'], true) ? $normalized : $definition['default'];
+		}
 		if ($key === 'share_expire_days') {
 			// Older backends accepted zero; publish the same minimum to every client.
 			return max($definition['min'], (int)$stored);

@@ -1,5 +1,12 @@
 {
     "translations": {
+        "Default values source": "Źródło wartości domyślnych",
+        "No preset": "Bez ustawienia wstępnego",
+        "Local settings": "Ustawienia lokalne",
+        "Choose where editable starting values come from for shares, Talk, attachments and signatures.": "Wybierz źródło edytowalnych wartości początkowych dla udostępnień, Talk, załączników i podpisów.",
+        "No preset keeps the registry or local selection. A backend choice takes precedence over the registry.": "Bez ustawienia wstępnego zachowuje wybór z rejestru lub wybór lokalny. Wybór w backendzie ma pierwszeństwo przed rejestrem.",
+        "Editable in add-on lets users choose a different source. Locked individual policies still apply.": "Opcja „Edytowalne w dodatku” pozwala użytkownikom wybrać inne źródło. Zablokowane indywidualne zasady nadal obowiązują.",
+        "This setting applies to all users and can only be changed by a Nextcloud administrator.": "To ustawienie dotyczy wszystkich użytkowników i może je zmienić tylko administrator Nextcloud.",
         "License capacity": "Pojemność licencji",
         "License capacity exceeded: Seats are paused.": "Przekroczono limit licencji: część stanowisk jest wstrzymana.",
         "Reduce Seat assignments or increase the license capacity.": "Zmniejsz liczbę przypisanych stanowisk lub zwiększ limit licencji.",

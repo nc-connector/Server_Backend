@@ -12,6 +12,17 @@ use OCA\NcConnector\Service\EmailSignatureRuntimeService;
 use PHPUnit\Framework\TestCase;
 
 final class AdminPermissionServiceTest extends TestCase {
+	public function testDefaultsSourceCannotBeDelegatedInAnyLayer(): void {
+		$key = ClientSettingsDefinitionService::DEFAULTS_SOURCE_KEY;
+		$service = self::service(false, ['delegate' => ['share.policy', 'share.user_overrides', 'share.group_overrides', 'admin.only']]);
+		foreach ([AdminPermissionService::SETTING_LAYER_DEFAULT, AdminPermissionService::SETTING_LAYER_USER_OVERRIDE, AdminPermissionService::SETTING_LAYER_GROUP_OVERRIDE] as $layer) {
+			$scopes = $service->scopesForSettingLayer($layer, $key);
+			self::assertSame(['admin.only'], $scopes);
+			self::assertFalse($service->hasScope('delegate', $scopes[0]));
+			self::assertTrue(self::service(true)->hasScope('admin', $scopes[0]));
+		}
+	}
+
 	public function testSignatureUserOverrideFieldsStayInTemplateScope(): void {
 		$service = self::service();
 

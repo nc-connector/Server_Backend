@@ -14,6 +14,15 @@
 	const TALK_INVITATION_TEMPLATE_FORMAT_KEY = 'talk_invitation_template_format'
 	const EMAIL_SIGNATURE_TEMPLATE_KEY = 'email_signature_template'
 	const SETTING_META = {
+		defaults_source: {
+			label: 'Default values source',
+			tooltip: [
+				'Choose where editable starting values come from for shares, Talk, attachments and signatures.',
+				'No preset keeps the registry or local selection. A backend choice takes precedence over the registry.',
+				'Editable in add-on lets users choose a different source. Locked individual policies still apply.',
+				'This setting applies to all users and can only be changed by a Nextcloud administrator.',
+			],
+		},
 		share_base_directory: {
 			label: 'Base directory',
 			tooltip: ['Files are stored below this folder (for example "NC Connector").'],
@@ -226,6 +235,11 @@
 		},
 	}
 	const ENUM_OPTION_LABELS = {
+		defaults_source: {
+			inherit: 'No preset',
+			local: 'Local settings',
+			backend: 'NC Connector Backend',
+		},
 		share_send_password_mode: {
 			plain: 'Plaintext',
 			secrets: 'Nextcloud Secret Link',

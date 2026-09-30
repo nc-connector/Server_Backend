@@ -9,6 +9,8 @@ use OCA\NcConnector\Db\ClientOverrideMapper;
 use OCA\NcConnector\Db\GroupOverride;
 use OCA\NcConnector\Db\GroupOverrideMapper;
 use OCA\NcConnector\Db\SettingMapper;
+use OCA\NcConnector\Controller\AdminClientSettingsController;
+use OCA\NcConnector\Service\AdminPermissionService;
 use OCA\NcConnector\Service\ClientPolicyRuntimeService;
 use OCA\NcConnector\Service\ClientSettingsDefinitionService;
 use OCA\NcConnector\Service\ClientSettingsService;
@@ -21,7 +23,142 @@ use OCP\IUser;
 use OCP\IUserManager;
 use PHPUnit\Framework\TestCase;
 
+require_once __DIR__ . '/../Controller/ControllerTestDoubles.php';
+
 final class ClientSettingsServicePersistenceTest extends TestCase {
+	public function testDefaultsSourcePersistsInExistingSettingsAndDefaultModes(): void {
+		[$service, $db, $settings] = $this->service();
+		self::assertSame('inherit', $service->getDefaults()['defaults_source']);
+		self::assertSame('default', $service->getDefaultModes()['defaults_source']);
+		self::assertSame('inherit', $service->getEffectiveForUser('alice')['defaults_source']);
+		self::assertFalse($service->getEffectiveForUser('alice')['defaults_source_editable']);
+		self::assertSame([], $settings->values());
+
+		foreach (['inherit', 'local', 'backend'] as $source) {
+			foreach (['default', 'user_choice'] as $mode) {
+				$stored = $service->setDefaults(['defaults_source' => ['mode' => $mode, 'value' => $source]]);
+				self::assertSame($source, $stored['defaults']['defaults_source']);
+				self::assertSame($mode, $stored['default_modes']['defaults_source']);
+				self::assertSame($source, $settings->values()['client.default.defaults_source']);
+				self::assertSame($mode, $settings->values()['client.default_mode.defaults_source']);
+				$effective = $service->getEffectiveForUser('alice');
+				self::assertSame($source, $effective['defaults_source']);
+				self::assertSame($source !== 'inherit' && $mode === 'user_choice', $effective['defaults_source_editable']);
+				foreach (['settings', 'sources', 'policies', 'addon_editable'] as $map) {
+					self::assertArrayNotHasKey('defaults_source', $effective[$map]);
+				}
+			}
+		}
+		self::assertSame(6, $db->commitCount);
+		$service->setDefaults(['defaults_source' => 'local']);
+		self::assertSame('default', $service->getDefaultModes()['defaults_source']);
+		$service->setDefaults(['defaults_source' => ['mode' => 'user_choice']]);
+		self::assertSame('local', $service->getEffectiveForUser('alice')['defaults_source']);
+		self::assertTrue($service->getEffectiveForUser('alice')['defaults_source_editable']);
+		$service->setDefaults(['defaults_source' => ['mode' => 'default', 'value' => 'inherit']]);
+		self::assertSame('inherit', $service->getEffectiveForUser('alice')['defaults_source']);
+		self::assertFalse($service->getEffectiveForUser('alice')['defaults_source_editable']);
+	}
+
+	public function testInvalidDefaultsSourceRejectsTheCompleteDefaultWrite(): void {
+		foreach (['', 'remote', null, [], false] as $source) {
+			[$service, $db, $settings] = $this->service();
+			try {
+				$service->setDefaults([
+					'share_set_password' => ['mode' => 'default', 'value' => false],
+					'defaults_source' => ['mode' => 'default', 'value' => $source],
+				]);
+				self::fail('Invalid source was accepted');
+			} catch (\InvalidArgumentException $exception) {
+				self::assertStringContainsString('defaults_source', $exception->getMessage());
+			}
+			self::assertSame([], $settings->values());
+			self::assertSame(0, $db->beginCount);
+		}
+	}
+
+	public function testDefaultsSourceRejectsAllOverrideModesBeforeAnyMutation(): void {
+		foreach (['user', 'group'] as $layer) {
+			foreach (['forced', 'inherit', 'user_choice'] as $mode) {
+				[$service, $db, $settings, $users, $groups] = $this->service(groupOverrides: [
+					'group-a' => ['share_set_password' => ['priority' => 100, 'value' => '1']],
+				]);
+				$before = [$settings->snapshot(), $users->snapshot(), $groups->snapshot()];
+				$payload = ['share_set_password' => ['mode' => 'forced', 'value' => false],
+					'defaults_source' => ['mode' => $mode, 'value' => 'backend']];
+				try {
+					if ($layer === 'user') {
+						$service->setUserSettings('alice', $payload, 'admin');
+					} else {
+						$service->setGroupSettings('group-a', 1, $payload, 'admin');
+					}
+					self::fail('Global source was accepted as an override');
+				} catch (\InvalidArgumentException $exception) {
+					self::assertStringContainsString('only available as a global default', $exception->getMessage());
+				}
+				self::assertSame(0, $db->beginCount);
+				self::assertEquals($before, [$settings->snapshot(), $users->snapshot(), $groups->snapshot()]);
+			}
+		}
+	}
+
+	public function testFullAdminOverrideApisRejectDefaultsSourceAtomically(): void {
+		foreach (['user', 'group'] as $layer) {
+			[$service, $db, $settings, $users, $groups] = $this->service(groupOverrides: [
+				'group-a' => ['share_set_password' => ['priority' => 100, 'value' => '1']],
+			]);
+			$before = [$settings->snapshot(), $users->snapshot(), $groups->snapshot()];
+			$access = new \OCA\NcConnector\Tests\Controller\TestAccessService(['admin']);
+			$controller = new AdminClientSettingsController(
+				'ncc_backend_4mc', new \OCA\NcConnector\Tests\Controller\TestRequest([
+					'group_id' => 'group-a', 'priority' => 1,
+					'overrides' => ['share_set_password' => ['mode' => 'forced', 'value' => false],
+						'defaults_source' => ['mode' => 'forced', 'value' => 'backend']],
+				]), $access,
+				new AdminPermissionService($access, new \OCA\NcConnector\Tests\Controller\TestAdminDelegationService()),
+				$service, new \OCA\NcConnector\Tests\Controller\TestSeatService(['alice']),
+				new \OCA\NcConnector\Tests\Controller\TestGroupManager(groups: ['group-a' => new \OCA\NcConnector\Tests\Controller\TestGroup('Group A')]),
+				new \OCA\NcConnector\Tests\Controller\TestUserManager(['alice' => new \OCA\NcConnector\Tests\Controller\TestUser('Alice')]),
+				new \OCA\NcConnector\Tests\Controller\TestLogger(), 'admin',
+			);
+			$response = $layer === 'user' ? $controller->setUserSettings('alice') : $controller->setGroupSettings();
+			self::assertSame(422, $response->getStatus());
+			self::assertStringContainsString('only available as a global default', $response->getData()['error']);
+			self::assertSame(0, $db->beginCount);
+			self::assertEquals($before, [$settings->snapshot(), $users->snapshot(), $groups->snapshot()]);
+		}
+	}
+
+	public function testStaleDefaultsSourceOverridesCannotAffectRuntimeOrGroupReports(): void {
+		[$service, $db, $settings, $users, $groups] = $this->service(
+			clientOverrides: ['alice' => ['defaults_source' => $this->clientOverride('alice', 'defaults_source', 'local')]],
+			groupOverrides: [
+				'group-a' => ['defaults_source' => ['priority' => 1, 'value' => 'local']],
+				'group-b' => ['defaults_source' => ['priority' => 2, 'value' => 'inherit'],
+					'share_set_password' => ['priority' => 80, 'value' => '0']],
+			], userGroups: ['group-a', 'group-b'],
+		);
+		$settings->setValue('client.default.defaults_source', 'backend', 0);
+		$settings->setValue('client.default_mode.defaults_source', 'user_choice', 0);
+		$before = [$settings->snapshot(), $users->snapshot(), $groups->snapshot()];
+		self::assertArrayNotHasKey('defaults_source', $service->getUserSettings('alice'));
+		self::assertArrayNotHasKey('defaults_source', $service->getGroupSettings('group-a')['items']);
+		self::assertSame(100, $service->getGroupSettings('group-a')['priority']);
+		self::assertSame(80, $service->getGroupSettings('group-b')['priority']);
+		$effective = $service->getEffectiveForUser('alice');
+		self::assertSame('backend', $effective['defaults_source']);
+		self::assertTrue($effective['defaults_source_editable']);
+		self::assertFalse($effective['settings']['share_set_password']);
+		self::assertSame(['group-b'], array_column($service->getUsersWithGroupOverrideDetails(['alice'])['alice'], 'group_id'));
+		self::assertEquals($before, [$settings->snapshot(), $users->snapshot(), $groups->snapshot()]);
+		self::assertSame(0, $db->beginCount);
+
+		$settings->setValue('client.default.defaults_source', 'invalid', 0);
+		self::assertSame('inherit', $service->getEffectiveForUser('alice')['defaults_source']);
+		self::assertFalse($service->getEffectiveForUser('alice')['defaults_source_editable']);
+		self::assertSame('invalid', $settings->values()['client.default.defaults_source']);
+	}
+
 	public function testAttachmentThresholdReadsPreserveDisabledAndExistingValuesInEveryLayer(): void {
 		foreach (['default', 'group', 'user'] as $layer) {
 			foreach (['' => null, '0' => 5, '1' => 1, '19' => 19] as $stored => $expected) {

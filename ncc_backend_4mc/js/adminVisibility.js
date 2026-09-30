@@ -84,6 +84,7 @@
 			setMainTab(root, 'group')
 		}
 
+		setTabVisibility(root, 'data-default-tab-button', 'data-default-tab-panel', 'general', isFullAdmin)
 		DEFAULT_CATEGORIES.forEach((category) => {
 			setTabVisibility(
 				root,

@@ -2,6 +2,13 @@
 OC.L10N.register(
     'ncc_backend_4mc',
 {
+  "Default values source": "Zdroj výchozích hodnot",
+  "No preset": "Bez přednastavení",
+  "Local settings": "Místní nastavení",
+  "Choose where editable starting values come from for shares, Talk, attachments and signatures.": "Vyberte zdroj upravitelných výchozích hodnot pro sdílení, Talk, přílohy a podpisy.",
+  "No preset keeps the registry or local selection. A backend choice takes precedence over the registry.": "Bez přednastavení se zachová volba z registru nebo místní volba. Volba v backendu má přednost před registrem.",
+  "Editable in add-on lets users choose a different source. Locked individual policies still apply.": "Možnost „V doplňku upravitelné“ umožňuje uživatelům vybrat jiný zdroj. Uzamčené jednotlivé zásady zůstávají v platnosti.",
+  "This setting applies to all users and can only be changed by a Nextcloud administrator.": "Toto nastavení platí pro všechny uživatele a může ho změnit pouze správce Nextcloudu.",
   "License capacity": "Kapacita licence",
   "License capacity exceeded: Seats are paused.": "Kapacita licence byla překročena: některá místa jsou pozastavena.",
   "Reduce Seat assignments or increase the license capacity.": "Snižte počet přiřazených míst nebo zvyšte kapacitu licence.",

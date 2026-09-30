@@ -11,6 +11,55 @@ use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/ControllerTestDoubles.php';
 
 final class AdminClientSettingsControllerPermissionTest extends TestCase {
+	public function testDefaultsSourceWritesRequireFullAdminAndRejectMixedDelegatedRequests(): void {
+		$permissions = ['share.policy', 'share.templates', 'share.user_overrides', 'share.group_overrides',
+			'talk.policy', 'talk.templates', 'talk.user_overrides', 'talk.group_overrides',
+			'signature.policy', 'signature.templates', 'signature.user_overrides', 'signature.group_overrides', 'admin.only'];
+		foreach ([false, true] as $mixed) {
+			$defaults = $mixed ? ['share_send_password_mode' => ['mode' => 'default', 'value' => 'plain']] : [];
+			$defaults['defaults_source'] = ['mode' => 'user_choice', 'value' => 'backend'];
+			[$controller, $settings] = $this->controller($permissions, ['defaults' => $defaults]);
+			self::assertSame(403, $controller->setDefaults()->getStatus());
+			self::assertSame([], $settings->setDefaultCalls);
+			[$controller, $settings] = $this->controller([], ['defaults' => $defaults], isFullAdmin: true);
+			self::assertSame(200, $controller->setDefaults()->getStatus());
+			self::assertSame([$defaults], $settings->setDefaultCalls);
+		}
+		[$controller, $settings] = $this->controller($permissions, [
+			'defaults' => ['share_send_password_mode' => 'plain'],
+			'template_asset_preview' => ['defaults_source' => 'backend'],
+		]);
+		self::assertSame(403, $controller->setDefaults()->getStatus());
+		self::assertSame([], $settings->setDefaultCalls);
+		foreach (['user', 'group'] as $layer) {
+			[$controller, $settings] = $this->controller($permissions, [
+				'group_id' => 'group-a',
+				'overrides' => ['share_send_password_mode' => ['mode' => 'forced', 'value' => 'plain'],
+					'defaults_source' => ['mode' => 'forced', 'value' => 'backend']],
+			]);
+			$response = $layer === 'user' ? $controller->setUserSettings('target') : $controller->setGroupSettings();
+			self::assertSame(403, $response->getStatus());
+			self::assertSame([], $settings->setUserCalls);
+			self::assertSame([], $settings->setGroupCalls);
+		}
+	}
+
+	public function testDefaultsSourceIsHiddenFromDelegatedDefaultsAndAllOverrideSchemas(): void {
+		foreach ([false, true] as $admin) {
+			[$controller] = $this->controller(['share.policy', 'share.user_overrides', 'share.group_overrides'], isFullAdmin: $admin);
+			$schema = $controller->getSchema()->getData();
+			foreach (['schema', 'defaults', 'default_modes'] as $field) {
+				self::assertSame($admin, array_key_exists('defaults_source', $schema[$field]));
+			}
+			foreach ([$controller->getUserSettings('target'), $controller->getGroupSettings('group-a')] as $response) {
+				self::assertSame(200, $response->getStatus());
+				foreach (['schema', 'items'] as $field) {
+					self::assertArrayNotHasKey('defaults_source', $response->getData()[$field]);
+				}
+			}
+		}
+	}
+
 	public function testDelegatedSignatureTemplateAdminCanSaveSignatureTemplateUserFields(): void {
 		[$controller, $settings] = $this->controller(
 			['signature.user_overrides', 'signature.templates'],
@@ -281,6 +330,7 @@ final class AdminClientSettingsControllerPermissionTest extends TestCase {
 		$access = new TestAccessService(adminUsers: $isFullAdmin ? ['delegate'] : []);
 		$settings = new TestClientSettingsService(
 			[
+				'defaults_source' => ['type' => 'enum', 'global_only' => true],
 				'email_signature_phone_mobile' => ['type' => 'string'],
 				'email_signature_custom1' => ['type' => 'string'],
 				'email_signature_template' => ['type' => 'html'],
@@ -290,6 +340,7 @@ final class AdminClientSettingsControllerPermissionTest extends TestCase {
 				'talk_lobby_enabled' => ['type' => 'boolean'],
 			],
 			[
+				'defaults_source' => ['mode' => 'forced', 'effective_value' => 'backend'],
 				'email_signature_phone_mobile' => ['mode' => 'forced', 'effective_value' => '0160 / 123'],
 				'email_signature_custom1' => ['mode' => 'forced', 'effective_value' => 'Team Nord'],
 				'email_signature_template' => ['mode' => 'forced', 'effective_value' => '<p>Signature</p>'],

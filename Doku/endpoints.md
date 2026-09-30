@@ -23,6 +23,27 @@ Activation states are `not_required`, `activated`, `proof_required`, `invalid_pr
 
 Old clients may ignore the added fields and keep using `is_valid` and Seat checks. New clients talking to an older backend must use their existing generic warning when these fields are absent, not infer an expiry or activation reason. Administrative actions remain protected by server-side permissions; `can_manage_license` is only a UI hint. Installation verification does not require a mail-client update.
 
+### Default values source
+
+The existing status endpoint adds two top-level fields, separate from `status`, `policy`, and `policy_editable`:
+
+| Field | Type and meaning |
+|---|---|
+| `defaults_source` | String: `inherit` (UI: **No preset**), `local` (**Local settings**), or `backend` (**NC Connector Backend**). This is an installation-wide setting, not a Share/Talk/signature policy field. |
+| `defaults_source_editable` | Boolean: whether the user may change an explicit `local` or `backend` source. Always `false` when the effective source is `inherit`. |
+
+The configured source is published only when the resolved user has valid access and an active assigned Seat, identically for Community and Pro. Otherwise the response returns `defaults_source="inherit"` and `defaults_source_editable=false`. Global overcapacity alone does not suppress metadata for an active Seat. An administrator's right to inspect policies during a license refusal does not enable source metadata for an ineligible user.
+
+Source resolution in clients that support these fields:
+
+1. Missing `defaults_source` or `inherit` supplies no backend override; ignore `defaults_source_editable`. Use the registry source if configured, otherwise the saved user source choice, otherwise `local`.
+2. Explicit `local` or `backend` supersedes the registry source and its lock. If `defaults_source_editable=true`, an explicit saved user source choice takes precedence over the backend source; otherwise use the backend source without allowing user changes.
+3. An individual locked backend policy always takes precedence with either source. For editable fields, `local` prefers an explicit local value before the backend default; `backend` prefers an available backend default before the local value. Missing values use the product default. Per-action wizard edits remain subject to their existing field-policy rules.
+
+The source affects signature insertion flags, not signature-template ownership. Only a full Nextcloud administrator may configure it; no group/user override or delegated scope exists. Runtime reads do not write user choices to the backend.
+
+The fields are additive. Older clients ignore them and retain their prior behavior; newer Outlook clients can use them, while Thunderbird currently does not. Older backends omit them, which means `inherit` to a client with source support. This does not change any existing status field, policy domain, or `policy_editable` meaning.
+
 ### 1) Combined status + policies
 - **HTTP method:** `GET`
 - **Path:** `/apps/ncc_backend_4mc/api/v1/status`
@@ -37,6 +58,7 @@ Old clients may ignore the added fields and keep using `is_valid` and Seat check
   - `status`: license and seat state for the resolved user
   - `policy`: effective settings grouped into `share`, `talk`, and `email_signature`; the `email_signature` group also contains runtime metadata for sender-identity matching
   - `policy_editable`: add-on editability grouped into `share`, `talk`, and `email_signature`
+  - `defaults_source` and `defaults_source_editable`: installation-wide [source metadata](#default-values-source), outside the policy groups
   - There is **no** separate `default` block in the runtime response.
 - **Policy null rules:**
   - For ordinary users, an unusable license also returns `null` policies. Full Nextcloud admins retain the existing inspection path for users with an active Seat, including when the license is unusable; this does not grant feature access to mail clients.
@@ -111,6 +133,8 @@ curl -u "alice:APP_PASSWORD" \
     "license_connection_error": false,
     "license_offline_until_iso": null
   },
+  "defaults_source": "inherit",
+  "defaults_source_editable": false,
   "policy": {
     "share": {
       "share_base_directory": "NC Connector",

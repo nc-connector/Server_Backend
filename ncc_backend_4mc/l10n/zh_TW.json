@@ -1,5 +1,12 @@
 {
     "translations": {
+        "Default values source": "預設值來源",
+        "No preset": "不預設",
+        "Local settings": "本機設定",
+        "Choose where editable starting values come from for shares, Talk, attachments and signatures.": "選擇分享、Talk、附件和簽章的可編輯初始值來源。",
+        "No preset keeps the registry or local selection. A backend choice takes precedence over the registry.": "不預設會保留登錄或本機選擇。後端選擇優先於登錄。",
+        "Editable in add-on lets users choose a different source. Locked individual policies still apply.": "啟用「可在附加元件中修改」可讓使用者選擇其他來源。鎖定的個別原則仍然適用。",
+        "This setting applies to all users and can only be changed by a Nextcloud administrator.": "此設定適用於所有使用者，且只能由 Nextcloud 管理員變更。",
         "License capacity": "授權容量",
         "License capacity exceeded: Seats are paused.": "已超出授權容量：部分席位已暫停。",
         "Reduce Seat assignments or increase the license capacity.": "請減少指派的席位數量或增加授權容量。",

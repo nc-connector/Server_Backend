@@ -29,6 +29,7 @@ Source layout, architecture, implementation details, builds, and tests belong in
 - [5. Policies and Seats](#5-policies-and-seats)
   - [5.1 Policy precedence](#51-policy-precedence)
   - [5.2 Editable in add-on](#52-editable-in-add-on)
+    - [5.2.1 Default values source](#521-default-values-source)
   - [5.3 Share settings](#53-share-settings)
   - [5.4 Talk settings](#54-talk-settings)
   - [5.5 Email signature settings](#55-email-signature-settings)
@@ -373,7 +374,7 @@ When enabled:
 
 - the backend sends a concrete default
 - the add-on may keep a local choice for that setting
-- the backend value field is inactive in the default-settings UI
+- the backend value field is inactive in the default-settings UI, except for the source selector described below
 
 When a group or user override is forced:
 
@@ -381,6 +382,26 @@ When a group or user override is forced:
 - local editing is disabled for that setting
 
 Templates remain backend-controlled. The detailed response fields are documented in [endpoints.md](endpoints.md).
+
+#### 5.2.1 Default values source
+
+Under **Group settings -> Default settings -> General**, a full Nextcloud administrator can set **Default values source** for the installation. This setting has no group or user overrides and cannot be delegated. It currently affects NC Connector for Outlook versions that support source selection; Thunderbird and older clients retain their existing behavior.
+
+Before changing the source, confirm valid backend access and an active assigned Seat for the affected users. Community and Pro Seats have the same requirements. A source setting does not grant a Seat or bypass an access restriction.
+
+Choose the required rollout behavior:
+
+- **No preset**: keep the Outlook registry setting or, without one, the user's local source choice. Without either, local defaults apply. **Editable in add-on** has no effect in this mode.
+- **Local settings**: prefer saved local choices for editable fields. The backend supplies defaults for fields without a local choice.
+- **NC Connector Backend**: prefer available backend defaults over saved local values for sharing, Talk, attachment automation, text languages, and signature insertion switches. Missing backend values still fall back to local or product defaults.
+
+An explicit **Local settings** or **NC Connector Backend** choice takes precedence over Outlook's `DefaultsSource` registry setting, including its lock. Enable **Editable in add-on** to let users select another source; an existing saved source choice then takes precedence over the proposed backend source. Leave it disabled to fix the source centrally. The backend source dropdown remains editable with this checkbox enabled so administrators can choose that proposed source.
+
+Individual locked policies remain mandatory with either source. Selecting backend defaults does not lock otherwise editable values in the Sharing or Talk wizard; they can still be adjusted for the current action. Signature templates remain backend-controlled regardless of the source.
+
+Save the default settings, then refresh the backend connection or reopen Outlook Settings. With backend source effective, Outlook's **Sharing**, **Talk Link**, and **Signature** settings tabs are greyed out and cannot be selected; **Advanced** shows the effective source and any administrative lock. Check with a Seat user, not merely an administrator account without a Seat.
+
+To return control to the registry or user, select **No preset** and save. Existing registry policies then take effect again; remove them separately if local choice is required. Source overrides never delete saved local source choices or individual settings, so those choices return when applicable. To change the proposed source later, select a concrete source; the saved **Editable in add-on** checkbox then applies again.
 
 ### 5.3 Share settings
 
@@ -587,6 +608,7 @@ Delegated admins:
 - may read the assigned-Seat overview when their scope requires override context
 - cannot assign Seats
 - cannot change license mode or credentials
+- cannot change the installation-wide default values source
 - cannot manage delegations
 
 The backend checks permissions on every request. UI visibility does not replace server-side access checks.
@@ -903,7 +925,7 @@ Checks:
 7. Confirm that the client version supports the setting.
 8. Refresh the add-on policy state or restart the client.
 
-Expected result: the effective value follows user, group, then default precedence.
+Expected result: the effective field policy follows user, group, then default precedence. If an editable value differs in Outlook, also check [Default values source](#521-default-values-source); this installation-wide setting is separate from group and user overrides.
 
 ### 10.5 A delegated admin cannot access a setting
 

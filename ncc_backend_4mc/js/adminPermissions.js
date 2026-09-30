@@ -67,6 +67,9 @@
 	]
 
 	function settingCategory(settingKey) {
+		if (settingKey === 'defaults_source') {
+			return 'general'
+		}
 		if (SHARE_POLICY_SETTING_KEYS.has(String(settingKey || ''))) {
 			return 'share'
 		}
@@ -142,15 +145,24 @@
 	}
 
 	function canEditDefaultSetting(state, settingKey) {
+		if (settingKey === 'defaults_source') {
+			return Boolean(state.admin?.is_nextcloud_admin)
+		}
 		return hasAdminPermission(state, defaultAdminPermissionForSetting(settingKey))
 	}
 
 	function canEditUserOverrideSetting(state, settingKey) {
+		if (settingKey === 'defaults_source') {
+			return false
+		}
 		return userOverrideAdminPermissionsForSetting(settingKey)
 			.every((permission) => hasAdminPermission(state, permission))
 	}
 
 	function canEditGroupOverrideSetting(state, settingKey) {
+		if (settingKey === 'defaults_source') {
+			return false
+		}
 		return groupOverrideAdminPermissionsForSetting(settingKey)
 			.every((permission) => hasAdminPermission(state, permission))
 	}

@@ -16,6 +16,30 @@ final class ClientSettingsDefinitionServiceTest extends TestCase {
 		$this->definitions = new ClientSettingsDefinitionService(new TemplateSanitizerService());
 	}
 
+	public function testDefaultsSourceIsGlobalOnlyAndUsesTheExistingDefaultModes(): void {
+		$key = ClientSettingsDefinitionService::DEFAULTS_SOURCE_KEY;
+		self::assertSame(['type' => 'enum', 'default' => 'inherit', 'options' => ['inherit', 'local', 'backend'], 'global_only' => true], $this->definitions->get($key));
+		self::assertTrue($this->definitions->isGlobalOnlySetting($key));
+		self::assertTrue($this->definitions->isAddonControllableSetting($key));
+		self::assertFalse($this->definitions->isGlobalOnlySetting('share_set_password'));
+		foreach (['inherit', 'local', 'backend'] as $source) {
+			self::assertSame($source, $this->definitions->normalizeValue($key, ' ' . strtoupper($source) . ' '));
+			self::assertSame($source, $this->definitions->serializeValue($key, $source));
+			self::assertSame($source, $this->definitions->parseStoredValue($key, $source));
+		}
+		foreach (['', 'remote', 'false'] as $stored) {
+			self::assertSame('inherit', $this->definitions->parseStoredValue($key, $stored));
+		}
+		foreach (['', 'remote', null, false, 1, []] as $invalid) {
+			try {
+				$this->definitions->normalizeValue($key, $invalid);
+				self::fail('Invalid defaults source accepted');
+			} catch (\InvalidArgumentException $exception) {
+				self::assertStringContainsString($key, $exception->getMessage());
+			}
+		}
+	}
+
 	public function testPasswordDeliveryModeAcceptsOnlyKnownValues(): void {
 		self::assertSame(
 			ClientSettingsDefinitionService::SHARE_SEND_PASSWORD_MODE_SECRETS,
