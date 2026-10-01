@@ -4,6 +4,16 @@ All notable changes to this repository are documented in this file.
 
 The format is based on **Keep a Changelog** and uses a simple version-first structure.
 
+## [1.4.3] - 2026-10-01
+
+### Added
+
+- Add a global **Default values source** setting to let administrators choose between local and backend defaults for NC Connector add-ons, with optional user choice through **Editable in add-on**
+
+### Changed
+
+- Keep backend default values editable instead of greying them out when **Editable in add-on** is enabled. The checkbox controls whether users may override the value; setting dependencies and administrator permissions still apply
+
 ## [1.4.2] - 2026-09-28
 
 ### Changed

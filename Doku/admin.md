@@ -386,13 +386,13 @@ Templates remain backend-controlled. The detailed response fields are documented
 
 #### 5.2.1 Default values source
 
-Under **Group settings -> Default settings -> General**, a full Nextcloud administrator can set **Default values source** for the installation. This setting has no group or user overrides and cannot be delegated. It currently affects NC Connector for Outlook versions that support source selection; Thunderbird and older clients retain their existing behavior.
+Under **Group settings -> Default settings -> General**, a full Nextcloud administrator can set **Default values source** for NC Connector add-ons across the installation. This setting has no group or user overrides and cannot be delegated. Older add-on versions without source selection retain their existing behavior.
 
 Before changing the source, confirm valid backend access and an active assigned Seat for the affected users. Community and Pro Seats have the same requirements. A source setting does not grant a Seat or bypass an access restriction.
 
 Choose the required rollout behavior:
 
-- **No preset**: keep the Outlook registry setting or, without one, the user's local source choice. Without either, local defaults apply. **Editable in add-on** has no effect in this mode.
+- **No preset**: keep the user's local source choice; in Outlook, an existing registry preset takes precedence. Without either, local defaults apply. **Editable in add-on** has no effect in this mode.
 - **Local settings**: prefer saved local choices for editable fields. The backend supplies defaults for fields without a local choice.
 - **NC Connector Backend**: prefer available backend defaults over saved local values for sharing, Talk, attachment automation, text languages, and signature insertion switches. Missing backend values still fall back to local or product defaults.
 
@@ -400,7 +400,7 @@ An explicit **Local settings** or **NC Connector Backend** choice takes preceden
 
 Individual locked policies remain mandatory with either source. Selecting backend defaults does not lock otherwise editable values in the Sharing or Talk wizard; they can still be adjusted for the current action. Signature templates remain backend-controlled regardless of the source.
 
-Save the default settings, then refresh the backend connection or reopen Outlook Settings. With backend source effective, Outlook's **Sharing**, **Talk Link**, and **Signature** settings tabs are greyed out and cannot be selected; **Advanced** shows the effective source and any administrative lock. Check with a Seat user, not merely an administrator account without a Seat.
+Save the default settings, then refresh the backend connection or reopen the add-on settings. In Outlook, with backend source effective, the **Sharing**, **Talk Link**, and **Signature** settings tabs are greyed out and cannot be selected; **Advanced** shows the effective source and any administrative lock. Check with a Seat user, not merely an administrator account without a Seat.
 
 To return control to the registry or user, select **No preset** and save. Existing registry policies then take effect again; remove them separately if local choice is required. Source overrides never delete saved local source choices or individual settings, so those choices return when applicable. To change the proposed source later, select a concrete source; the saved **Editable in add-on** checkbox then applies again.
 
@@ -926,7 +926,7 @@ Checks:
 7. Confirm that the client version supports the setting.
 8. Refresh the add-on policy state or restart the client.
 
-Expected result: the effective field policy follows user, group, then default precedence. If an editable value differs in Outlook, also check [Default values source](#521-default-values-source); this installation-wide setting is separate from group and user overrides.
+Expected result: the effective field policy follows user, group, then default precedence. If an editable value differs in the add-on, also check [Default values source](#521-default-values-source); this installation-wide setting is separate from group and user overrides.
 
 ### 10.5 A delegated admin cannot access a setting
 

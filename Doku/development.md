@@ -517,7 +517,7 @@ When editability is true, clients may store a local choice. They do not write it
 
 `StatusController` returns the source and its editability as top-level metadata alongside the unchanged policy domains. It uses the existing valid-license and active-assigned-Seat access check for the resolved user, with identical Community/Pro handling. The administrator policy-inspection exception does not bypass that source check. Field types, fallback behavior, source precedence, and compatibility are specified in [endpoints.md](endpoints.md#default-values-source).
 
-Source selection currently belongs to the Outlook client. It changes the preference between editable backend defaults and local choices, not the backend's individual forced-policy resolution or signature-template ownership. A new Outlook client treats absent source metadata from older backends as `inherit`; clients without source support ignore the new fields. No endpoint version or client-mode branch is required.
+Source selection belongs to the mail clients. It changes the preference between editable backend defaults and local choices, not the backend's individual forced-policy resolution or signature-template ownership. Clients with source support treat absent source metadata from older backends as `inherit`; clients without source support ignore the new fields. No endpoint version or client-mode branch is required.
 
 ### 7.3 Runtime dependencies
 

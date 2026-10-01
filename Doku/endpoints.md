@@ -42,7 +42,7 @@ Source resolution in clients that support these fields:
 
 The source affects signature insertion flags, not signature-template ownership. Only a full Nextcloud administrator may configure it; no group/user override or delegated scope exists. Runtime reads do not write user choices to the backend.
 
-The fields are additive. Older clients ignore them and retain their prior behavior; newer Outlook clients can use them, while Thunderbird currently does not. Older backends omit them, which means `inherit` to a client with source support. This does not change any existing status field, policy domain, or `policy_editable` meaning.
+The fields are additive and shared by NC Connector mail add-ons. Older clients without source support ignore them and retain their prior behavior. Older backends omit them, which means `inherit` to a client with source support. This does not change any existing status field, policy domain, or `policy_editable` meaning.
 
 ### 1) Combined status + policies
 - **HTTP method:** `GET`
