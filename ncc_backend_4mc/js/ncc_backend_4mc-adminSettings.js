@@ -953,7 +953,7 @@
 			modeSelector: '.nccb-addon-changeable',
 			modeClass: 'nccb-addon-changeable',
 			rowAttribute: 'data-default-setting-key',
-			isDisabledByMode: (control) => control.getAttribute('data-setting-key') !== 'defaults_source' && Boolean(control.checked),
+			isDisabledByMode: () => false,
 			updateDefaultValueCell: true,
 			disableAttachmentToggleByMode: true,
 		},
@@ -1035,8 +1035,6 @@
 			const value = Object.prototype.hasOwnProperty.call(defaults || {}, key) ? defaults[key] : definition.default
 			const addonEditableSupported = definition?.addon_editable_supported !== false && !isTemplateEditorSettingKey(key)
 			const addonChangeable = addonEditableSupported && defaultModes?.[key] === 'user_choice'
-			const valueDisabledByMode = addonChangeable && key !== 'defaults_source'
-			const controlDisabled = false
 
 			if (isTemplateEditorSettingKey(key)) {
 				const talkTemplateFormat = key === TALK_INVITATION_TEMPLATE_KEY
@@ -1060,7 +1058,7 @@
 							${talkTemplateFormat
 								? `<div class="nccb-template-row-head">${talkTemplateFormat}</div>`
 								: ''}
-							${renderSettingControl('default', key, definition, value, controlDisabled, templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}
+							${renderSettingControl('default', key, definition, value, false, templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}
 						</td>
 					</tr>
 				`
@@ -1081,7 +1079,7 @@
 							</label>`
 							: '<span class="nccb-muted">—</span>'}
 					</td>
-					<td class="nccb-default-value-cell ${valueDisabledByMode ? 'nccb-default-value-cell--disabled' : ''}">${renderSettingControl('default', key, definition, value, controlDisabled || valueDisabledByMode, templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}</td>
+					<td class="nccb-default-value-cell">${renderSettingControl('default', key, definition, value, false, templateAssets?.[key] || {}, defaultTemplateAssets?.[key] || {})}</td>
 				</tr>
 			`
 		}).join('')

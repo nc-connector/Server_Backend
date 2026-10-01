@@ -26,6 +26,32 @@ use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../Controller/ControllerTestDoubles.php';
 
 final class ClientSettingsServicePersistenceTest extends TestCase {
+	public function testEditableDefaultsRetainChangedValuesWhenLocked(): void {
+		[$service, , $settings] = $this->service();
+		$valuesByKey = [
+			'share_permission_upload' => [true, false],
+			'share_name_template' => ['Initial share', 'Updated share'],
+			'share_expire_days' => [8, 14],
+			'talk_room_type' => ['event', 'group'],
+		];
+
+		foreach ($valuesByKey as $key => [$initial, $changed]) {
+			foreach ([['user_choice', $initial], ['user_choice', $changed], ['default', $changed]] as [$mode, $value]) {
+				$stored = $service->setDefaults([$key => ['mode' => $mode, 'value' => $value]]);
+				self::assertSame($value, $stored['defaults'][$key], $key);
+				self::assertSame($mode, $stored['default_modes'][$key], $key);
+				self::assertSame($value, $service->getDefaults()[$key], $key);
+				self::assertSame($mode, $service->getDefaultModes()[$key], $key);
+				$serialized = is_bool($value) ? ($value ? '1' : '0') : (string)$value;
+				self::assertSame($serialized, $settings->values()['client.default.' . $key], $key);
+				self::assertSame($mode, $settings->values()['client.default_mode.' . $key], $key);
+				$effective = $service->getEffectiveForUser('alice');
+				self::assertSame($value, $effective['settings'][$key], $key);
+				self::assertSame($mode === 'user_choice', $effective['addon_editable'][$key], $key);
+			}
+		}
+	}
+
 	public function testDefaultsSourcePersistsInExistingSettingsAndDefaultModes(): void {
 		[$service, $db, $settings] = $this->service();
 		self::assertSame('inherit', $service->getDefaults()['defaults_source']);

@@ -12,6 +12,7 @@ class Element {
       .map(([key, value]) => [key.slice(5).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase()), value]))
     const classes = new Set((attributes.class || '').split(/\s+/))
     this.classList = {
+      add: (name) => classes.add(name),
       contains: (name) => classes.has(name),
       toggle: (name, enabled) => enabled ? classes.add(name) : classes.delete(name),
     }
@@ -40,7 +41,11 @@ class Element {
   }
 
   querySelector(selector) { return this.querySelectorAll(selector)[0] || null }
-  closest(selector) { return selector === 'tr' ? this.parent : null }
+  closest(selector) {
+    if (selector === 'tr') return this.parent
+    if (this.matches(selector)) return this
+    return this.parent?.closest(selector) || null
+  }
 }
 
 function controls() {
@@ -147,6 +152,7 @@ function defaultControls(key, value, editable) {
   toggle.checked = editable
   const input = new Element({ class: 'nccb-setting-control', 'data-prefix': 'default', 'data-setting-key': key })
   input.value = value
+  input.checked = value === true
   const cell = new Element({ class: 'nccb-default-value-cell' })
   const row = new Element({ 'data-default-setting-key': key }, [toggle, input, cell])
   return { row, toggle, input, cell }
@@ -215,7 +221,7 @@ test('source row renders three starting values and keeps its value enabled with 
   }
 })
 
-test('live source editability changes preserve the starting value and ordinary policy control behavior', () => {
+test('live editability changes keep source and ordinary backend defaults enabled', () => {
   const ui = controls()
   for (const value of sourceDefinition.options) {
     const source = defaultControls(sourceKey, value, false)
@@ -233,10 +239,162 @@ test('live source editability changes preserve the starting value and ordinary p
       assert.equal(source.cell.classList.contains('nccb-default-value-cell--disabled'), false)
       assert.equal(source.input.value, value)
       assert.equal(source.toggle.checked, editable)
-      assert.equal(ordinary.input.disabled, editable)
-      assert.equal(ordinary.cell.classList.contains('nccb-default-value-cell--disabled'), editable)
+      assert.equal(ordinary.input.disabled, false)
+      assert.equal(ordinary.cell.classList.contains('nccb-default-value-cell--disabled'), false)
     }
   }
+})
+
+test('backend defaults of every control type remain editable and retain their submitted values', () => {
+  const ui = controls()
+  const cases = [
+    ['share_permission_upload', { type: 'bool', default: true }, [false, true]],
+    ['vfs_provider_enabled', { type: 'bool', default: true }, [false, true]],
+    ['vfs_external_providers_enabled', { type: 'bool', default: false }, [true, false]],
+    ['share_expire_days', { type: 'int', default: 8, min: 1, max: 3650 }, [1, 30]],
+    ['share_name_template', { type: 'string', default: 'Files', max_length: 255 }, ['Documents', 'Project files']],
+    ['talk_title', { type: 'string', default: 'Meeting', max_length: 120 }, ['Project review', 'Team meeting']],
+    ['talk_room_type', { type: 'enum', default: 'event', options: ['event', 'group'] }, ['group', 'event']],
+    ['language_share_html_block', { type: 'enum', default: 'en', options: ['en', 'de', 'custom'] }, ['de', 'custom']],
+    ['language_talk_description', { type: 'enum', default: 'en', options: ['en', 'de', 'custom'] }, ['de', 'custom']],
+    ['email_signature_on_compose', { type: 'bool', default: true }, [false, true]],
+    ['email_signature_on_reply', { type: 'bool', default: false }, [true, false]],
+    ['email_signature_on_forward', { type: 'bool', default: false }, [true, false]],
+  ]
+  for (const [key, definition, values] of cases) {
+    const schema = { [key]: definition }
+    const field = defaultControls(key, values[0], true)
+    const root = new Element({}, [field.row])
+    const state = { schema, admin: { is_nextcloud_admin: true } }
+    const helpers = payloadHelpers(ui, root, state)
+    for (const editable of [true, false, true]) {
+      field.toggle.checked = editable
+      for (const value of values) {
+        field.input.value = String(value)
+        field.input.checked = value === true
+        ui.syncDefaultControlState(root)
+        assert.equal(field.input.disabled, false, `${key}: backend value remains enabled`)
+        assert.equal(field.input.dataset.disabledByMode, '0')
+        const submitted = JSON.parse(JSON.stringify(helpers.collectDefaultPayload()[key]))
+        assert.deepEqual(submitted, { mode: editable ? 'user_choice' : 'default', value })
+        const table = new Element()
+        ui.renderDefaultsRows(table, schema, { [key]: submitted.value }, { [key]: submitted.mode }, {}, {}, ui.settingCategory(key))
+        const tag = table.innerHTML.match(new RegExp(`<(?:input|select|textarea)[^>]*class="nccb-setting-control"[^>]*data-setting-key="${key}"[^>]*>`))?.[0]
+        assert.ok(tag, `Rendered value: ${key}`)
+        assert.doesNotMatch(tag, /\bdisabled\b/, key)
+        assert.doesNotMatch(table.innerHTML, /nccb-default-value-cell--disabled/, key)
+      }
+    }
+  }
+})
+
+test('editable defaults preserve password, signature and template dependencies', () => {
+  const ui = controls()
+  const fields = Object.fromEntries(Object.entries({
+    share_send_password_separately: true,
+    share_send_password_mode: 'secrets',
+    share_secrets_expire_days: 7,
+    email_signature_on_compose: true,
+    email_signature_on_reply: true,
+    email_signature_on_forward: false,
+    email_signature_template: '<p>Signature</p>',
+    language_share_html_block: 'custom',
+    share_html_block_template: '<p>Share</p>',
+    share_password_template: '<p>Password</p>',
+    language_talk_description: 'custom',
+    talk_invitation_template: '<p>Talk</p>',
+    talk_invitation_template_format: 'html',
+  }).map(([key, value]) => [key, defaultControls(key, value, true)]))
+  const secrets = new Element({ value: 'secrets' })
+  fields.share_send_password_mode.input.children.push(secrets)
+  const talk = fields.talk_invitation_template.row
+  talk.classList.add('nccb-template-row')
+  talk.children.push(fields.talk_invitation_template_format.input)
+  fields.talk_invitation_template_format.input.parent = talk
+  const root = new Element({}, Object.entries(fields)
+    .filter(([key]) => key !== 'talk_invitation_template_format').map(([, field]) => field.row))
+  for (const editable of [true, false, true]) {
+    for (const field of Object.values(fields)) field.toggle.checked = editable
+    for (const enabled of [true, false, true]) {
+      fields.share_send_password_separately.input.checked = enabled
+      fields.email_signature_on_compose.input.checked = enabled
+      fields.language_share_html_block.input.value = enabled ? 'custom' : 'de'
+      fields.language_talk_description.input.value = enabled ? 'custom' : 'en'
+      ui.syncDefaultControlState(root)
+      for (const key of ['share_send_password_mode', 'share_secrets_expire_days', 'email_signature_on_reply',
+        'email_signature_on_forward', 'email_signature_template', 'share_html_block_template',
+        'share_password_template', 'talk_invitation_template', 'talk_invitation_template_format']) {
+        assert.equal(fields[key].input.disabled, !enabled, `${key}: only its dependency disables it`)
+      }
+    }
+    for (const mode of ['plain', 'secrets']) {
+      for (const available of [true, false]) {
+        fields.share_send_password_mode.input.value = mode
+        secrets.disabled = !available
+        ui.syncDefaultControlState(root)
+        assert.equal(fields.share_send_password_mode.input.disabled, false)
+        assert.equal(fields.share_secrets_expire_days.input.disabled, mode !== 'secrets' || !available)
+      }
+    }
+    fields.share_send_password_mode.input.value = 'secrets'
+    secrets.disabled = false
+  }
+})
+
+test('editable attachment defaults keep the threshold switch and its value independent', () => {
+  const ui = controls()
+  const always = defaultControls('attachments_always_via_ncconnector', false, true)
+  const threshold = defaultControls('attachments_min_size_mb', '19', true)
+  const enabled = new Element({ class: 'nccb-threshold-enabled', 'data-prefix': 'default', 'data-setting-key': 'attachments_min_size_mb' })
+  enabled.checked = true
+  threshold.row.children.push(enabled)
+  enabled.parent = threshold.row
+  const root = new Element({}, [always.row, threshold.row])
+  for (const editable of [true, false, true]) {
+    always.toggle.checked = editable
+    threshold.toggle.checked = editable
+    for (const active of [true, false]) {
+      enabled.checked = active
+      ui.syncDefaultControlState(root)
+      assert.equal(always.input.disabled, false)
+      assert.equal(enabled.disabled, false)
+      assert.equal(threshold.input.disabled, !active)
+      always.input.checked = true
+      ui.syncDefaultControlState(root)
+      assert.equal(enabled.disabled, true)
+      assert.equal(enabled.checked, false)
+      assert.equal(threshold.input.disabled, true)
+      always.input.checked = false
+      ui.syncDefaultControlState(root)
+      assert.equal(enabled.disabled, false)
+      assert.equal(enabled.checked, active)
+      assert.equal(threshold.input.disabled, !active)
+      assert.equal(threshold.input.value, '19')
+    }
+  }
+})
+
+test('inherited user and group values stay disabled and forbidden defaults stay out of the payload', () => {
+  const ui = controls()
+  for (const layer of ['userOverride', 'groupOverride']) {
+    const config = ui.settingLayerUi[layer]
+    const key = 'share_permission_upload'
+    const mode = new Element({ class: config.modeClass, 'data-setting-key': key })
+    const input = new Element({ class: 'nccb-setting-control', 'data-prefix': config.prefix, 'data-setting-key': key })
+    input.checked = true
+    const root = new Element({}, [new Element({}, [mode, input])])
+    for (const value of ['inherit', 'forced', 'inherit']) {
+      mode.value = value
+      ui.syncSettingLayerControlState(root, config)
+      assert.equal(input.disabled, value === 'inherit')
+      assert.equal(input.checked, true)
+    }
+  }
+  const root = new Element({}, [defaultControls('share_permission_upload', true, true).row])
+  const state = { schema: sourceSchema, admin: { is_nextcloud_admin: false, permissions: ['talk.policy'] } }
+  ui.window.NCCBackendAdminVisibility.applySettingRowVisibility(root, state, ui.window.NCCBackendAdminPermissions)
+  assert.equal(root.children[0].hidden, true)
+  assert.deepEqual(Object.keys(payloadHelpers(ui, root, state).collectDefaultPayload()), [])
 })
 
 test('default payload retains source and editability while delegates and override payloads omit it', () => {

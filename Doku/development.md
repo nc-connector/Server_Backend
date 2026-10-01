@@ -234,7 +234,9 @@ Default rows remain separate from override rows:
 
 These are different state models and should not share one implicit mode.
 
-The global `defaults_source` row appears only in **Group settings -> Default settings -> General** for full Nextcloud admins. Its value selector stays enabled when **Editable in add-on** is checked; other default rows retain their existing disabling behavior. Group/user override selectors and delegated views exclude this row. `adminPermissions.js` mirrors the server's full-admin restriction, including field filtering during save.
+Default value controls and **Editable in add-on** are independent: the checkbox does not disable backend default inputs. Setting dependencies and administrator permission checks still apply. Group and user overrides retain their `inherit`/`forced` behavior.
+
+The global `defaults_source` row appears only in **Group settings -> Default settings -> General** for full Nextcloud admins. Group/user override selectors and delegated views exclude this row. `adminPermissions.js` mirrors the server's full-admin restriction, including field filtering during save.
 
 ### 4.3 Controllers
 

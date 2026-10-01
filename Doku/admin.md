@@ -370,11 +370,12 @@ If several group overrides apply, the group with the lowest numeric priority win
 
 **Editable in add-on** separates the backend default from the local user choice.
 
+The backend default and add-on editability can be configured independently. Checking or clearing **Editable in add-on** does not lock the backend value field. Setting dependencies and administrator permissions still apply.
+
 When enabled:
 
 - the backend sends a concrete default
 - the add-on may keep a local choice for that setting
-- the backend value field is inactive in the default-settings UI, except for the source selector described below
 
 When a group or user override is forced:
 
@@ -395,7 +396,7 @@ Choose the required rollout behavior:
 - **Local settings**: prefer saved local choices for editable fields. The backend supplies defaults for fields without a local choice.
 - **NC Connector Backend**: prefer available backend defaults over saved local values for sharing, Talk, attachment automation, text languages, and signature insertion switches. Missing backend values still fall back to local or product defaults.
 
-An explicit **Local settings** or **NC Connector Backend** choice takes precedence over Outlook's `DefaultsSource` registry setting, including its lock. Enable **Editable in add-on** to let users select another source; an existing saved source choice then takes precedence over the proposed backend source. Leave it disabled to fix the source centrally. The backend source dropdown remains editable with this checkbox enabled so administrators can choose that proposed source.
+An explicit **Local settings** or **NC Connector Backend** choice takes precedence over Outlook's `DefaultsSource` registry setting, including its lock. Enable **Editable in add-on** to let users select another source; an existing saved source choice then takes precedence over the proposed backend source. Leave it disabled to fix the source centrally.
 
 Individual locked policies remain mandatory with either source. Selecting backend defaults does not lock otherwise editable values in the Sharing or Talk wizard; they can still be adjusted for the current action. Signature templates remain backend-controlled regardless of the source.
 
