@@ -155,6 +155,7 @@ Planned work across Thunderbird, Outlook, and the Backend is tracked in the publ
 
 | <a href="screenshots/appsettings.png"><img src="screenshots/appsettings.png" alt="Backend settings" width="420"></a> | <a href="screenshots/AdminDelegation.png"><img src="screenshots/AdminDelegation.png" alt="Admin delegation settings" width="420"></a> |
 | --- | --- |
+| <a href="screenshots/UserOverrides.png"><img src="screenshots/UserOverrides.png" alt="User override settings" width="420"></a> | |
 
 </details>
 
