@@ -2,89 +2,147 @@
 <info>
 	<id>ncc_backend_4mc</id>
 	<name>NC Connector for mail integration</name>
-	<summary lang="en">Central policies, templates, signatures, licensing and password delivery for NC Connector mail add-ons.</summary>
-	<summary lang="de">Zentrale Richtlinien, Vorlagen, Signaturen, Lizenzverwaltung und Passwortzustellung für NC Connector Mail-Add-ons.</summary>
+	<summary lang="en">Central policies, signatures and delegated administration for Thunderbird and Outlook Classic.</summary>
+	<summary lang="de">Zentrale Richtlinien, Signaturen und delegierte Administration für Thunderbird und Outlook Classic.</summary>
 	<description lang="en"><![CDATA[
 # NC Connector Backend
 
-NC Connector Backend is the optional Nextcloud app for organizations that centrally manage NC Connector for Thunderbird and Outlook Classic. The mail add-ons continue to work without it.
+Shared settings, consistent signatures and clear responsibilities: manage NC Connector for Thunderbird and Outlook Classic centrally in your Nextcloud.
 
-Community mode includes one free seat. It gives one assigned Nextcloud user the full Pro feature set. Pro extends this model to teams from five seats. Each seat corresponds to exactly one assigned Nextcloud user.
+## Shared defaults, tailored exceptions
 
-## Features
+Decide which settings are mandatory and which users may change in the add-on. Set central defaults for sharing permissions, password protection and expiry dates, for example.
 
-- Define Share, Talk, attachment, email-signature and Thunderbird VFS policies
-- Lock selected settings while leaving others editable in the mail add-on
-- Apply defaults with group and user overrides
-- Manage Community and Pro license modes and their user assignments
-- Delegate selected administration tasks without granting full Nextcloud administrator rights
-- Create custom-branded HTML templates for Share blocks, password mails, Talk invitations and email signatures
-- Deliver passwords through a separate mail or an expiring Nextcloud Secrets link
-- Provide backend, license and assignment status for client diagnostics
-- Control NC Connector's Nextcloud VFS provider and access to compatible external VFS sources in Thunderbird
+Use **group and user overrides** to accommodate different needs: sales can have different sharing text and expiry periods from internal administration. Individual users can receive different settings or personalized signature details when needed.
 
-Email signatures can use Nextcloud profile data and per-user values. Nextcloud Talk and Secrets remain optional integrations.
+## Delegate tasks, keep control
 
-The backend does not store email content or attachments.
+Not every change to a signature or sharing text needs to go through the Nextcloud administrator.
 
-## Mail clients
+With **admin delegation**, give selected people access to exactly the areas they need. For example, someone in marketing or communications can maintain email-signature branding and revise the wording of sharing templates without permission to change sharing or Talk policies.
 
-- Thunderbird: [https://addons.thunderbird.net/thunderbird/addon/nc4tb/](https://addons.thunderbird.net/thunderbird/addon/nc4tb/)
-- Outlook Classic: [https://github.com/nc-connector/NC_Connector_for_Outlook/releases/latest](https://github.com/nc-connector/NC_Connector_for_Outlook/releases/latest)
+Assign permissions separately for sharing, Talk and email signatures, covering policies, templates, group overrides and user overrides in each area. Delegated users work in their personal Nextcloud settings and do not need full Nextcloud administrator rights.
+
+## A consistent brand with personal signatures
+
+Design central HTML templates for email signatures, sharing blocks, separate password emails and Talk invitations. Your own text, logos and design create consistent company branding.
+
+Email signatures combine these templates with Nextcloud profile data and individual details, such as phone numbers or additional contact information. The mail add-ons automatically select the matching signature based on the sender address.
+
+## Simple rollout and central defaults
+
+Preconfigure the server address and sign-in method through the [Windows registry for Outlook](https://github.com/nc-connector/NC_Connector_for_Outlook/blob/main/docs/ADMIN.md#enterprise-rollout) or [enterprise policies for Thunderbird](https://github.com/nc-connector/NC_Connector_for_Thunderbird/blob/main/docs/ADMIN.md#enterprise-rollout). Users do not have to configure these details themselves.
+
+In the backend, choose whether the add-ons use local or centrally supplied defaults. You can also let users choose the source themselves. Mandatory policies continue to apply regardless of that choice.
+
+## Additional functions
+
+- **Attachment automation:** Set size-based rules and decide when attachments are shared through Nextcloud.
+- **Talk meetings:** Set defaults for room type, password, lobby and adding invited users and guests.
+- **Separate password delivery:** Send sharing passwords in a separate email or through a time-limited Nextcloud Secrets link.
+- **File sources in Thunderbird:** Centrally control NC Connector's Nextcloud VFS provider and access to compatible external VFS providers.
+
+## Start for free and expand for teams
+
+Community mode includes one free Seat for one Nextcloud user account with all backend functions. [Pro licenses](https://nc-connector.de/preise-lizenzierung/) are available for teams starting at five Seats. The functions remain the same.
+
+Seats are assigned to Nextcloud users. Each user needs a valid assigned Seat to use central backend functions.
+
+## Requirements and data storage
+
+You need NC Connector for Thunderbird or Outlook Classic. Nextcloud Talk is required for Talk meetings; the Nextcloud Secrets app is only required for password delivery through Secrets links.
+
+The backend does not store email messages or attachments. Centrally configured templates, settings and individual signature details are stored in your Nextcloud.
+
+## Mail add-ons
+
+- [NC Connector for Thunderbird](https://addons.thunderbird.net/thunderbird/addon/nc4tb/)
+- [NC Connector for Outlook Classic](https://github.com/nc-connector/NC_Connector_for_Outlook/releases/latest)
 
 ## More information
 
-- Homepage: [https://nc-connector.de](https://nc-connector.de)
-- Contact: [https://nc-connector.de/kontakt/](https://nc-connector.de/kontakt/)
+- [Homepage](https://nc-connector.de)
+- [Contact](https://nc-connector.de/kontakt/)
+- [Support form](https://nc-connector.de/support/)
 ]]></description>
 	<description lang="de"><![CDATA[
 # NC Connector Backend
 
-NC Connector Backend ist die optionale Nextcloud-App für Organisationen, die NC Connector für Thunderbird und Outlook Classic zentral verwalten möchten. Die Mail-Add-ons funktionieren weiterhin ohne Backend.
+Gemeinsame Einstellungen, einheitliche Signaturen und klar verteilte Zuständigkeiten: Verwalten Sie NC Connector für Thunderbird und Outlook Classic zentral in Ihrer Nextcloud.
 
-Der Community-Modus enthält einen kostenlosen Seat. Damit steht einem zugewiesenen Nextcloud-Benutzer der vollständige Pro-Funktionsumfang zur Verfügung. Pro erweitert dieses Modell auf Teams ab fünf Seats. Jeder Seat entspricht genau einem zugewiesenen Nextcloud-Benutzer.
+## Gemeinsame Vorgaben – passende Ausnahmen
 
-## Funktionen
+Entscheiden Sie, welche Einstellungen verbindlich sind und welche Benutzer im Add-on selbst ändern dürfen. Geben Sie beispielsweise Freigabeberechtigungen, Passwortschutz und Ablaufzeiten zentral vor.
 
-- Freigabe-, Talk-, Anhangs-, E-Mail-Signatur- und Thunderbird-VFS-Richtlinien definieren
-- Ausgewählte Einstellungen sperren und andere im Mail-Add-on änderbar lassen
-- Standardwerte mit Gruppen- und Benutzerüberschreibungen anwenden
-- Community- und Pro-Lizenzmodi samt Benutzerzuweisungen verwalten
-- Ausgewählte Verwaltungsaufgaben delegieren, ohne vollständige Nextcloud-Administratorrechte zu erteilen
-- Individuell gestaltete HTML-Vorlagen für Freigabeblöcke, Passwort-Mails, Talk-Einladungen und E-Mail-Signaturen erstellen
-- Passwörter über eine separate Mail oder einen ablaufenden Nextcloud-Secrets-Link zustellen
-- Backend-, Lizenz- und Zuweisungsstatus für die Client-Diagnose bereitstellen
-- Den Nextcloud-VFS-Anbieter von NC Connector und den Zugriff auf kompatible externe VFS-Quellen in Thunderbird steuern
+Mit **Gruppen- und Benutzerüberschreibungen** berücksichtigen Sie unterschiedliche Anforderungen: Der Vertrieb kann andere Freigabetexte und Ablaufzeiten erhalten als die interne Verwaltung. Einzelne Benutzer bekommen bei Bedarf abweichende Einstellungen oder individuelle Signaturangaben.
 
-E-Mail-Signaturen können Nextcloud-Profildaten und benutzerbezogene Werte verwenden. Nextcloud Talk und Secrets bleiben optionale Integrationen.
+## Aufgaben delegieren, Kontrolle behalten
 
-Das Backend speichert weder E-Mail-Inhalte noch Anhänge.
+Nicht jede Änderung an einer Signatur oder einem Freigabetext muss beim Nextcloud-Administrator landen.
 
-## Mail-Clients
+Über die **Admin-Delegation** geben Sie ausgewählten Personen Zugriff auf genau die benötigten Bereiche. Beispielsweise kann eine Person aus Marketing oder Kommunikation das Branding der E-Mail-Signaturen pflegen und die Texte der Freigabevorlagen überarbeiten, ohne Freigabe- oder Talk-Richtlinien ändern zu dürfen.
 
-- Thunderbird: [https://addons.thunderbird.net/thunderbird/addon/nc4tb/](https://addons.thunderbird.net/thunderbird/addon/nc4tb/)
-- Outlook Classic: [https://github.com/nc-connector/NC_Connector_for_Outlook/releases/latest](https://github.com/nc-connector/NC_Connector_for_Outlook/releases/latest)
+Vergeben Sie Berechtigungen getrennt für Freigaben, Talk und E-Mail-Signaturen – jeweils für Richtlinien, Vorlagen sowie Gruppen- und Benutzerüberschreibungen. Die beauftragten Personen arbeiten in ihren persönlichen Nextcloud-Einstellungen und benötigen keine vollständigen Nextcloud-Administratorrechte.
+
+## Einheitlicher Auftritt mit persönlichen Signaturen
+
+Gestalten Sie zentrale HTML-Vorlagen für E-Mail-Signaturen, Freigabeblöcke, separate Passwort-Mails und Talk-Einladungen. Eigene Texte, Logos und Gestaltung sorgen für einen einheitlichen Unternehmensauftritt.
+
+E-Mail-Signaturen verbinden diese Vorlagen mit Nextcloud-Profildaten und individuellen Angaben, etwa Telefonnummern oder zusätzlichen Kontaktinformationen. Die Mail-Add-ons wählen die passende Signatur automatisch anhand der Absenderadresse.
+
+## Einfacher Rollout und zentrale Standardwerte
+
+Bereiten Sie Serveradresse und Anmeldemethode über [Windows-Registry für Outlook](https://github.com/nc-connector/NC_Connector_for_Outlook/blob/main/docs/ADMIN.md#enterprise-rollout) oder [Unternehmensrichtlinien für Thunderbird](https://github.com/nc-connector/NC_Connector_for_Thunderbird/blob/main/docs/ADMIN.md#enterprise-rollout) vor. Benutzer müssen diese Angaben dadurch nicht selbst konfigurieren.
+
+Im Backend bestimmen Sie, ob die Add-ons lokale oder zentral vorgegebene Standardwerte verwenden. Auf Wunsch dürfen Benutzer die Quelle selbst auswählen. Verbindliche Richtlinien gelten unabhängig davon weiterhin.
+
+## Weitere Funktionen
+
+- **Anhangsautomatisierung:** Größenabhängige Vorgaben festlegen und entscheiden, wann Anhänge über Nextcloud geteilt werden.
+- **Talk-Meetings:** Raumtyp, Passwort, Lobby und das Hinzufügen eingeladener Benutzer und Gäste vorgeben.
+- **Separate Passwortzustellung:** Freigabepasswörter in einer eigenen E-Mail oder über einen zeitlich begrenzten Nextcloud-Secrets-Link übermitteln.
+- **Dateiquellen in Thunderbird:** Den Nextcloud-VFS-Anbieter von NC Connector und den Zugriff auf kompatible externe VFS-Anbieter zentral steuern.
+
+## Kostenlos starten, für Teams erweitern
+
+Der Community-Modus enthält einen kostenlosen Seat für ein Nextcloud-Benutzerkonto mit sämtlichen Backend-Funktionen. Für Teams sind [Pro-Lizenzen ab fünf Seats](https://nc-connector.de/preise-lizenzierung/) verfügbar. Der Funktionsumfang bleibt derselbe.
+
+Seats werden Nextcloud-Benutzern zugewiesen. Für zentrale Backend-Funktionen benötigt jeder Benutzer einen gültig zugeteilten Seat.
+
+## Voraussetzungen und Datenhaltung
+
+Sie benötigen NC Connector für Thunderbird oder Outlook Classic. Nextcloud Talk wird für Talk-Meetings benötigt; die Nextcloud-Secrets-App nur für die Passwortzustellung über Secrets-Links.
+
+Das Backend speichert keine E-Mail-Nachrichten oder Anhänge. Zentral konfigurierte Vorlagen, Einstellungen und individuelle Signaturangaben werden in Ihrer Nextcloud gespeichert.
+
+## Passende Mail-Add-ons
+
+- [NC Connector für Thunderbird](https://addons.thunderbird.net/thunderbird/addon/nc4tb/)
+- [NC Connector für Outlook Classic](https://github.com/nc-connector/NC_Connector_for_Outlook/releases/latest)
 
 ## Weitere Informationen
 
-- Homepage: [https://nc-connector.de](https://nc-connector.de)
-- Kontakt: [https://nc-connector.de/kontakt/](https://nc-connector.de/kontakt/)
+- [Homepage](https://nc-connector.de)
+- [Kontakt](https://nc-connector.de/kontakt/)
+- [Supportformular](https://nc-connector.de/support/)
 ]]></description>
-	<version>1.4.3</version>
+	<version>1.4.4</version>
 	<licence>AGPL-3.0-or-later</licence>
 	<author mail="info@nc-connector.de" homepage="https://nc-connector.de">NC Connector</author>
 	<namespace>NcConnector</namespace>
 	<category>integration</category>
 	<category>tools</category>
 	<website>https://nc-connector.de</website>
-	<bugs>https://nc-connector.de/kontakt/</bugs>
+	<bugs>https://nc-connector.de/support/</bugs>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/appsettings.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/UserOverrides.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/AdminDelegation.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/TemplateEditor.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/email_sig.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/nc-connector/NC_Connector_for_Thunderbird/main/screenshots/talk_wizzard1.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/nc-connector/NC_Connector_for_Thunderbird/main/screenshots/filelink_wizzard1.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/media/gif/nc-connector_signatur_en_1200x900.gif</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/media/gif/nc-connector_filelink_en_1200x900.gif</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/media/gif/nc-connector_talk_en_1200x900.gif</screenshot>
 
 	<dependencies>
 		<nextcloud min-version="32" max-version="36"/>

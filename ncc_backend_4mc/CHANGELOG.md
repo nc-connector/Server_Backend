@@ -4,6 +4,15 @@ All notable changes to this repository are documented in this file.
 
 The format is based on **Keep a Changelog** and uses a simple version-first structure.
 
+## [1.4.4] - 2026-10-08
+
+### Changed
+
+- Update bundled DOMPurify to 3.4.16
+- Refresh backend screenshots and include user overrides in the README screenshot overview
+- Rewrite the English and German App Store descriptions around central management, delegated administration, group and user overrides, signatures, and Managed Rollout
+- Link the App Store description to rollout guides, pricing and support, and direct bug reports to the support form
+
 ## [1.4.3] - 2026-10-01
 
 ### Added
