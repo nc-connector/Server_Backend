@@ -126,7 +126,7 @@ Das Backend speichert keine E-Mail-Nachrichten oder Anhänge. Zentral konfigurie
 - [Kontakt](https://nc-connector.de/kontakt/)
 - [Supportformular](https://nc-connector.de/support/)
 ]]></description>
-	<version>1.4.4</version>
+	<version>1.4.5</version>
 	<licence>AGPL-3.0-or-later</licence>
 	<author mail="info@nc-connector.de" homepage="https://nc-connector.de">NC Connector</author>
 	<namespace>NcConnector</namespace>

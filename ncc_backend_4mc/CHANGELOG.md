@@ -4,6 +4,12 @@ All notable changes to this repository are documented in this file.
 
 The format is based on **Keep a Changelog** and uses a simple version-first structure.
 
+## [1.4.5] - 2026-10-12
+
+### Changed
+
+- Use revision-pinned URLs for App Store screenshots and GIF demos
+
 ## [1.4.4] - 2026-10-08
 
 ### Changed
