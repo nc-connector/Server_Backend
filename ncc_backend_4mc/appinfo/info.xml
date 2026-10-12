@@ -134,15 +134,15 @@ Das Backend speichert keine E-Mail-Nachrichten oder Anhänge. Zentral konfigurie
 	<category>tools</category>
 	<website>https://nc-connector.de</website>
 	<bugs>https://nc-connector.de/support/</bugs>
-	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/appsettings.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/UserOverrides.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/AdminDelegation.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/TemplateEditor.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/main/screenshots/email_sig.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/media/gif/nc-connector_signatur_en_1200x900.gif</screenshot>
-	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/media/gif/nc-connector_filelink_en_1200x900.gif</screenshot>
-	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/media/gif/nc-connector_talk_en_1200x900.gif</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/5bd885790d5107e7bdda03cedb920805c93d66b8/profile/header-solid-blue.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/e50d52a9fa16f23cc82118bf499c746510057c13/screenshots/appsettings.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/e50d52a9fa16f23cc82118bf499c746510057c13/screenshots/UserOverrides.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/e50d52a9fa16f23cc82118bf499c746510057c13/screenshots/AdminDelegation.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/e50d52a9fa16f23cc82118bf499c746510057c13/screenshots/TemplateEditor.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/Server_Backend/e50d52a9fa16f23cc82118bf499c746510057c13/screenshots/email_sig.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/5bd885790d5107e7bdda03cedb920805c93d66b8/profile/media/gif/nc-connector_signatur_en_1200x900.gif</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/5bd885790d5107e7bdda03cedb920805c93d66b8/profile/media/gif/nc-connector_filelink_en_1200x900.gif</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nc-connector/.github/5bd885790d5107e7bdda03cedb920805c93d66b8/profile/media/gif/nc-connector_talk_en_1200x900.gif</screenshot>
 
 	<dependencies>
 		<nextcloud min-version="32" max-version="36"/>
