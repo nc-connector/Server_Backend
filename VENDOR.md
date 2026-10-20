@@ -16,13 +16,13 @@
 ## DOMPurify
 
 - Package: `dompurify`
-- Version: `3.4.16`
-- Source: https://registry.npmjs.org/dompurify/-/dompurify-3.4.16.tgz
-- Source integrity (SHA-512): `sha512-sqo+pNp3qRhCIpbgRi1y8Tgk27Bo2Ry7w0dC1NBeNTdZChWjz9Xb/KOoZbRP/R6pQZ80Qw8YhXw13hWWBbMRnQ==`
+- Version: `3.4.17`
+- Source: https://registry.npmjs.org/dompurify/-/dompurify-3.4.17.tgz
+- Source integrity (SHA-512): `sha512-B/pSlYVHQ58kqISD/yDjuJ1yfzI34m1gF4lAod2bwSRhiN4K5Cl3H8Af7hqB2PmTL911tdEudnnXn5FnhRoz0w==`
 - Upstream repository: https://github.com/cure53/DOMPurify
-- Upstream release: https://github.com/cure53/DOMPurify/releases/tag/3.4.16
+- Upstream release: https://github.com/cure53/DOMPurify/releases/tag/3.4.17
 - Included file: `ncc_backend_4mc/js/vendor/dompurify/purify.js` (unchanged UMD browser distribution from `dist/purify.js`)
-- SHA-256: `ACEFBA6EBC9733869F60C80B519EAEFAD1691EA56022C54A3E6CBE74286D8D46`
+- SHA-256: `A7B6DC750251C79C95592D6ABF8908BCECB51319B0B5C4194B82222566ED29B9`
 - License: Apache-2.0 OR MPL-2.0
 - Usage in this backend:
   - Admin-side sanitization of rich template drafts before preview and save
