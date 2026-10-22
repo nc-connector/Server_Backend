@@ -1,176 +1,157 @@
+<div align="center"><img src="assets/header-solid-blue.png" alt="NC Connector" height="80"></div>
+
+# NC Connector Backend
+
 <p align="center">
-  <img
-    src="https://raw.githubusercontent.com/nc-connector/.github/refs/heads/main/profile/header-solid-blue.png"
-    alt="NC Connector header"
-    width="1280"
-  />
+  <strong>Your team's NC Connector settings, managed in Nextcloud.</strong><br/>
+  Set shared defaults, design branded templates and signatures, and give administrators control without configuring every mailbox by hand.
 </p>
 
 <p align="center">
-  <b>Central policy and template backend for NC Connector.</b><br/>
-  Seats, policies, templates, signatures, and password delivery for Thunderbird and Outlook Classic.
+  <a href="https://apps.nextcloud.com/apps/ncc_backend_4mc"><strong>Install the free backend</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#table-of-contents">Admin guide</a>
+  &nbsp;·&nbsp;
+  <a href="https://nc-connector.de/">Website</a>
 </p>
 
-# NC Connector Server Backend
+The optional Nextcloud app for centrally managed [Thunderbird](https://github.com/nc-connector/NC_Connector_for_Thunderbird) and [Outlook Classic](https://github.com/nc-connector/NC_Connector_for_Outlook) installations. Start with **one free, full-featured Community seat** and add seats as your team grows.
 
-NC Connector Server Backend is the optional Nextcloud app for organizations that want central control over NC Connector clients.
+File sharing, **My Nextcloud**, Talk, and attachment rules also work without the backend using local client settings.
 
-The mail add-ons can work directly with a Nextcloud account. The backend is used when admins need shared defaults, locked settings, seat assignment, templates, managed signatures, or separate password delivery rules.
+---
 
-## What The Backend Does
+## See it in action
 
-- assign seats to Nextcloud users
-- deliver effective Share, Talk, and email-signature policies to the clients
-- define which settings users may still change in the add-on
-- manage Share, password-mail, Talk invitation, and email-signature templates
-- provide user and group overrides for teams with different rules
-- delegate NC Connector administration without making users full Nextcloud admins
-- control separate password delivery as plaintext mail or Nextcloud Secret link
-- expose setup state so Thunderbird and Outlook can explain backend problems clearly
-- control Thunderbird's own VFS-provider switch and its Pro-only use of external VFS providers
+Manage settings in Nextcloud and use them in your mail clients. Expand a section to see the workflow.
 
-## Backend Or No Backend
+<details>
+<summary><strong>Set shared defaults and decide what users can change</strong></summary>
 
-| Use case | Without backend | With backend |
-|---|---|---|
-| Local file sharing from the mail client | Yes | Yes |
-| Talk rooms from calendar events | Yes | Yes |
-| Central seat assignment | No | Yes |
-| Admin-locked Share/Talk defaults | No | Yes |
-| Central email signatures | No | Yes |
-| Custom templates for Share, Talk, and password mails | No | Yes |
-| Delegated NC Connector admins | No | Yes |
-| Separate password delivery policies | No | Yes |
-| Nextcloud Secret links for password delivery | No | Yes, with the Secrets app |
-| NC Connector as a Thunderbird VFS provider | Local setting | Central policy or local setting |
-| Other Thunderbird VFS providers in the Sharing queue | No | Yes, with Pro and an active assigned seat |
+Choose defaults for sharing, password protection, expiration, attachment rules, and Talk meetings. Keep selected settings editable in the add-on or lock them centrally. Group and user overrides handle teams and individual exceptions without changing the defaults for everyone.
 
-## Admin Delegation
+<p align="center">
+  <a href="screenshots/appsettings.png">
+    <img src="screenshots/appsettings.png" alt="NC Connector Backend: shared defaults and per-setting controls for local editing" width="900" />
+  </a>
+</p>
 
-Full Nextcloud admins can delegate NC Connector administration to selected users without giving them full Nextcloud admin rights.
+Forced user overrides take precedence over forced group overrides, then defaults. Among matching groups, the lowest numeric priority wins.
 
-Delegations are scoped by area and task:
+[Policy precedence](https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#51-policy-precedence) · [Editable settings](https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#52-editable-in-add-on)
 
-- Share, Talk, and email-signature policies
-- templates
-- group overrides
-- user overrides
+</details>
 
-Delegated admins see NC Connector in their personal Nextcloud settings and only see the tabs and rows covered by their permissions.
+<details>
+<summary><strong>Give shares and meeting invitations your own branding</strong></summary>
 
-## Policy Model
+Edit templates for share blocks, separate password emails, and Talk invitations. Add your logo, adjust the wording, and insert variables for links, passwords, permissions, and other workflow details. Preview the result before saving it for your users.
 
-The backend resolves settings in this order:
+<p align="center">
+  <a href="screenshots/TemplateEditor.png">
+    <img src="screenshots/TemplateEditor.png" alt="NC Connector Backend: template editor with language choices and share placeholders" width="900" />
+  </a>
+</p>
 
-1. user override
-2. group override
-3. default settings
+[Template setup and operation](https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#56-template-operation)
 
-Clients receive the resolved values plus editable flags. That lets admins lock selected options while still showing users which values are active.
+</details>
 
-Policy areas:
+<details>
+<summary><strong>Keep your team's email signatures consistent</strong></summary>
 
-- Share defaults and permissions
-- password behavior and expiration days
-- separate password delivery mode
-- Talk room defaults
-- email-signature behavior for compose, reply, and forward
-- template language and custom template usage
-- Thunderbird-only VFS provider and external-source switches
+Design a signature centrally and fill it with Nextcloud profile details and per-user fields. Choose when it appears in new messages, replies, and forwards. The mail client applies it to matching sender identities; unrelated accounts keep their own signatures.
 
-## Seats And License Modes
+<p align="center">
+  <a href="screenshots/gif/nc-connector_signatur_en_1200x900.gif">
+    <img src="screenshots/gif/nc-connector_signatur_en_1200x900.gif" alt="Demo: design a signature in NC Connector Backend and use it with a matching sender identity in Thunderbird" width="900" />
+  </a>
+</p>
 
-Community mode includes one local seat and does not require a license lookup.
+*Shown in Thunderbird. Centrally managed signatures are also available in Outlook Classic.*
 
-Pro mode uses the NC Connector license backend and supports team use with more seats. Seats map to Nextcloud users and can be reassigned by admins.
+Replace the example address and legal text before rollout. The sender address must match the seat user's effective signature email address.
 
-Administrator accounts appear in Seat assignment like other Nextcloud users and can receive a Seat without an extra command. No account receives a Seat automatically; the same capacity and license rules apply to administrators and other users.
+[Managed signature setup](https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#55-email-signature-settings)
 
-## Templates And Signatures
+</details>
 
-Admins can manage central HTML templates for:
+<details>
+<summary><strong>Delegate administration without granting full Nextcloud admin rights</strong></summary>
 
-- Share blocks
-- separate password mails
-- Talk invitations
-- email signatures
+Let selected colleagues maintain Share, Talk, or signature settings, templates, and overrides. Assign only the areas and tasks they need. Delegated administrators work from their personal Nextcloud settings and see only their permitted controls.
 
-Templates are edited in the backend UI and sanitized before they are stored. Email signatures can use Nextcloud profile values and per-user override fields for matching email address, mobile phone, and custom values.
+<p align="center">
+  <a href="screenshots/AdminDelegation.png">
+    <img src="screenshots/AdminDelegation.png" alt="NC Connector Backend: delegation permissions for Share, Talk, signatures, templates, and overrides" width="900" />
+  </a>
+</p>
 
-If a signature placeholder has no value, the backend removes the empty line or table row before returning the rendered HTML to Thunderbird or Outlook.
+Seat assignment, licensing, and delegation management remain with full Nextcloud administrators.
 
-## Password Delivery And Secrets
+[Delegated administration](https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#6-delegated-administration)
 
-Separate password delivery is a backend feature.
+</details>
 
-Supported modes:
+## One full-featured seat included.
 
-- `plain`: send the password in a separate mail
-- `secrets`: send an expiring Nextcloud Secrets link
+The backend includes **one free Community seat**, assigned to one Nextcloud user. That seat unlocks the **same seat-based features as paid seats**; paid plans add seats for more users.
 
-If the Nextcloud Secrets app is missing or disabled, the runtime policy returns `null` for the Secrets mode values. Clients then fall back to the existing plaintext password mail behavior instead of blocking the user.
+- Central settings, administrator locks, and delegated management
+- Low-touch enterprise rollout with user-friendly sign-in through the client deployment options
+- Managed signatures, custom templates, and branding
+- Room and resource picker with filters and availability checks in Thunderbird and Outlook Classic
+- Separate password delivery by email or expiring Nextcloud Secrets links; Secrets links also require the Secrets app
+- Additional storage sources **in Thunderbird**, using compatible provider add-ons
 
-The default Secrets link lifetime is 7 days.
+Personal seat-based features in the mail clients need valid backend access and an active assigned seat. A seat belongs to a **Nextcloud user**, not a device. Administrator rights alone do not grant personal seat features; administrative access does not itself require a seat.
 
-## Requirements
+Room selection and booking happen through the mail client and Nextcloud calendar, not through a separate backend booking service. Save and synchronize the event, then check the resource's response.
 
-- Nextcloud 32 through 36
-- PHP 8.3 or newer
-- NC Connector for Thunderbird or NC Connector for Outlook Classic
-- Nextcloud Files Sharing
-- optional: Nextcloud Talk
-- optional: Nextcloud Secrets for Secret-link password delivery
+[Community and paid seats](https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#42-community-and-pro-mode) · [Plans and licensing](https://nc-connector.de/preise-lizenzierung/)
 
-## Installation
+## Get started
 
-1. Install the app from the [Nextcloud App Store](https://apps.nextcloud.com/apps/ncc_backend_4mc) or from a release archive.
-2. Enable the app in Nextcloud.
-3. Open **Administration settings -> NC Connector**.
-4. Choose Community or Pro mode.
-5. Assign seats.
-6. Configure Share, Talk, signatures, templates, and password delivery.
-7. Save the settings and test from Thunderbird or Outlook.
+1. Install and enable **NC Connector for mail integration** from the [Nextcloud App Store](https://apps.nextcloud.com/apps/ncc_backend_4mc).
+2. Open **Administration settings → NC Connector Backend** and choose Community mode. For a paid license, select Pro, save the license credentials, and select **Sync now**.
+3. Review the defaults under **Group Settings → Default Settings**. Replace example branding and signature details before enabling them for users.
+4. Assign the first seat to a pilot user. Connect the Thunderbird or Outlook add-on to Nextcloud as that same user.
+5. Test sharing and every enabled Talk, signature, and policy workflow before extending the rollout.
 
-## Client Repositories
+The backend provides settings and access information; it does not install the mail add-ons or configure client accounts. Use the [Thunderbird rollout guide](https://github.com/nc-connector/NC_Connector_for_Thunderbird/blob/main/docs/ADMIN.md#enterprise-rollout) or [Outlook rollout guide](https://github.com/nc-connector/NC_Connector_for_Outlook/blob/main/docs/ADMIN.md#enterprise-rollout) for managed client deployment and sign-in.
 
-- [NC Connector for Thunderbird](https://github.com/nc-connector/NC_Connector_for_Thunderbird)
-- [NC Connector for Outlook Classic](https://github.com/nc-connector/NC_Connector_for_Outlook)
+[Installation and first rollout](https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#3-installation-and-first-rollout) · [Pilot acceptance checklist](https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#34-pilot-acceptance)
+
+### What you need
+
+- **Nextcloud 32 through 36** with **PHP 8.3 or newer**
+- HTTPS for production access and regularly running Nextcloud background jobs
+- A Nextcloud administrator for installation and initial configuration
+- A maintained **NC Connector for Thunderbird** or **NC Connector for Outlook Classic** release
+- **Files Sharing** for file shares, **Talk** for online meetings, and optionally **Secrets** for expiring password links
+
+Client workflows can have additional requirements. Room and resource booking needs a suitable Nextcloud calendar and scheduling setup; Outlook Classic also needs CalDAV Synchronizer. The new Outlook is not supported.
+
+[Platform and network requirements](https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#2-requirements-and-network-access)
 
 ## Documentation
 
-- [Admin documentation](Doku/admin.md)
-- [Development notes](Doku/development.md)
-- [Changelog](CHANGELOG.md)
-- [Translations](Translations.md)
-- [Third-party licenses](VENDOR.md)
+- [Admin guide](https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#table-of-contents): installation, policies, seats, delegation, updates, and troubleshooting
+- [Client rollout dependencies](https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#7-client-rollout-dependencies) · [Backup and recovery](https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#93-back-up)
+- [Development guide](https://github.com/nc-connector/Server_Backend/blob/main/Doku/development.md) · [HTTP API](https://github.com/nc-connector/Server_Backend/blob/main/Doku/endpoints.md)
+- [Changelog](https://github.com/nc-connector/Server_Backend/blob/main/CHANGELOG.md) · [Supported languages](https://github.com/nc-connector/Server_Backend/blob/main/Translations.md) · [Screenshots](https://github.com/nc-connector/Server_Backend/tree/main/screenshots)
+- [License](https://github.com/nc-connector/Server_Backend/blob/main/LICENSE.txt) · [Third-party components](https://github.com/nc-connector/Server_Backend/blob/main/VENDOR.md)
 
-## Roadmap
+## Open source, with clear data paths
 
-Planned work across Thunderbird, Outlook, and the Backend is tracked in the public [NC Connector Roadmap](https://github.com/orgs/nc-connector/projects/1).
+Policies, templates, seats, and delegation settings stay in your Nextcloud database. The backend does not store mail content or attachments. File sharing and Talk use your own Nextcloud; file contents are not relayed through an NC Connector-hosted service.
 
-## Screenshots
+A daily version check sends the product, installed version, channel, and a daily pseudonymous identifier. License checks are separate; Community mode does not contact the license endpoint. External images used in templates may be fetched for editor previews.
 
-<details open>
-<summary><strong>Backend settings</strong></summary>
+[Network paths and transmitted data](https://github.com/nc-connector/Server_Backend/blob/main/Doku/admin.md#24-network-paths) · [Trust and transparency](https://nc-connector.de/vertrauen-transparenz/) · [Public roadmap](https://github.com/orgs/nc-connector/projects/1)
 
-| <a href="screenshots/appsettings.png"><img src="screenshots/appsettings.png" alt="Backend settings" width="420"></a> | <a href="screenshots/AdminDelegation.png"><img src="screenshots/AdminDelegation.png" alt="Admin delegation settings" width="420"></a> |
-| --- | --- |
-| <a href="screenshots/UserOverrides.png"><img src="screenshots/UserOverrides.png" alt="User override settings" width="420"></a> | |
+## Help and feedback
 
-</details>
+Found a bug or have a feature request? [Open an issue](https://github.com/nc-connector/Server_Backend/issues). Include your Nextcloud, PHP, backend, and affected client versions, plus steps to reproduce. Remove license keys, credentials, private links, and personal information from logs and screenshots.
 
-<details>
-<summary><strong>Template editor</strong></summary>
-
-| <a href="https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/screenshots/TemplateEditor.png"><img src="https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/screenshots/TemplateEditor.png" alt="Template editor" width="420"></a> |
-| --- |
-
-</details>
-
-<details>
-<summary><strong>Email signatures</strong></summary>
-
-| <a href="https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/screenshots/email_sig.png"><img src="https://raw.githubusercontent.com/nc-connector/Server_Backend/refs/heads/main/screenshots/email_sig.png" alt="Email signature settings" width="420"></a> |
-| --- |
-
-</details>
+For rollout questions, [get in touch](https://nc-connector.de/kontakt/). If NC Connector helps you, a GitHub star helps others find it.
